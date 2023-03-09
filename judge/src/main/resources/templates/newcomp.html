@@ -1,86 +1,120 @@
-<!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
 
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Getting Started: Serving Web Content</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <!--Import Google Icon Font-->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <!--Import materialize.css-->
-    <link type="text/css" rel="stylesheet" href="mdl/material.min.css" media="screen,projection" />
-    <link href="slider/nouislider.min" rel="stylesheet">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+  <title>Starter Template - Materialize</title>
 
-    <!--Let browser know website is optimized for mobile-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- CSS  -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+  <link href="materialize/css/nouislider.css" type="text/css" rel="stylesheet"/>
 </head>
-
 <body>
-    <!-- Always shows a header, even in smaller screens. -->
-    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-        <header class="mdl-layout__header">
-            <div class="mdl-layout__header-row">
-                <!-- Title -->
-                <span class="mdl-layout-title">IMAC Judge</span>
-                <!-- Add spacer, to align navigation to the right -->
-                <div class="mdl-layout-spacer"></div>
-                <!-- Navigation. We hide it in small screens. -->
-
-            </div>
-        </header>
-
-        <main class="mdl-layout__content">
-            <div class="page-content"><!-- Your content goes here -->
-                <div class="mdl-grid">
-                <dialog class="mdl-dialog">
-                    <h4 class="mdl-dialog__title">No Competition Detected!</h4>
-                    <div class="mdl-dialog__content">
-                        <p>
-                            We cant seem to find a competition for you. Lets create one!!
-                        </p>
-                    </div>
-                    <div id="slider"></div>
-                    <div class="mdl-dialog__actions">
-                        <button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" >Start</button>
-                    </div>
-                </dialog>
-            </div>
+    <nav class="light-blue lighten-1" role="navigation">
+        <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">Judge</a>
+         
         </div>
-        </main>
-        <button id="show-dialog" type="button" class="mdl-button" hidden>Show Dialog</button>
-        <script type="text/javascript" src="mdl/material.min.js"></script>
-        <script src="slider/nouislider.js"></script>
+      </nav>
+  <div class="section no-pad-bot" id="index-banner">
+    <div class="container">
+      <br><br>
+      <h1 class="header center orange-text">New Competition</h1>
+      <div class="row center">
+        <h5 class="header col s12 light">We couldn't find a current Competition, Lets start a new one!</h5>
+      </div>
+      <div class="row center">
+        <h5 class="header col s12 light">Rounds</h5>
+      </div>
+      <div class="row center">
+        <div id="round-slider"></div>
+      </div>
+      <br><br>
+      <div class="row center">
+        <h5 class="header col s12 light">Sequences Per Round</h5>
+      </div>
+      <div class="row center">
+        <div id="sequence-slider"></div>
+      </div>
+      <br><br>
+      <div class="row center">
+        <a href="#" id="createComp" class="btn-large waves-effect waves-light orange">Create Competition</a>
+      </div>
+      <br><br>
 
-        <script type="text/javascript" src="jquery-3.6.4.min.js"></script>
-        
-        <script>
-              var dialog = document.querySelector('dialog');
-            var showDialogButton = document.querySelector('#show-dialog');
-            if (!dialog.showModal) {
-                dialogPolyfill.registerDialog(dialog);
-            }
-            showDialogButton.addEventListener('click', function () {
-                dialog.showModal();
-            });
-            dialog.querySelector('.close').addEventListener('click', function () {
-                dialog.close();
-            });
-            noUiSlider.create(slider, {
-    start: [20, 80],
-    connect: true,
-    range: {
-        'min': 0,
-        'max': 100
+    </div>
+  </div>
+
+
+
+  <!--  Scripts-->
+  <script src="jquery-3.6.4.min.js"></script>
+  <script src="materialize/js/materialize.js"></script>
+  <script src="materialize/js/nouislider.js"></script>
+  <script >
+      var roundslider = document.getElementById('round-slider');
+      var sequenceslider = document.getElementById('sequence-slider');
+      var valuesForRoundSlider = [1,2,3,4,5,6,7]; // 16 values
+      var valuesForSequenceSlider = [1,2,3,4,5,6,7]; // 16 values
+      var format = {
+    to: function(value) {
+        return valuesForRoundSlider[Math.round(value)];
+    },
+    from: function (value) {
+        return valuesForRoundSlider.indexOf(Number(value));
+    }
+    
+};
+var seqformat = {
+    to: function(value) {
+        return valuesForSequenceSlider[Math.round(value)];
+    },
+    from: function (value) {
+        return valuesForSequenceSlider.indexOf(Number(value));
+    }
+    
+};
+noUiSlider.create(roundslider, {
+    start: 2,
+    // A linear range from 0 to 15 (16 values)
+    range: { min: 0, max: 6 },
+    // steps of 1
+    step: 1,
+    tooltips: true,
+    format: format,
+    pips: { mode: 'steps', format: format },
+});
+noUiSlider.create(sequenceslider, {
+    start: 2,
+    // A linear range from 0 to 15 (16 values)
+    range: { min: 0, max: 6 },
+    // steps of 1
+    step: 1,
+    tooltips: true,
+    format: seqformat,
+    pips: { mode: 'steps', format: seqformat },
+});
+
+$( "#createComp" ).click(function() {
+    $.ajax({
+    type: "POST",
+    url: "/api/comp",
+    // The key needs to match your method's input parameter (case-sensitive).
+    data: JSON.stringify({ rounds: 2, sequences: 2 }),
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+    success: function(data){
+        window.location = "/"
+    },
+    error: function(errMsg) {
+        alert(errMsg);
     }
 });
-        </script>
-        <script>
-            $(document).ready(function () {
-              
-                $('#show-dialog').trigger('click');
-            });
-        </script>
-    </div>
-   
-</body>
+});
 
+
+  </script>
+
+  </body>
 </html>

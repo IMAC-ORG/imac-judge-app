@@ -18,14 +18,14 @@ import co.za.imac.judge.dto.CompDTO;
 public class CompService {
     
 
-private final String  COMP_FILE_NAME = "/tmp/comp.json";
+private final String COMP_FILE_NAME = "/tmp/comp.json";
 
 public boolean isCurrentComp(){
     File targetFile = new File(COMP_FILE_NAME);
     return targetFile.exists();
 }
 
-public void createComp(CompDTO compDTO) throws IOException{
+public CompDTO createComp(CompDTO compDTO) throws IOException{
     File newFile = new File(COMP_FILE_NAME);
     newFile.createNewFile();
     String compdtoJson = new Gson().toJson(compDTO);
@@ -33,6 +33,7 @@ public void createComp(CompDTO compDTO) throws IOException{
     FileOutputStream outputStream = new FileOutputStream(COMP_FILE_NAME);
     outputStream.write(strToBytes);
     outputStream.close();
+    return compDTO;
 }
 
 public CompDTO getComp() throws IOException{
