@@ -8,7 +8,7 @@
       <sequence index="0">
          <sequence_id></sequence_id>
          <type>KNOWN</type>
-         <class>BASIC</class>
+         <_class>BASIC</_class>
          <min_round>1</min_round>
          <max_round>20</max_round>
          <figures>
@@ -77,7 +77,7 @@
       <sequence index="1">
          <sequence_id></sequence_id>
          <type>KNOWN</type>
-         <class>SPORTSMAN</class>
+         <_class>SPORTSMAN</_class>
          <min_round>1</min_round>
          <max_round>20</max_round>
          <figures>
@@ -146,7 +146,7 @@
       <sequence index="2">
          <sequence_id></sequence_id>
          <type>KNOWN</type>
-         <class>INTERMEDIATE</class>
+         <_class>INTERMEDIATE</_class>
          <min_round>1</min_round>
          <max_round>20</max_round>
          <figures>
@@ -215,7 +215,7 @@
       <sequence index="3">
          <sequence_id></sequence_id>
          <type>KNOWN</type>
-         <class>ADVANCED</class>
+         <_class>ADVANCED</_class>
          <min_round>1</min_round>
          <max_round>2</max_round>
          <figures>
@@ -284,7 +284,7 @@
       <sequence index="4">
          <sequence_id></sequence_id>
          <type>KNOWN</type>
-         <class>UNLIMITED</class>
+         <_class>UNLIMITED</_class>
          <min_round>1</min_round>
          <max_round>20</max_round>
          <figures>
@@ -353,7 +353,7 @@
       <sequence index="5">
          <sequence_id></sequence_id>
          <type>UNKNOWN</type>
-         <class>BASIC</class>
+         <_class>BASIC</_class>
          <min_round>1</min_round>
          <max_round>20</max_round>
          <figures>

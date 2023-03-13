@@ -19,6 +19,7 @@ import co.za.imac.judge.dto.CompDTO;
 import co.za.imac.judge.dto.Pilot;
 import co.za.imac.judge.service.CompService;
 import co.za.imac.judge.service.PilotService;
+import co.za.imac.judge.service.SequenceService;
 
 @Controller
 public class RootController {
@@ -27,6 +28,8 @@ public class RootController {
     private CompService compService;
     @Autowired
     private PilotService pilotService;
+    @Autowired
+    private SequenceService sequenceService;
 
     @GetMapping("/")
 	public String home(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) throws IOException, ParserConfigurationException, SAXException {
@@ -48,6 +51,7 @@ public class RootController {
             System.out.println("Theres no current comp!!");
             return "redirect:/newcomp";
         }
+        sequenceService.getAllSequences();
 		return "judge";
 	}
     
