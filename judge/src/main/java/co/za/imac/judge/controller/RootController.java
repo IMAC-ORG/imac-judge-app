@@ -1,6 +1,7 @@
 package co.za.imac.judge.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -15,6 +16,7 @@ import org.xml.sax.SAXException;
 import com.google.gson.Gson;
 
 import co.za.imac.judge.dto.CompDTO;
+import co.za.imac.judge.dto.Pilot;
 import co.za.imac.judge.service.CompService;
 import co.za.imac.judge.service.PilotService;
 
@@ -30,14 +32,25 @@ public class RootController {
 	public String home(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) throws IOException, ParserConfigurationException, SAXException {
 
         System.out.println("Is there a comp? : " + compService.isCurrentComp());
-        pilotService.getPilots();
+        List<Pilot> pilots = pilotService.getPilots();
         if(!compService.isCurrentComp()){
             System.out.println("Theres no current comp!!");
             return "redirect:/newcomp";
         }
-		model.addAttribute("name", name);
+		model.addAttribute("pilots", pilots);
 		return "index";
 	}
+    @GetMapping("/judge")
+	public String judge(@RequestParam(name="pilot_id", required=false, defaultValue="World") String name, Model model) throws IOException, ParserConfigurationException, SAXException {
+
+        System.out.println("Is there a comp? : " + compService.isCurrentComp());
+        if(!compService.isCurrentComp()){
+            System.out.println("Theres no current comp!!");
+            return "redirect:/newcomp";
+        }
+		return "judge";
+	}
+    
     @GetMapping("/newcomp")
 	public String newcomp(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) throws IOException {
 

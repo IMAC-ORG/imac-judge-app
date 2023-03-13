@@ -1,6 +1,11 @@
 package co.za.imac.judge.dto;
 
 public class Classes {
+    
+    public Classes(String _class) {
+        this._class = _class;
+    }
+
     private String _class;
 
     public String get_Class ()
