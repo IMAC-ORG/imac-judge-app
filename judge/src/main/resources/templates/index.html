@@ -1,27 +1,38 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
   <title>Starter Template - Materialize</title>
 
   <!-- CSS  -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+  <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
 </head>
+
 <body>
-    <nav class="light-blue lighten-1" role="navigation">
-        <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">Judge</a>
-         
-        </div>
-      </nav>
+  <nav class="light-blue lighten-1" role="navigation">
+    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">Judge</a>
+
+    </div>
+  </nav>
   <div class="section no-pad-bot" id="index-banner">
     <div class="container">
       <br><br>
-      <h1 class="header center orange-text">New Competition</h1>
-      <div class="row center">
-        <h5 class="header col s12 light">We found a current Competition!</h5>
+      <h1 class="header center orange-text">Select Pilot</h1>
+      <div class="carousel carousel-slider center">
+        <div th:each="pilot: ${pilots}" class="carousel-item" href="#one!" style="max-width: 300px;">
+          <div class="card light-blue lighten-1 small" >
+            <div class="card-content white-text">
+              <span class="card-title" th:text="${pilot.name}">Card Title</span>
+            </div>
+            <div class="card-action">
+              <a class="waves-effect waves-light btn orange"><i class="material-icons right">flight_takeoff</i>Judge</a>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -31,9 +42,14 @@
   <!--  Scripts-->
   <script src="jquery-3.6.4.min.js"></script>
   <script src="materialize/js/materialize.js"></script>
-  <script >
+  <script>
+    // Or with jQuery
 
+    $('.carousel.carousel-slider').carousel({
+      indicators: true
+    });
   </script>
 
-  </body>
+</body>
+
 </html>

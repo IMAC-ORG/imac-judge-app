@@ -1,7 +1,7 @@
 package co.za.imac.judge.dto;
 
 public class Pilot {
-    private String freestyle;
+    private Boolean freestyle;
 
     private String comments;
 
@@ -13,177 +13,165 @@ public class Pilot {
 
     private String index;
 
-    private String active;
+    private Boolean active;
 
-    private String comp_id;
+    private int comp_id;
 
-    private String frequency;
+    private int frequency;
 
-    private String spread_spectrum;
+    private Boolean spread_spectrum;
 
-    private String secondary_id;
+    private int secondary_id;
 
     private String airplane;
 
     private String name;
 
-    private String missing_pilot_panel;
+    private Boolean missing_pilot_panel;
 
-    private String primary_id;
+    private int primary_id;
 
-    public String getFreestyle ()
-    {
-        return freestyle;
-    }
-
-    public void setFreestyle (String freestyle)
-    {
+    public Pilot(Boolean freestyle, String comments, String addr2, String addr1, String _class, String index,
+            Boolean active, int comp_id, int frequency, Boolean spread_spectrum, int secondary_id, String airplane,
+            String name, Boolean missing_pilot_panel, int primary_id) {
         this.freestyle = freestyle;
-    }
-
-    public String getComments ()
-    {
-        return comments;
-    }
-
-    public void setComments (String comments)
-    {
         this.comments = comments;
-    }
-
-    public String getAddr2 ()
-    {
-        return addr2;
-    }
-
-    public void setAddr2 (String addr2)
-    {
         this.addr2 = addr2;
-    }
-
-    public String getAddr1 ()
-    {
-        return addr1;
-    }
-
-    public void setAddr1 (String addr1)
-    {
         this.addr1 = addr1;
-    }
-
-    public Classes getClasses ()
-    {
-        return classes;
-    }
-
-    public void setClasses (Classes classes)
-    {
-        this.classes = classes;
-    }
-
-    public String getIndex ()
-    {
-        return index;
-    }
-
-    public void setIndex (String index)
-    {
+        this.classes = new Classes(_class);
         this.index = index;
-    }
-
-    public String getActive ()
-    {
-        return active;
-    }
-
-    public void setActive (String active)
-    {
         this.active = active;
-    }
-
-    public String getComp_id ()
-    {
-        return comp_id;
-    }
-
-    public void setComp_id (String comp_id)
-    {
         this.comp_id = comp_id;
-    }
-
-    public String getFrequency ()
-    {
-        return frequency;
-    }
-
-    public void setFrequency (String frequency)
-    {
         this.frequency = frequency;
-    }
-
-    public String getSpread_spectrum ()
-    {
-        return spread_spectrum;
-    }
-
-    public void setSpread_spectrum (String spread_spectrum)
-    {
         this.spread_spectrum = spread_spectrum;
-    }
-
-    public String getSecondary_id ()
-    {
-        return secondary_id;
-    }
-
-    public void setSecondary_id (String secondary_id)
-    {
         this.secondary_id = secondary_id;
-    }
-
-    public String getAirplane ()
-    {
-        return airplane;
-    }
-
-    public void setAirplane (String airplane)
-    {
         this.airplane = airplane;
-    }
-
-    public String getName ()
-    {
-        return name;
-    }
-
-    public void setName (String name)
-    {
         this.name = name;
-    }
-
-    public String getMissing_pilot_panel ()
-    {
-        return missing_pilot_panel;
-    }
-
-    public void setMissing_pilot_panel (String missing_pilot_panel)
-    {
         this.missing_pilot_panel = missing_pilot_panel;
-    }
-
-    public String getPrimary_id ()
-    {
-        return primary_id;
-    }
-
-    public void setPrimary_id (String primary_id)
-    {
         this.primary_id = primary_id;
     }
 
-    @Override
-    public String toString()
-    {
-        return "ClassPojo [freestyle = "+freestyle+", comments = "+comments+", addr2 = "+addr2+", addr1 = "+addr1+", classes = "+classes+", index = "+index+", active = "+active+", comp_id = "+comp_id+", frequency = "+frequency+", spread_spectrum = "+spread_spectrum+", secondary_id = "+secondary_id+", airplane = "+airplane+", name = "+name+", missing_pilot_panel = "+missing_pilot_panel+", primary_id = "+primary_id+"]";
+    public Boolean getFreestyle() {
+        return freestyle;
     }
+
+    public void setFreestyle(Boolean freestyle) {
+        this.freestyle = freestyle;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
+
+    public String getAddr2() {
+        return addr2;
+    }
+
+    public void setAddr2(String addr2) {
+        this.addr2 = addr2;
+    }
+
+    public String getAddr1() {
+        return addr1;
+    }
+
+    public void setAddr1(String addr1) {
+        this.addr1 = addr1;
+    }
+
+    public Classes getClasses() {
+        return classes;
+    }
+
+    public void setClasses(Classes classes) {
+        this.classes = classes;
+    }
+
+    public String getIndex() {
+        return index;
+    }
+
+    public void setIndex(String index) {
+        this.index = index;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public int getComp_id() {
+        return comp_id;
+    }
+
+    public void setComp_id(int comp_id) {
+        this.comp_id = comp_id;
+    }
+
+    public int getFrequency() {
+        return frequency;
+    }
+
+    public void setFrequency(int frequency) {
+        this.frequency = frequency;
+    }
+
+    public Boolean getSpread_spectrum() {
+        return spread_spectrum;
+    }
+
+    public void setSpread_spectrum(Boolean spread_spectrum) {
+        this.spread_spectrum = spread_spectrum;
+    }
+
+    public int getSecondary_id() {
+        return secondary_id;
+    }
+
+    public void setSecondary_id(int secondary_id) {
+        this.secondary_id = secondary_id;
+    }
+
+    public String getAirplane() {
+        return airplane;
+    }
+
+    public void setAirplane(String airplane) {
+        this.airplane = airplane;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Boolean getMissing_pilot_panel() {
+        return missing_pilot_panel;
+    }
+
+    public void setMissing_pilot_panel(Boolean missing_pilot_panel) {
+        this.missing_pilot_panel = missing_pilot_panel;
+    }
+
+    public int getPrimary_id() {
+        return primary_id;
+    }
+
+    public void setPrimary_id(int primary_id) {
+        this.primary_id = primary_id;
+    }
+public String getClassString(){
+    return this.classes.get_Class();
+}
+
 }
