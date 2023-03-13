@@ -31,4 +31,5 @@ jobs:
       run: |
           pwd
           cd judge
-          mvn package build
+          mvn clean package
+          mvn spring-boot:build-image
