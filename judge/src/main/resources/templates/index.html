@@ -28,7 +28,7 @@
               <span class="card-title" th:text="${pilot.name}">Card Title</span>
             </div>
             <div class="card-action">
-              <a class="waves-effect waves-light btn orange"><i class="material-icons right">flight_takeoff</i>Judge</a>
+              <a class="waves-effect waves-light btn orange" th:href="@{/judge(pilot_id=${pilot.primary_id})}"><i class="material-icons right">flight_takeoff</i>Judge</a>
             </div>
           </div>
         </div>

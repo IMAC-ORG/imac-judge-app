@@ -86,4 +86,9 @@ public class PilotService {
         }
         return pilots;
     }
+
+    public Pilot getPilot(int pilot_id) throws ParserConfigurationException, SAXException, IOException{
+        List<Pilot> pilots = getPilots();
+        return pilots.stream().filter(pilot -> pilot.getPrimary_id() == pilot_id).findFirst().orElse(null);
+    }
 }
