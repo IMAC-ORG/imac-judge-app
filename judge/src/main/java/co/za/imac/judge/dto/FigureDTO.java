@@ -6,7 +6,7 @@ public class FigureDTO {
     public String scoring;
     public FigureDTO(int k_factor, String description, String scoring) {
         this.k_factor = k_factor;
-        this.description = description;
+        this.description = description.replaceAll("[^\\x00-\\x7F]", "");
         this.scoring = scoring;
     }
     public int getK_factor() {

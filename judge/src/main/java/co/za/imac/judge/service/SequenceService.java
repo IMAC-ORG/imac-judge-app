@@ -78,7 +78,6 @@ public class SequenceService {
                 figuresMap.put(key, figures);
             }
         }
-       System.out.println(new Gson().toJson(figuresMap));
        return figuresMap;
     }
     public  List<FigureDTO> getAllSequenceForClass(String _class, String type) throws FileNotFoundException, SAXException, IOException, ParserConfigurationException{

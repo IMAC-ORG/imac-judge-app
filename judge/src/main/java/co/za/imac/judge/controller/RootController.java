@@ -16,6 +16,7 @@ import org.xml.sax.SAXException;
 import com.google.gson.Gson;
 
 import co.za.imac.judge.dto.CompDTO;
+import co.za.imac.judge.dto.FigureDTO;
 import co.za.imac.judge.dto.Pilot;
 import co.za.imac.judge.service.CompService;
 import co.za.imac.judge.service.PilotService;
@@ -44,14 +45,21 @@ public class RootController {
 		return "index";
 	}
     @GetMapping("/judge")
-	public String judge(@RequestParam(name="pilot_id", required=false, defaultValue="World") String name, Model model) throws IOException, ParserConfigurationException, SAXException {
+	public String judge(@RequestParam(name="pilot_id", required=true) int pilot_id, Model model) throws IOException, ParserConfigurationException, SAXException {
 
         System.out.println("Is there a comp? : " + compService.isCurrentComp());
         if(!compService.isCurrentComp()){
             System.out.println("Theres no current comp!!");
             return "redirect:/newcomp";
         }
-        sequenceService.getAllSequences();
+        Pilot pilot = pilotService.getPilot(pilot_id);
+        System.out.println("Pilot data");
+        System.out.println(new Gson().toJson(pilot));
+        List<FigureDTO> sequences =  sequenceService.getAllSequenceForClass(pilot.getClassString().toUpperCase(), "KNOWN");
+        model.addAttribute("sequences", sequences);
+        String sequencesJson =  new Gson().toJson(sequences);
+        model.addAttribute("sequencesjson",sequencesJson);
+        System.out.println(new Gson().toJson(sequences));
 		return "judge";
 	}
     
