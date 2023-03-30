@@ -26,19 +26,19 @@ height: 100vh;
 
               <div class="carousel carousel-slider center" >
                 <div class="carousel-fixed-item center">
-                  <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(1);">-1</a>
                   <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(0.5);">-0.5</a>
                   <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(0);">0</a>
                   <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(0.5);">+0.5</a>
-                  <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(1);">+1</a>
                   <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();">next</a>
                 </div>
 
                 <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item blue white-text" href="#one!">
-                  <h2 th:text="${maneuver.description}">First Panel</h2>
-                  <h3>Score</h3>
-                  <h1 style="font-family: digitalFont; font-size: 20vh;" th:id="'score_'+ ${iterStat.index}">10</h1>
-                  <img id="my-svg" style="width: 80vw; height: 30vh;" th:if="${iterStat.index < 10}" th:src="@{/man/known/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index})}" >
+                    <p class="" style="line-height: 50%; font-weight: 500;">Pilot 3 </p>
+                    <p class="" style="line-height: 50%; font-weight: 500;">Seq 1 Round 1 </p>
+                      <p class="" style="line-height: 50%; font-weight: 500;">Fig 1 KNOWN</p>
+                    <h1 style="font-family: digitalFont; font-size: 20vh; line-height: 1vh; " th:id="'score_'+ ${iterStat.index}">10.0</h1>
+                    <img id="my-svg" style="width: 80vw; height: 40vh;" th:if="${iterStat.index < 10}" th:src="@{/man/known/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index})}" >
+                    <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;">First Panel</h2>
                 </div>
                 
               </div>
