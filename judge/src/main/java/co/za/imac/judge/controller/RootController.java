@@ -56,7 +56,8 @@ public class RootController {
         System.out.println("Pilot data");
         System.out.println(new Gson().toJson(pilot));
         List<FigureDTO> sequences =  sequenceService.getAllSequenceForClass(pilot.getClassString().toUpperCase(), "KNOWN");
-        model.addAttribute("sequences", sequences);
+        model.addAttribute("maneuvers", sequences);
+        model.addAttribute("pilot", pilot);
         String sequencesJson =  new Gson().toJson(sequences);
         model.addAttribute("sequencesjson",sequencesJson);
         System.out.println(new Gson().toJson(sequences));

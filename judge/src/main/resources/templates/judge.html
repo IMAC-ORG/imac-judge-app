@@ -5,39 +5,54 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
     <title>Starter Template - Materialize</title>
-
+    <style>
+        .carousel{
+height: 100vh;
+}
+    </style>
     <!-- CSS  -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
-    <link rel="stylesheet" href="materialize/stepper/mstepper.min.css">
 
 </head>
 
-<body>
+<body style="height: 110vh !important;">
 
-    <div class="section no-pad-bot" id="index-banner">
-        <div class="container">
-            <br><br>
-            <h3 class="header center orange-text" th:text="${sequencesjson}">lETS jUDGE</h3>
-            <div class="carousel carousel-slider center">
+   
+
+              <div class="carousel carousel-slider center" >
+                <div class="carousel-fixed-item center">
+                  <a class="btn waves-effect white grey-text darken-text-2">-1</a>
+                  <a class="btn waves-effect white grey-text darken-text-2">0</a>
+                  <a class="btn waves-effect white grey-text darken-text-2">+1</a>
+                  <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();">next</a>
+                </div>
+
+                <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item blue white-text" href="#one!">
+                  <h2 th:text="${maneuver.description}">First Panel</h2>
+                  <img id="my-svg" style="width: 80vw; height: 50vh;" th:if="${iterStat.index < 10}" th:src="@{/man/known/{class}/{index}.svg(class=${pilot.getClassString()}, index=${iterStat.index})}" >
+                </div>
                 
+              </div>
 
-            </div>
-        </div>
-    </div>
 
 
 
     <!--  Scripts-->
     <script src="jquery-3.6.4.min.js"></script>
     <script src="materialize/js/materialize.js"></script>
-    <script src="materialize/stepper/mstepper.min.js"></script>
+
     <script>
         // Or with jQuery
-
-        $('.carousel.carousel-slider').carousel({
+        var windowHeight = window.innerHeight;
+        var car = $('.carousel.carousel-slider').carousel({
+            fullWidth: true,
             indicators: true
-        });
+        }).height(windowHeight);
+        
+        function carouselNext() {
+            $('.carousel').carousel('next');
+        }
     </script>
 
 </body>
