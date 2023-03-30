@@ -1,5 +1,6 @@
 package co.za.imac.judge.service;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class SequenceService {
         // parse XML file
         DocumentBuilder db = dbf.newDocumentBuilder();
 
-        Document doc = db.parse(ResourceUtils.getFile("classpath:static/sequences.dat"));
+        Document doc = db.parse( new File("/tmp/sequences.dat"));
         doc.getDocumentElement().normalize();
         System.out.println("Root Element :" + doc.getDocumentElement().getNodeName());
         System.out.println("------");

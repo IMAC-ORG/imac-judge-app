@@ -9,6 +9,10 @@
         .carousel{
 height: 100vh;
 }
+@font-face {
+  font-family: digitalFont;
+  src: url(font/digital-7.ttf);
+}
     </style>
     <!-- CSS  -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -22,15 +26,19 @@ height: 100vh;
 
               <div class="carousel carousel-slider center" >
                 <div class="carousel-fixed-item center">
-                  <a class="btn waves-effect white grey-text darken-text-2">-1</a>
-                  <a class="btn waves-effect white grey-text darken-text-2">0</a>
-                  <a class="btn waves-effect white grey-text darken-text-2">+1</a>
+                  <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(1);">-1</a>
+                  <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(0.5);">-0.5</a>
+                  <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(0);">0</a>
+                  <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(0.5);">+0.5</a>
+                  <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(1);">+1</a>
                   <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();">next</a>
                 </div>
 
                 <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item blue white-text" href="#one!">
                   <h2 th:text="${maneuver.description}">First Panel</h2>
-                  <img id="my-svg" style="width: 80vw; height: 50vh;" th:if="${iterStat.index < 10}" th:src="@{/man/known/{class}/{index}.svg(class=${pilot.getClassString()}, index=${iterStat.index})}" >
+                  <h3>Score</h3>
+                  <h1 style="font-family: digitalFont; font-size: 20vh;" th:id="'score_'+ ${iterStat.index}">10</h1>
+                  <img id="my-svg" style="width: 80vw; height: 30vh;" th:if="${iterStat.index < 10}" th:src="@{/man/known/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index})}" >
                 </div>
                 
               </div>
@@ -43,15 +51,55 @@ height: 100vh;
     <script src="materialize/js/materialize.js"></script>
 
     <script>
+
         // Or with jQuery
+        var score_index = 0; 
         var windowHeight = window.innerHeight;
+
+        update_index =  function (){
+            var activeIndicator = this.$indicators.find('.indicator-item.active');
+            i = activeIndicator.index();
+            score_index = i;
+            console.log(score_index)
+        }
+
+
         var car = $('.carousel.carousel-slider').carousel({
             fullWidth: true,
-            indicators: true
+            indicators: true,
+            onCycleTo: update_index
         }).height(windowHeight);
-        
+
+    
+
         function carouselNext() {
             $('.carousel').carousel('next');
+        }
+        function addScore(increment){
+            score_id = "#score_"+ score_index
+            console.log(score_id)
+            var scoreFloat = parseFloat($(score_id).text());
+            scoreFloat = scoreFloat + increment
+            if (scoreFloat > 10){
+                scoreFloat = 10
+            }
+            console.log(scoreFloat)
+            $(score_id).text(scoreFloat);
+        }
+        function removeScore(increment){
+            score_id = "#score_"+ score_index
+            console.log(score_id)
+            var scoreFloat = parseFloat($(score_id).text());
+            scoreFloat = scoreFloat - increment
+            if (scoreFloat < 0){
+                scoreFloat = 0
+            }
+            console.log(scoreFloat)
+            $(score_id).text(scoreFloat);
+        }
+        function setScore(score){
+            score_id = "#score_"+ score_index
+            $(score_id).text(score);
         }
     </script>
 

@@ -37,7 +37,7 @@ public class PilotService {
         // parse XML file
         DocumentBuilder db = dbf.newDocumentBuilder();
 
-        Document doc = db.parse( ResourceUtils.getFile("classpath:static/pilots.dat"));
+        Document doc = db.parse(  new File("/tmp/pilots.dat"));
         // optional, but recommended
         // http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
         doc.getDocumentElement().normalize();
