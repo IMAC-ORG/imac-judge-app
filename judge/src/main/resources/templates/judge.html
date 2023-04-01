@@ -36,6 +36,7 @@
             <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(0.5);">+0.5</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-1);">Break</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-2);">N/O</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="textToSpeech();">speak</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();">next</a>
         </div>
 
@@ -50,7 +51,8 @@
                 th:id="'score_'+ ${iterStat.index}">10.0</h1>
             <img id="my-svg" style="width: 80vw; height: 40vh;" th:if="${iterStat.index < 10}"
                 th:src="@{/man/known/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index})}">
-            <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;">First Panel</h2>
+            <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
+                th:id="'description_'+ ${iterStat.index}">First Panel</h2>
         </div>
 
     </div>
@@ -72,21 +74,33 @@
         const round =  /*[[${pilotScores.activeRound}]]*/ ;
         const sequence =  /*[[${pilotScores.activeSequence}]]*/ ;
         const primary_id =  /*[[${pilot.primary_id}]]*/ ;
+
+        const synth = window.speechSynthesis;
+        const voices = synth.getVoices();
+        
+        function textToSpeech() {
+            var description_id = "#description_" + score_index;
+            var description_text = $(description_id).text();
+            const msg = new SpeechSynthesisUtterance();
+            msg.text = description_text;
+            synth.speak(msg);
+        }
         update_index = function () {
             var activeIndicator = this.$indicators.find('.indicator-item.active');
             i = activeIndicator.index();
             score_index = i;
             console.log(score_index)
             scores[score_index] = getCurrentScore(score_index);
+            textToSpeech();
         }
 
         function getCurrentScore(index) {
             score_id = "#score_" + index
             var score_text = $(score_id).text();
-            if(score_text == 'BREAK'){
+            if (score_text == 'BREAK') {
                 return parseFloat(-1);
             }
-            if(score_text == 'N/O'){
+            if (score_text == 'N/O') {
                 return parseFloat(-2);
             }
             return parseFloat($(score_id).text());
@@ -99,6 +113,9 @@
             onCycleTo: update_index
         });
         car.height(windowHeight);
+        $(document).ready(function () {
+            textToSpeech();
+        });
 
 
         function carouselNext() {
@@ -142,7 +159,7 @@
             if (scoreFloat > 10) {
                 scoreFloat = 10;
             }
-            if(scoreFloat < 0){
+            if (scoreFloat < 0) {
                 scoreFloat = 0;
             }
             scores[score_index] = scoreFloat
@@ -168,13 +185,13 @@
             var currentScore = parseFloat(score);
             scores[score_index] = currentScore;
             score_id = "#score_" + score_index
-            if(currentScore == -1){
+            if (currentScore == -1) {
                 $(score_id).text('BREAK');
             }
-            if(currentScore == -2){
+            if (currentScore == -2) {
                 $(score_id).text('N/O');
             }
-            if(currentScore >= 0){
+            if (currentScore >= 0) {
                 $(score_id).text(currentScore);
             }
             console.log(JSON.stringify(scores));
@@ -192,6 +209,10 @@
                 window.location.replace("/");
             }
         }
+
+
+      
+
         /*]]>*/
     </script>
 
