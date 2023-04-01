@@ -14,6 +14,14 @@
             visibility: hidden;
         }
 
+        .figure-wrapper svg path {
+            fill: rgb(6, 223, 252) !important;
+        }
+
+        .figure-wrapper svg text {
+            fill: green !important;
+        }
+
         @font-face {
             font-family: digitalFont;
             src: url(font/digital-7.ttf);
@@ -25,7 +33,7 @@
 
 </head>
 
-<body style="height: 110vh !important;">
+<body style="height: 100vh !important;">
 
 
 
@@ -47,9 +55,9 @@
                     th:text="${pilotScores.activeSequence}"></span> </p>
             <p class="" style="line-height: 50%; font-weight: 500;">Fig <span th:text="${iterStat.index + 1}"></span>
                 KNOWN</p>
-            <h1 style="font-family: digitalFont; font-size: 20vh; line-height: 1vh; "
+            <h1 style="font-family: digitalFont; font-size: 20vh; line-height: 10vh;  "
                 th:id="'score_'+ ${iterStat.index}">10.0</h1>
-            <img id="my-svg" style="width: 80vw; height: 40vh;" th:if="${iterStat.index < 10}"
+            <img id="my-svg" style="max-width: 80vw; max-height: 30vh;" class="figure-wrapper" th:if="${iterStat.index < 10}"
                 th:src="@{/man/known/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index})}">
             <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
                 th:id="'description_'+ ${iterStat.index}">First Panel</h2>
@@ -74,7 +82,8 @@
         const round =  /*[[${pilotScores.activeRound}]]*/ ;
         const sequence =  /*[[${pilotScores.activeSequence}]]*/ ;
         const primary_id =  /*[[${pilot.primary_id}]]*/ ;
-
+        const pilot_name =  /*[[${pilot.name}]]*/ ;
+        const welcome_text = 'Now judging ' + pilot_name + ' round ' + round + ' sequence ' + sequence
         const synth = window.speechSynthesis;
         const voices = synth.getVoices();
         
@@ -85,13 +94,19 @@
             msg.text = description_text;
             synth.speak(msg);
         }
+
+        function textToSpeechCustomMessage(text) {
+            const msg = new SpeechSynthesisUtterance();
+            msg.text = text;
+            synth.speak(msg);
+        }
         update_index = function () {
             var activeIndicator = this.$indicators.find('.indicator-item.active');
             i = activeIndicator.index();
             score_index = i;
             console.log(score_index)
             scores[score_index] = getCurrentScore(score_index);
-            textToSpeech();
+
         }
 
         function getCurrentScore(index) {
@@ -113,9 +128,7 @@
             onCycleTo: update_index
         });
         car.height(windowHeight);
-        $(document).ready(function () {
-            textToSpeech();
-        });
+        textToSpeechCustomMessage(welcome_text);
 
 
         function carouselNext() {
@@ -165,8 +178,11 @@
             scores[score_index] = scoreFloat
             console.log(scoreFloat)
             console.log(JSON.stringify(scores));
+
             score_id = "#score_" + score_index
             $(score_id).text(scoreFloat);
+            textToSpeechCustomMessage(scoreFloat);
+
         }
         function removeScore(increment) {
             var scoreFloat = getCurrentScore(score_index);
@@ -179,6 +195,7 @@
             console.log(JSON.stringify(scores));
             score_id = "#score_" + score_index
             $(score_id).text(scoreFloat);
+            textToSpeechCustomMessage(scoreFloat);
         }
         function setScore(score) {
             console.log("setting score to > " + score);
@@ -187,12 +204,15 @@
             score_id = "#score_" + score_index
             if (currentScore == -1) {
                 $(score_id).text('BREAK');
+                textToSpeechCustomMessage('BREAK');
             }
             if (currentScore == -2) {
                 $(score_id).text('N/O');
+                textToSpeechCustomMessage('Not Observed');
             }
             if (currentScore >= 0) {
                 $(score_id).text(currentScore);
+                textToSpeechCustomMessage(currentScore);
             }
             console.log(JSON.stringify(scores));
         }
@@ -211,7 +231,7 @@
         }
 
 
-      
+
 
         /*]]>*/
     </script>
