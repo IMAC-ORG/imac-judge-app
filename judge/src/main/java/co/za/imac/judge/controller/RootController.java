@@ -1,6 +1,7 @@
 package co.za.imac.judge.controller;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -18,6 +19,7 @@ import com.google.gson.Gson;
 import co.za.imac.judge.dto.CompDTO;
 import co.za.imac.judge.dto.FigureDTO;
 import co.za.imac.judge.dto.Pilot;
+import co.za.imac.judge.dto.PilotScores;
 import co.za.imac.judge.service.CompService;
 import co.za.imac.judge.service.PilotService;
 import co.za.imac.judge.service.SequenceService;
@@ -42,6 +44,11 @@ public class RootController {
             return "redirect:/newcomp";
         }
 		model.addAttribute("pilots", pilots);
+        HashMap<Integer,PilotScores> pilotScores = new HashMap<>();
+        for(Pilot pilot : pilots){
+            pilotScores.put(pilot.getPrimary_id(), pilotService.getPilotScores(pilot));
+        }
+        model.addAttribute("pilotScores", pilotScores);
 		return "index";
 	}
     @GetMapping("/judge")
@@ -55,9 +62,12 @@ public class RootController {
         Pilot pilot = pilotService.getPilot(pilot_id);
         System.out.println("Pilot data");
         System.out.println(new Gson().toJson(pilot));
+        PilotScores pilotScores = pilotService.getPilotScores(pilot);
         List<FigureDTO> sequences =  sequenceService.getAllSequenceForClass(pilot.getClassString().toUpperCase(), "KNOWN");
         model.addAttribute("maneuvers", sequences);
+        model.addAttribute("numOfManeuvers", sequences.size());
         model.addAttribute("pilot", pilot);
+        model.addAttribute("pilotScores", pilotScores);
         String sequencesJson =  new Gson().toJson(sequences);
         model.addAttribute("sequencesjson",sequencesJson);
         System.out.println(new Gson().toJson(sequences));

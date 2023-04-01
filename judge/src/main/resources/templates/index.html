@@ -9,6 +9,15 @@
     .carousel{
 height: 100vh;
 }
+.pilot_class{
+  font-size: calc(6vw + 3vh) !important;
+}
+.pilot_name{
+  font-size: calc(8vw + 3vh) !important;
+}
+.pilot_round{
+  font-size: calc(4vw + 3vh) !important;
+}
 @font-face {
 font-family: digitalFont;
 src: url(font/digital-7.ttf);
@@ -19,15 +28,19 @@ src: url(font/digital-7.ttf);
   <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
 </head>
 
-<body style="height: 110vh !important;">
+<body style="height: 100vh !important;">
 
 
   <div class="carousel carousel-slider center" >
 
 
     <div th:each="pilot,iterStat : ${pilots}" class="carousel-item blue white-text" th:href="@{/judge(pilot_id=${pilot.primary_id})}">
-      <h2 th:text="${pilot.name}" >First Panel</h2>
-      <a class="waves-effect waves-light btn orange" th:href="@{/judge(pilot_id=${pilot.primary_id})}"><i class="material-icons right">flight_takeoff</i>Judge</a>
+      <h1 th:text="${pilot.name}" class="pilot_name" >First Panel</h1>
+      <h2 th:text="${pilot.getClassString()}" class="pilot_class" >First Panel</h2>
+      <h2 th:if="${pilotScores[pilot.primary_id].isActive}" class="pilot_round">Round: <span th:text="${pilotScores[pilot.primary_id].activeRound}" class="pilot_round"></span> Sequence: <span th:text="${pilotScores[pilot.primary_id].activeSequence}" class="pilot_round"></span></h2>
+      <h2 th:unless="${pilotScores[pilot.primary_id].isActive}" class="pilot_round"> All Rounds Completed!</h2>
+      <a  class="pilot_round" th:unless="${pilotScores[pilot.primary_id].isActive}" > <i class="material-icons center white-text">done</i>  </a>
+      <a th:if="${pilotScores[pilot.primary_id].isActive}" class="waves-effect waves-light btn orange pulse" th:href="@{/judge(pilot_id=${pilot.primary_id})}"><i class="material-icons right">flight_takeoff</i>Judge</a>
     </div>
     
   </div>

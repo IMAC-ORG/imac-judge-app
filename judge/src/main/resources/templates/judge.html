@@ -6,13 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
     <title>Starter Template - Materialize</title>
     <style>
-        .carousel{
-height: 100vh;
-}
-@font-face {
-  font-family: digitalFont;
-  src: url(font/digital-7.ttf);
-}
+        .carousel {
+            height: 100vh;
+        }
+
+        .indicators {
+            visibility: hidden;
+        }
+
+        @font-face {
+            font-family: digitalFont;
+            src: url(font/digital-7.ttf);
+        }
     </style>
     <!-- CSS  -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -22,26 +27,33 @@ height: 100vh;
 
 <body style="height: 110vh !important;">
 
-   
 
-              <div class="carousel carousel-slider center" >
-                <div class="carousel-fixed-item center">
-                  <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(0.5);">-0.5</a>
-                  <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(0);">0</a>
-                  <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(0.5);">+0.5</a>
-                  <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();">next</a>
-                </div>
 
-                <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item blue white-text" href="#one!">
-                    <p class="" style="line-height: 50%; font-weight: 500;">Pilot 3 </p>
-                    <p class="" style="line-height: 50%; font-weight: 500;">Seq 1 Round 1 </p>
-                      <p class="" style="line-height: 50%; font-weight: 500;">Fig 1 KNOWN</p>
-                    <h1 style="font-family: digitalFont; font-size: 20vh; line-height: 1vh; " th:id="'score_'+ ${iterStat.index}">10.0</h1>
-                    <img id="my-svg" style="width: 80vw; height: 40vh;" th:if="${iterStat.index < 10}" th:src="@{/man/known/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index})}" >
-                    <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;">First Panel</h2>
-                </div>
-                
-              </div>
+    <div class="carousel carousel-slider center">
+        <div class="carousel-fixed-item center">
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(0.5);">-0.5</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(0);">0</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(0.5);">+0.5</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-1);">Break</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-2);">N/O</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();">next</a>
+        </div>
+
+        <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item blue white-text" href="#one!">
+            <p class="" style="line-height: 50%; font-weight: 500;">Pilot: <span th:text="${pilot.name}"></span> </p>
+            <p class="" style="line-height: 50%; font-weight: 500;">Round <span
+                    th:text="${pilotScores.activeRound}"></span> Seq <span
+                    th:text="${pilotScores.activeSequence}"></span> </p>
+            <p class="" style="line-height: 50%; font-weight: 500;">Fig <span th:text="${iterStat.index + 1}"></span>
+                KNOWN</p>
+            <h1 style="font-family: digitalFont; font-size: 20vh; line-height: 1vh; "
+                th:id="'score_'+ ${iterStat.index}">10.0</h1>
+            <img id="my-svg" style="width: 80vw; height: 40vh;" th:if="${iterStat.index < 10}"
+                th:src="@{/man/known/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index})}">
+            <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;">First Panel</h2>
+        </div>
+
+    </div>
 
 
 
@@ -50,57 +62,137 @@ height: 100vh;
     <script src="jquery-3.6.4.min.js"></script>
     <script src="materialize/js/materialize.js"></script>
 
-    <script>
-
+    <script th:inline="javascript">
+        /*<![CDATA[*/
         // Or with jQuery
-        var score_index = 0; 
+        var score_index = 0;
         var windowHeight = window.innerHeight;
-
-        update_index =  function (){
+        const scores = [];
+        const numOfManeuvers = /*[[${numOfManeuvers}]]*/ ;
+        const round =  /*[[${pilotScores.activeRound}]]*/ ;
+        const sequence =  /*[[${pilotScores.activeSequence}]]*/ ;
+        const primary_id =  /*[[${pilot.primary_id}]]*/ ;
+        update_index = function () {
             var activeIndicator = this.$indicators.find('.indicator-item.active');
             i = activeIndicator.index();
             score_index = i;
             console.log(score_index)
+            scores[score_index] = getCurrentScore(score_index);
         }
 
+        function getCurrentScore(index) {
+            score_id = "#score_" + index
+            var score_text = $(score_id).text();
+            if(score_text == 'BREAK'){
+                return parseFloat(-1);
+            }
+            if(score_text == 'N/O'){
+                return parseFloat(-2);
+            }
+            return parseFloat($(score_id).text());
+        }
 
         var car = $('.carousel.carousel-slider').carousel({
             fullWidth: true,
             indicators: true,
+            noWrap: true,
             onCycleTo: update_index
-        }).height(windowHeight);
+        });
+        car.height(windowHeight);
 
-    
 
         function carouselNext() {
             $('.carousel').carousel('next');
-        }
-        function addScore(increment){
-            score_id = "#score_"+ score_index
-            console.log(score_id)
-            var scoreFloat = parseFloat($(score_id).text());
-            scoreFloat = scoreFloat + increment
-            if (scoreFloat > 10){
-                scoreFloat = 10
+            if (score_index == (numOfManeuvers - 1)) {
+                submitScores();
             }
+        }
+        function submitScores() {
+            for (i in scores) {
+                console.log(scores[i]);
+                if (scores[i] == null) {
+                    scores[i] = 10;
+                }
+            }
+            console.log(JSON.stringify(scores));
+            var postData = {
+                primary_id: primary_id,
+                round: round,
+                sequence: sequence,
+                type: 'KNOWN',
+                scores: scores
+            }
+            $.ajax({
+                type: "POST",
+                url: "/api/score",
+                data: JSON.stringify(postData),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    nextEvent(data);
+                },
+                failure: function (errMsg) {
+                    alert(errMsg);
+                }
+            });
+        }
+        function addScore(increment) {
+            var scoreFloat = getCurrentScore(score_index);
+            scoreFloat = scoreFloat + increment
+            if (scoreFloat > 10) {
+                scoreFloat = 10;
+            }
+            if(scoreFloat < 0){
+                scoreFloat = 0;
+            }
+            scores[score_index] = scoreFloat
             console.log(scoreFloat)
+            console.log(JSON.stringify(scores));
+            score_id = "#score_" + score_index
             $(score_id).text(scoreFloat);
         }
-        function removeScore(increment){
-            score_id = "#score_"+ score_index
-            console.log(score_id)
-            var scoreFloat = parseFloat($(score_id).text());
+        function removeScore(increment) {
+            var scoreFloat = getCurrentScore(score_index);
             scoreFloat = scoreFloat - increment
-            if (scoreFloat < 0){
+            if (scoreFloat < 0) {
                 scoreFloat = 0
             }
+            scores[score_index] = scoreFloat
             console.log(scoreFloat)
+            console.log(JSON.stringify(scores));
+            score_id = "#score_" + score_index
             $(score_id).text(scoreFloat);
         }
-        function setScore(score){
-            score_id = "#score_"+ score_index
-            $(score_id).text(score);
+        function setScore(score) {
+            console.log("setting score to > " + score);
+            var currentScore = parseFloat(score);
+            scores[score_index] = currentScore;
+            score_id = "#score_" + score_index
+            if(currentScore == -1){
+                $(score_id).text('BREAK');
+            }
+            if(currentScore == -2){
+                $(score_id).text('N/O');
+            }
+            if(currentScore >= 0){
+                $(score_id).text(currentScore);
+            }
+            console.log(JSON.stringify(scores));
         }
+
+        function nextEvent(responseData) {
+            if (responseData.isActive) {
+                if (responseData.activeRound > round) {
+                    window.location.replace("/");
+                }
+                if (responseData.activeSequence > sequence) {
+                    location.reload();
+                }
+            } else {
+                window.location.replace("/");
+            }
+        }
+        /*]]>*/
     </script>
 
 </body>
