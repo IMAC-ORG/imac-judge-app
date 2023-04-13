@@ -8,18 +8,14 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.xml.sax.SAXException;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.gson.Gson;
 
-import co.za.imac.judge.dto.CompDTO;
 import co.za.imac.judge.dto.FigureDTO;
-import co.za.imac.judge.dto.FlightsUploadDTO;
 import co.za.imac.judge.dto.Pilot;
 import co.za.imac.judge.dto.PilotScores;
 import co.za.imac.judge.service.CompService;
@@ -51,10 +47,7 @@ public class RootController {
             pilotScores.put(pilot.getPrimary_id(), pilotService.getPilotScores(pilot));
         }
         model.addAttribute("pilotScores", pilotScores);
-        XmlMapper xmlMapper = new XmlMapper();
-        FlightsUploadDTO dto = new FlightsUploadDTO();
-        String xml = xmlMapper.writeValueAsString(dto);
-        System.out.println(xml);
+        pilotService.syncPilotsToScoreWebService(pilotService.getPilotScores(pilots.get(0)));
 		return "index";
 	}
     @GetMapping("/judge")

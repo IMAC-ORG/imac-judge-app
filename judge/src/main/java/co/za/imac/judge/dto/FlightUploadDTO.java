@@ -13,11 +13,18 @@ public class FlightUploadDTO {
 	public boolean missing_pilot_panel;
 	public FiguresUploadDTO figures;
     @JacksonXmlProperty(isAttribute = true, localName = "index")
-	public int index = 1;
-	public String text;
+	public int index = 0;
     
-    public FlightUploadDTO() {
-        
+    public FlightUploadDTO(int pilot_primary_id, String type, int round, int sequence, int judge,
+            boolean missing_pilot_panel, FiguresUploadDTO figures, int index) {
+        this.pilot_primary_id = pilot_primary_id;
+        this.type = type;
+        this.round = round;
+        this.sequence = sequence;
+        this.judge = judge;
+        this.missing_pilot_panel = missing_pilot_panel;
+        this.figures = figures;
+        this.index = index;
     }
     public int getPilot_primary_id() {
         return pilot_primary_id;
@@ -67,12 +74,7 @@ public class FlightUploadDTO {
     public void setIndex(int index) {
         this.index = index;
     }
-    public String getText() {
-        return text;
-    }
-    public void setText(String text) {
-        this.text = text;
-    }
+ 
 
 
 }

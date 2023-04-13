@@ -10,13 +10,24 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public class FlightsUploadDTO {
     public int flightline = 1;
     @JacksonXmlElementWrapper(useWrapping = false)
-	public FlightUploadDTO flight[];
-
-
-    public FlightsUploadDTO() {
-        this.flight = new FlightUploadDTO[1];
-        this.flight[0] = new FlightUploadDTO();
+	public List<FlightUploadDTO> flight;
+    
+    public FlightsUploadDTO(List<FlightUploadDTO> flight) {
+        this.flight = flight;
     }
+    public int getFlightline() {
+        return flightline;
+    }
+    public void setFlightline(int flightline) {
+        this.flightline = flightline;
+    }
+    public List<FlightUploadDTO> getFlight() {
+        return flight;
+    }
+    public void setFlight(List<FlightUploadDTO> flight) {
+        this.flight = flight;
+    }
+    
 
     
 }

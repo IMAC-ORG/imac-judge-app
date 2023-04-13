@@ -23,9 +23,15 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.gson.Gson;
 
 import co.za.imac.judge.dto.CompDTO;
+import co.za.imac.judge.dto.FigureUploadDTO;
+import co.za.imac.judge.dto.FiguresUploadDTO;
+import co.za.imac.judge.dto.FlightUploadDTO;
+import co.za.imac.judge.dto.FlightsUploadDTO;
 import co.za.imac.judge.dto.PScore;
 import co.za.imac.judge.dto.Pilot;
 import co.za.imac.judge.dto.PilotScoreDTO;
@@ -219,5 +225,37 @@ public class PilotService {
 
         }
         return pilotScore;
+    }
+
+    public void syncPilotsToScoreWebService(PilotScores pilotScore) throws JsonProcessingException{
+        List<FlightUploadDTO> flight = new ArrayList<>();
+        int index = 0 ; 
+        for(PScore score : pilotScore.getScores()){
+            List<FigureUploadDTO> figureScores = new ArrayList<>();
+            for(int i = 0; i< score.getScores().length; i++){
+                float fscore = score.getScores()[i];
+                boolean break_err = false;
+                boolean box_err = false;
+                if(fscore == -1){
+                    fscore = 0; 
+                    break_err = true;
+                }
+                if(fscore == -2){
+                    fscore = 0; 
+                }
+                FigureUploadDTO figureScore = new FigureUploadDTO(fscore, break_err, box_err, i);
+                figureScores.add(figureScore);
+            }
+            FiguresUploadDTO figures = new FiguresUploadDTO(figureScores);
+            //create FlightUploadDTO
+            FlightUploadDTO flightUploadDTO = new FlightUploadDTO(pilotScore.getPrimary_id(), "KNOWN", score.getRound(), score.getSequence(), 1, false, figures, index);
+            flight.add(flightUploadDTO);
+            index ++;
+        }
+         //create final stupid wrapper
+        FlightsUploadDTO flightsUploadDTO = new FlightsUploadDTO(flight);
+        XmlMapper xmlMapper = new XmlMapper();
+        String xml = xmlMapper.writeValueAsString(flightsUploadDTO);
+        System.out.println(xml);
     }
 }
