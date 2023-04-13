@@ -33,6 +33,8 @@ public CompDTO createComp(CompDTO compDTO) throws IOException{
     FileOutputStream outputStream = new FileOutputStream(COMP_FILE_NAME);
     outputStream.write(strToBytes);
     outputStream.close();
+
+    //get pilots dat file
     return compDTO;
 }
 

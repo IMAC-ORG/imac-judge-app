@@ -6,23 +6,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
   <title>Starter Template - Materialize</title>
   <style>
-    .carousel{
-height: 100vh;
-}
-.pilot_class{
-  font-size: calc(6vw + 3vh) !important;
-}
-.pilot_name{
-  font-size: calc(8vw + 3vh) !important;
-}
-.pilot_round{
-  font-size: calc(4vw + 3vh) !important;
-}
-@font-face {
-font-family: digitalFont;
-src: url(font/digital-7.ttf);
-}
-</style>
+    .carousel {
+      height: 100vh;
+    }
+
+    .pilot_class {
+      font-size: calc(6vw + 3vh) !important;
+    }
+
+    .pilot_name {
+      font-size: calc(8vw + 3vh) !important;
+    }
+
+    .pilot_round {
+      font-size: calc(4vw + 3vh) !important;
+    }
+
+    @font-face {
+      font-family: digitalFont;
+      src: url(font/digital-7.ttf);
+    }
+  </style>
   <!-- CSS  -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
@@ -31,22 +35,36 @@ src: url(font/digital-7.ttf);
 <body style="height: 100vh !important;">
 
 
-  <div class="carousel carousel-slider center" >
+  <div class="carousel carousel-slider center">
 
 
-    <div th:each="pilot,iterStat : ${pilots}" class="carousel-item blue white-text" th:href="@{/judge(pilot_id=${pilot.primary_id})}">
-      <h1 th:text="${pilot.name}" class="pilot_name" >First Panel</h1>
-      <h2 th:text="${pilot.getClassString()}" class="pilot_class" >First Panel</h2>
-      <h2 th:if="${pilotScores[pilot.primary_id].isActive}" class="pilot_round">Round: <span th:text="${pilotScores[pilot.primary_id].activeRound}" class="pilot_round"></span> Sequence: <span th:text="${pilotScores[pilot.primary_id].activeSequence}" class="pilot_round"></span></h2>
+    <div th:each="pilot,iterStat : ${pilots}" class="carousel-item blue white-text"
+      th:href="@{/judge(pilot_id=${pilot.primary_id})}">
+      <h1 th:text="${pilot.name}" class="pilot_name">First Panel</h1>
+      <h2 th:text="${pilot.getClassString()}" class="pilot_class">First Panel</h2>
+      <h2 th:if="${pilotScores[pilot.primary_id].isActive}" class="pilot_round">Round: <span
+          th:text="${pilotScores[pilot.primary_id].activeRound}" class="pilot_round"></span> Sequence: <span
+          th:text="${pilotScores[pilot.primary_id].activeSequence}" class="pilot_round"></span></h2>
       <h2 th:unless="${pilotScores[pilot.primary_id].isActive}" class="pilot_round"> All Rounds Completed!</h2>
-      <a  class="pilot_round" th:unless="${pilotScores[pilot.primary_id].isActive}" > <i class="material-icons center white-text">done</i>  </a>
-      <a th:if="${pilotScores[pilot.primary_id].isActive}" class="waves-effect waves-light btn orange pulse" th:href="@{/judge(pilot_id=${pilot.primary_id})}"><i class="material-icons right">flight_takeoff</i>Judge</a>
+      <a class="pilot_round" th:unless="${pilotScores[pilot.primary_id].isActive}"> <i
+          class="material-icons center white-text">done</i> </a>
+      <a th:if="${pilotScores[pilot.primary_id].isActive}" class="waves-effect waves-light btn orange pulse"
+        th:href="@{/judge(pilot_id=${pilot.primary_id})}"><i class="material-icons right">flight_takeoff</i>Judge</a>
     </div>
-    
+
   </div>
 
 
-
+  <div class="fixed-action-btn">
+    <a class="btn-floating btn-small red">
+      <i class="large material-icons">menu</i>
+    </a>
+    <ul>
+      <li><a class="btn-floating btn-small red" onclick="syncPilots();"><i class="material-icons">sync</i></a></li>
+      <li><a class="btn-floating btn-small yellow darken-1"><i class="material-icons">publish</i></a></li>
+      <li><a class="btn-floating btn-small green" href="/newcomp"><i class="material-icons">edit</i></a></li>
+    </ul>
+  </div>
 
 
 
@@ -60,6 +78,27 @@ src: url(font/digital-7.ttf);
       fullWidth: true,
       indicators: false
     }).height(windowHeight);
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var elems = document.querySelectorAll('.fixed-action-btn');
+      var instances = M.FloatingActionButton.init(elems, {
+        hoverEnabled: false
+      });
+    });
+
+
+    function syncPilots() {
+      $.ajax({
+        url: "/api/pilots/sync",
+        success: function (data) {
+          M.toast({html: 'Sync Success'})
+          window.location.replace("/");
+        },
+        failure: function (errMsg) {
+          M.toast({html: 'Sync Error'})
+        }
+      });
+    }
   </script>
 
 </body>

@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,8 +28,18 @@ public class APIController {
 
     @PostMapping("/api/comp")
 	public CompDTO createEmployee(@RequestBody CompDTO comp) throws IOException, ParserConfigurationException, SAXException {
+        //fetch pilots
+        pilotService.getPilotsFileFromScore();
         pilotService.setupPilotScores();
 		return compService.createComp(comp);
+	}
+
+    @GetMapping("/api/pilots/sync")
+	public String syncPilots() throws IOException, ParserConfigurationException, SAXException {
+        //fetch pilots
+        pilotService.getPilotsFileFromScore();
+        pilotService.setupPilotScores();
+		return "{'sync':'ok'}";
 	}
 
     @PostMapping("/api/score")
