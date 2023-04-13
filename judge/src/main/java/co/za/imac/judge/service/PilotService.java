@@ -281,9 +281,8 @@ public class PilotService {
         Unirest.setTimeouts(0, 0);
         HttpResponse<String> response = Unirest.post(SCORE_UPLOAD_URL)
                 .header("Accept-Language", "en-au")
-                .header("User-Agent", "Score%20Pad/253 CFNetwork/811.5.4 Darwin/16.7.0")
-                .header("Content-Type", "multipart/form-data; boundary=\"__Part__\"")
-                .header("", "")
+               // .header("User-Agent", "Score%20Pad/253 CFNetwork/811.5.4 Darwin/16.7.0")
+                //.header("Content-Type", 'multipart/form-data; boundary="__Part__"')
                 .field("uploadtype", "flightdata")
                 .field("keepbackup", "false")
                 .field("submit", "submit")
