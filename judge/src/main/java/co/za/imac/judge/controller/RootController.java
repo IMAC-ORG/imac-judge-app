@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.xml.sax.SAXException;
 
 import com.google.gson.Gson;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 import co.za.imac.judge.dto.FigureDTO;
 import co.za.imac.judge.dto.Pilot;
@@ -33,7 +34,7 @@ public class RootController {
     private SequenceService sequenceService;
 
     @GetMapping("/")
-	public String home(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) throws IOException, ParserConfigurationException, SAXException {
+	public String home(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) throws IOException, ParserConfigurationException, SAXException, UnirestException {
 
         System.out.println("Is there a comp? : " + compService.isCurrentComp());
         List<Pilot> pilots = pilotService.getPilots();
@@ -47,6 +48,7 @@ public class RootController {
             pilotScores.put(pilot.getPrimary_id(), pilotService.getPilotScores(pilot));
         }
         model.addAttribute("pilotScores", pilotScores);
+        pilotService.getPilotsFileFromScore();
         pilotService.syncPilotsToScoreWebService(pilotService.getPilotScores(pilots.get(0)));
 		return "index";
 	}
@@ -77,10 +79,6 @@ public class RootController {
 	public String newcomp(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) throws IOException {
 
         System.out.println("Is there a comp? : " + compService.isCurrentComp());
-        if(compService.isCurrentComp()){
-            System.out.println("Theres is a current comp!!");
-            return "redirect:/";
-        }
 		model.addAttribute("name", name);
 		return "newcomp";
 	}

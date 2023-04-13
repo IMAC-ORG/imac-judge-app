@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,6 +16,7 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
@@ -26,6 +29,9 @@ import org.xml.sax.SAXException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.gson.Gson;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 import co.za.imac.judge.dto.CompDTO;
 import co.za.imac.judge.dto.FigureUploadDTO;
@@ -45,8 +51,15 @@ import javax.xml.parsers.ParserConfigurationException;
 public class PilotService {
 
     private static final String PILOT_SCORE_DIR = "/tmp/pilots/scores/";
+    private static final String PILOT_DAT_PATH = "/tmp/pilots.dat";
+    private static final String PILOT_DAT_URL = "http://192.168.1.4:8181/scorepad/pilots.dat";
+    private static final String SCORE_UPLOAD_URL = "http://192.168.1.4:8181/scorepadupload/";
     @Autowired
     private CompService compService;
+
+    public void getPilotsFileFromScore() throws MalformedURLException, IOException {
+        FileUtils.copyURLToFile(new URL(PILOT_DAT_URL), new File(PILOT_DAT_PATH));
+    }
 
     public List<Pilot> getPilots() throws ParserConfigurationException, SAXException, IOException {
         // Get Document Builder
@@ -56,7 +69,7 @@ public class PilotService {
         // parse XML file
         DocumentBuilder db = dbf.newDocumentBuilder();
 
-        Document doc = db.parse(new File("/tmp/pilots.dat"));
+        Document doc = db.parse(new File(PILOT_DAT_PATH));
         // optional, but recommended
         // http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
         doc.getDocumentElement().normalize();
@@ -227,35 +240,58 @@ public class PilotService {
         return pilotScore;
     }
 
-    public void syncPilotsToScoreWebService(PilotScores pilotScore) throws JsonProcessingException{
+    public void syncPilotsToScoreWebService(PilotScores pilotScore) throws IOException, UnirestException {
         List<FlightUploadDTO> flight = new ArrayList<>();
-        int index = 0 ; 
-        for(PScore score : pilotScore.getScores()){
+        int index = 0;
+        for (PScore score : pilotScore.getScores()) {
             List<FigureUploadDTO> figureScores = new ArrayList<>();
-            for(int i = 0; i< score.getScores().length; i++){
+            for (int i = 0; i < score.getScores().length; i++) {
                 float fscore = score.getScores()[i];
                 boolean break_err = false;
                 boolean box_err = false;
-                if(fscore == -1){
-                    fscore = 0; 
+                if (fscore == -1) {
+                    fscore = 0;
                     break_err = true;
                 }
-                if(fscore == -2){
-                    fscore = 0; 
+                if (fscore == -2) {
+                    fscore = 0;
                 }
                 FigureUploadDTO figureScore = new FigureUploadDTO(fscore, break_err, box_err, i);
                 figureScores.add(figureScore);
             }
             FiguresUploadDTO figures = new FiguresUploadDTO(figureScores);
-            //create FlightUploadDTO
-            FlightUploadDTO flightUploadDTO = new FlightUploadDTO(pilotScore.getPrimary_id(), "KNOWN", score.getRound(), score.getSequence(), 1, false, figures, index);
+            // create FlightUploadDTO
+            FlightUploadDTO flightUploadDTO = new FlightUploadDTO(pilotScore.getPrimary_id(), "KNOWN", score.getRound(),
+                    score.getSequence(), 1, false, figures, index);
             flight.add(flightUploadDTO);
-            index ++;
+            index++;
         }
-         //create final stupid wrapper
+        // create final stupid wrapper
         FlightsUploadDTO flightsUploadDTO = new FlightsUploadDTO(flight);
         XmlMapper xmlMapper = new XmlMapper();
         String xml = xmlMapper.writeValueAsString(flightsUploadDTO);
+
+        String flights_dat_file_name = "LINE1_JUDGE" + 1 + "_flights.dat";
+        String flights_dat_file_path = PILOT_SCORE_DIR + flights_dat_file_name;
+        File flights_dat_file = new File(flights_dat_file_path);
+        FileWriter fw = new FileWriter(flights_dat_file.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fw);
+        bw.write(xml);
+        bw.close();
+        Unirest.setTimeouts(0, 0);
+        HttpResponse<String> response = Unirest.post(SCORE_UPLOAD_URL)
+                .header("Accept-Language", "en-au")
+                .header("User-Agent", "Score%20Pad/253 CFNetwork/811.5.4 Darwin/16.7.0")
+                .header("Content-Type", "multipart/form-data; boundary=\"__Part__\"")
+                .header("", "")
+                .field("uploadtype", "flightdata")
+                .field("keepbackup", "false")
+                .field("submit", "submit")
+                .field("file", flights_dat_file)
+                .field("filename", flights_dat_file_name)
+                .asString();
+        
+        System.out.println(response.getStatus());
         System.out.println(xml);
     }
 }
