@@ -48,12 +48,12 @@ public class RootController {
             pilotScores.put(pilot.getPrimary_id(), pilotService.getPilotScores(pilot));
         }
         model.addAttribute("pilotScores", pilotScores);
+        model.addAttribute("comp", compService.getComp());
         pilotService.getPilotsFileFromScore();
-        pilotService.syncPilotsToScoreWebService(pilotService.getPilotScores(pilots.get(0)));
 		return "index";
 	}
     @GetMapping("/judge")
-	public String judge(@RequestParam(name="pilot_id", required=true) int pilot_id, Model model) throws IOException, ParserConfigurationException, SAXException {
+	public String judge(@RequestParam(name="pilot_id", required=true) int pilot_id,@RequestParam(name="roundType", required=true) String roundType, Model model) throws IOException, ParserConfigurationException, SAXException {
 
         System.out.println("Is there a comp? : " + compService.isCurrentComp());
         if(!compService.isCurrentComp()){
@@ -64,11 +64,16 @@ public class RootController {
         System.out.println("Pilot data");
         System.out.println(new Gson().toJson(pilot));
         PilotScores pilotScores = pilotService.getPilotScores(pilot);
-        List<FigureDTO> sequences =  sequenceService.getAllSequenceForClass(pilot.getClassString().toUpperCase(), "KNOWN");
+        
+        List<FigureDTO> sequences =  sequenceService.getAllSequenceForClass(pilot.getClassString().toUpperCase(), roundType.toUpperCase());
+        if(sequences == null || sequences.size() == 0 || sequences.isEmpty()){
+            return "noseq";
+        }
         model.addAttribute("maneuvers", sequences);
         model.addAttribute("numOfManeuvers", sequences.size());
         model.addAttribute("pilot", pilot);
         model.addAttribute("pilotScores", pilotScores);
+        model.addAttribute("roundType", roundType.toUpperCase());
         String sequencesJson =  new Gson().toJson(sequences);
         model.addAttribute("sequencesjson",sequencesJson);
         System.out.println(new Gson().toJson(sequences));

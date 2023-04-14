@@ -54,7 +54,7 @@ public class SequenceService {
                 String type = element.getElementsByTagName("type").item(0).getTextContent();
                 String _class =  "";
                 try {
-                     _class = element.getElementsByTagName("_class").item(0).getTextContent();
+                     _class = element.getElementsByTagName("class").item(0).getTextContent();
                 } catch (Exception e) {
                      _class = "FREESTYLE";
                 }

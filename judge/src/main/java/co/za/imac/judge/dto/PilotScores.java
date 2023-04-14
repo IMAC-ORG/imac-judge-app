@@ -14,6 +14,15 @@ public class PilotScores {
     private Boolean isActive = true;
     private int activeRound = 1;
     private int activeSequence = 1;
+    private String activeRoundType;
+
+    public String getActiveRoundType() {
+        return activeRoundType;
+    }
+
+    public void setActiveRoundType(String activeRoundType) {
+        this.activeRoundType = activeRoundType;
+    }
 
     private List<PScore> scores = new ArrayList<>();
 

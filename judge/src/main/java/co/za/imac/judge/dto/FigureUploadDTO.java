@@ -6,14 +6,22 @@ public class FigureUploadDTO {
     public float raw_score;
 	public boolean box_err;
 	public boolean break_err;
+	public boolean not_observed;
+	public boolean isNot_observed() {
+		return not_observed;
+	}
+	public void setNot_observed(boolean not_observed) {
+		this.not_observed = not_observed;
+	}
 	@JacksonXmlProperty(isAttribute = true, localName = "index")
 	public int index;
 	
-	public FigureUploadDTO(float raw_score, boolean box_err, boolean break_err, int index) {
+	public FigureUploadDTO(float raw_score, boolean box_err, boolean break_err, boolean not_observed, int index) {
 		this.raw_score = raw_score;
 		this.box_err = box_err;
 		this.break_err = break_err;
 		this.index = index;
+		this.not_observed = not_observed;
 	}
 	public float getRaw_score() {
 		return raw_score;

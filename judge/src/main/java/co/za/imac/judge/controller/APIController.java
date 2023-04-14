@@ -28,6 +28,7 @@ public class APIController {
 
     @PostMapping("/api/comp")
 	public CompDTO createEmployee(@RequestBody CompDTO comp) throws IOException, ParserConfigurationException, SAXException {
+        System.out.println(new Gson().toJson(comp));
         //fetch pilots
         pilotService.getPilotsFileFromScore();
         pilotService.setupPilotScores();
@@ -38,9 +39,17 @@ public class APIController {
 	public String syncPilots() throws IOException, ParserConfigurationException, SAXException {
         //fetch pilots
         pilotService.getPilotsFileFromScore();
-        pilotService.setupPilotScores();
+       // pilotService.setupPilotScores();
 		return "{'sync':'ok'}";
 	}
+    
+    @GetMapping("/api/scores/sync")
+	public String syncScores() throws Exception {
+        //fetch pilots
+        pilotService.syncPilotsToScoreWebService();
+		return "{'sync':'ok'}";
+	}
+    
 
     @PostMapping("/api/score")
     public PilotScores submitScores(@RequestBody PilotScoreDTO pilotScoreDTO) throws ParserConfigurationException, SAXException, IOException{
