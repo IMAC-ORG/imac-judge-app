@@ -110,10 +110,8 @@ public class PilotService {
                 int frequency = Integer.parseInt(element.getElementsByTagName("frequency").item(0).getTextContent());
 
                 NodeList classesList = doc.getElementsByTagName("classes");
-                Element class_element = (Element) classesList.item(0);
-                System.out.println();
+                Element class_element = (Element) classesList.item(Integer.parseInt(index));
                 String _class = class_element.getElementsByTagName("class").item(0).getTextContent();
-
                 Pilot pilot = new Pilot(freestyle, comments, addr2, addr1, _class, index, active, comp_id, frequency,
                         spread_spectrum, secondary_id, airplane, name, missing_pilot_panel, primary_id);
                 pilots.add(pilot);
@@ -187,13 +185,14 @@ public class PilotService {
             throws ParserConfigurationException, SAXException, IOException {
         Pilot pilot = getPilot(pilotScoreDTO.getPrimary_id());
         PilotScores pilotScores = getPilotScores(pilot);
-        PScore newScore = new PScore(pilotScoreDTO.getRound(), pilotScoreDTO.getSequence(), pilotScoreDTO.getScores());
+        PScore newScore = new PScore(pilotScoreDTO.getRound(), pilotScoreDTO.getSequence(), pilotScoreDTO.getScores(),pilotScoreDTO.getType().toUpperCase());
         if (isNewScore(pilotScores, newScore)) {
             List<PScore> currentScores = pilotScores.getScores();
             currentScores.add(newScore);
             pilotScores.setScores(currentScores);
             // update next seq / round
-            pilotScores = setNextEvent(pilotScores);
+            pilotScores = setNextEvent(pilotScores,pilotScoreDTO.getType().toUpperCase());
+            pilotScores.setActiveRoundType(pilotScoreDTO.getType().toUpperCase());
             // save to file
             pilotScores = savePilotScoresToFile(pilotScores);
         } else {
@@ -211,18 +210,24 @@ public class PilotService {
         return true;
     }
 
-    public PilotScores setNextEvent(PilotScores pilotScore) throws IOException {
+    public PilotScores setNextEvent(PilotScores pilotScore , String roundType) throws IOException {
 
         // fetch comp details
         CompDTO compDTO = compService.getComp();
-
+        int compSequences = 0;
+        if(roundType.equalsIgnoreCase("KNOWN")){
+            compSequences = compDTO.getSequences();
+        }
+        if(roundType.equalsIgnoreCase("UNKNOWN")){
+            compSequences = compDTO.getUnknown_sequences();
+        }
         // check if theres a next sequence
-        if (pilotScore.getActiveSequence() < compDTO.getSequences()) {
+        if (pilotScore.getActiveSequence() < compSequences) {
             // there is a next sequence for round increment and return
             pilotScore.setActiveSequence((pilotScore.getActiveSequence() + 1));
             return pilotScore;
         }
-        if (pilotScore.getActiveSequence() == compDTO.getSequences()) {
+        if (pilotScore.getActiveSequence() == compSequences) {
             // sequences for round is complete advanced round
             if (pilotScore.getActiveRound() < compDTO.getRounds()) {
                 // theres a next round advance round
@@ -240,34 +245,48 @@ public class PilotService {
         return pilotScore;
     }
 
-    public void syncPilotsToScoreWebService(PilotScores pilotScore) throws IOException, UnirestException {
+    public void syncPilotsToScoreWebService() throws Exception {
         List<FlightUploadDTO> flight = new ArrayList<>();
         int index = 0;
-        for (PScore score : pilotScore.getScores()) {
-            List<FigureUploadDTO> figureScores = new ArrayList<>();
-            for (int i = 0; i < score.getScores().length; i++) {
-                float fscore = score.getScores()[i];
-                boolean break_err = false;
-                boolean box_err = false;
-                if (fscore == -1) {
-                    fscore = 0;
-                    break_err = true;
-                }
-                if (fscore == -2) {
-                    fscore = 0;
-                }
-                FigureUploadDTO figureScore = new FigureUploadDTO(fscore, break_err, box_err, i);
-                figureScores.add(figureScore);
-            }
-            FiguresUploadDTO figures = new FiguresUploadDTO(figureScores);
-            // create FlightUploadDTO
-            FlightUploadDTO flightUploadDTO = new FlightUploadDTO(pilotScore.getPrimary_id(), "KNOWN", score.getRound(),
-                    score.getSequence(), 1, false, figures, index);
-            flight.add(flightUploadDTO);
-            index++;
+        List<PilotScores> pilotScores = new ArrayList<>();
+        List<Pilot> pilots = getPilots();
+        for (Pilot pilot : pilots) {
+            pilotScores.add(getPilotScores(pilot));
         }
-        // create final stupid wrapper
+        for (PilotScores pilotScore : pilotScores) {
+            if (pilotScore.getScores().size() > 0) {
+                for (PScore score : pilotScore.getScores()) {
+                    List<FigureUploadDTO> figureScores = new ArrayList<>();
+                    for (int i = 0; i < score.getScores().length; i++) {
+                        float fscore = score.getScores()[i];
+                        boolean break_err = false;
+                        boolean box_err = false;
+                        boolean not_observed = false;
+                        if (fscore == -1) {
+                            fscore = 0;
+                            break_err = true;
+                        }
+                        if (fscore == -2) {
+                            fscore = 0;
+                            not_observed = true;
+                        }
+                        FigureUploadDTO figureScore = new FigureUploadDTO(fscore, box_err, break_err,not_observed, i);
+                        figureScores.add(figureScore);
+                    }
+                    FiguresUploadDTO figures = new FiguresUploadDTO(figureScores);
+                    // create FlightUploadDTO
+                    FlightUploadDTO flightUploadDTO = new FlightUploadDTO(pilotScore.getPrimary_id(), score.getType(),
+                            score.getRound(),
+                            score.getSequence(), 1, false, figures, index);
+                    flight.add(flightUploadDTO);
+                    index++;
+                }
+            }
+            // create final stupid wrapper
+        }
+
         FlightsUploadDTO flightsUploadDTO = new FlightsUploadDTO(flight);
+
         XmlMapper xmlMapper = new XmlMapper();
         String xml = xmlMapper.writeValueAsString(flightsUploadDTO);
 
@@ -281,15 +300,15 @@ public class PilotService {
         Unirest.setTimeouts(0, 0);
         HttpResponse<String> response = Unirest.post(SCORE_UPLOAD_URL)
                 .header("Accept-Language", "en-au")
-               // .header("User-Agent", "Score%20Pad/253 CFNetwork/811.5.4 Darwin/16.7.0")
-                //.header("Content-Type", 'multipart/form-data; boundary="__Part__"')
                 .field("uploadtype", "flightdata")
                 .field("keepbackup", "false")
                 .field("submit", "submit")
                 .field("file", flights_dat_file)
                 .field("filename", flights_dat_file_name)
                 .asString();
-        
+        if(response.getStatus() != 200){
+            throw new Exception("Unable to sync to Score");
+        }
         System.out.println(response.getStatus());
         System.out.println(xml);
     }

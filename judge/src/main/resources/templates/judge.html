@@ -54,7 +54,7 @@
                     th:text="${pilotScores.activeRound}"></span> Seq <span
                     th:text="${pilotScores.activeSequence}"></span> </p>
             <p class="" style="line-height: 50%; font-weight: 500;">Fig <span th:text="${iterStat.index + 1}"></span>
-                KNOWN</p>
+                <span th:text="${roundType}"></span></p>
             <h1 style="font-family: digitalFont; font-size: 20vh; line-height: 10vh;  "
                 th:id="'score_'+ ${iterStat.index}">10.0</h1>
             <img id="my-svg" style="max-width: 80vw; max-height: 30vh;" class="figure-wrapper" th:if="${iterStat.index < 10}"
@@ -83,6 +83,8 @@
         const sequence =  /*[[${pilotScores.activeSequence}]]*/ ;
         const primary_id =  /*[[${pilot.primary_id}]]*/ ;
         const pilot_name =  /*[[${pilot.name}]]*/ ;
+        const roundType =  /*[[${roundType}]]*/ ;
+        
         const welcome_text = 'Now judging ' + pilot_name + ' round ' + round + ' sequence ' + sequence
         const synth = window.speechSynthesis;
         const voices = synth.getVoices();
@@ -149,7 +151,7 @@
                 primary_id: primary_id,
                 round: round,
                 sequence: sequence,
-                type: 'KNOWN',
+                type: roundType,
                 scores: scores
             }
             $.ajax({
