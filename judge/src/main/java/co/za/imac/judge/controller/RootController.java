@@ -49,7 +49,6 @@ public class RootController {
         }
         model.addAttribute("pilotScores", pilotScores);
         model.addAttribute("comp", compService.getComp());
-        pilotService.getPilotsFileFromScore();
 		return "index";
 	}
     @GetMapping("/judge")
