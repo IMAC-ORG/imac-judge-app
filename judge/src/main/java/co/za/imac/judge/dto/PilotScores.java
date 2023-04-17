@@ -15,7 +15,7 @@ public class PilotScores {
     private int activeRound = 1;
     private int activeSequence = 1;
     private String activeRoundType;
-
+    private int judge_id;
     public String getActiveRoundType() {
         return activeRoundType;
     }
@@ -26,10 +26,11 @@ public class PilotScores {
 
     private List<PScore> scores = new ArrayList<>();
 
-    public PilotScores(String name, int primary_id, String _class) {
+    public PilotScores(String name, int primary_id, String _class,int judge_id) {
         this.name = name;
         this.primary_id = primary_id;
         this._class = _class;
+        this.judge_id = judge_id;
     }
 
     public String getName() {
@@ -86,6 +87,14 @@ public class PilotScores {
 
     public void setScores(List<PScore> scores) {
         this.scores = scores;
+    }
+
+    public int getJudge_id() {
+        return judge_id;
+    }
+
+    public void setJudge_id(int judge_id) {
+        this.judge_id = judge_id;
     }
 
     

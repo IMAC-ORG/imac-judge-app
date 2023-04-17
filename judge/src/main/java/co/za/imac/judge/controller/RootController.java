@@ -80,10 +80,10 @@ public class RootController {
 	}
     
     @GetMapping("/newcomp")
-	public String newcomp(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) throws IOException {
+	public String newcomp(Model model) throws IOException {
 
         System.out.println("Is there a comp? : " + compService.isCurrentComp());
-		model.addAttribute("name", name);
+		model.addAttribute("isCurrentComp", compService.isCurrentComp());
 		return "newcomp";
 	}
 }

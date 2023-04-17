@@ -158,7 +158,7 @@ public class PilotService {
             FileWriter fw = new FileWriter(pilotScoreFile.getAbsoluteFile());
             BufferedWriter bw = new BufferedWriter(fw);
 
-            PilotScores pilotScores = new PilotScores(pilot.getName(), pilot.getPrimary_id(), pilot.getClassString());
+            PilotScores pilotScores = new PilotScores(pilot.getName(), pilot.getPrimary_id(), pilot.getClassString(), settingService.getSettings().getJudge_id());
             bw.write(new Gson().toJson(pilotScores));
             bw.close();
         } catch (Exception e) {
@@ -291,7 +291,7 @@ public class PilotService {
                     // create FlightUploadDTO
                     FlightUploadDTO flightUploadDTO = new FlightUploadDTO(pilotScore.getPrimary_id(), score.getType(),
                             score.getRound(),
-                            score.getSequence(), 1, false, figures, index);
+                            score.getSequence(), pilotScore.getJudge_id(), false, figures, index);
                     flight.add(flightUploadDTO);
                     index++;
                 }

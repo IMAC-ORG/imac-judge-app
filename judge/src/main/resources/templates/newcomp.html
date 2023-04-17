@@ -1,48 +1,80 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
   <title>Starter Template - Materialize</title>
 
   <!-- CSS  -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection"/>
-  <link href="materialize/css/nouislider.css" type="text/css" rel="stylesheet"/>
+  <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+  <link href="materialize/css/nouislider.css" type="text/css" rel="stylesheet" />
+  <style>
+    .carousel {
+      height: 100vh;
+    }
+
+    .pilot_class {
+      font-size: calc(6vw + 3vh) !important;
+    }
+
+    .pilot_name {
+      font-size: calc(8vw + 3vh) !important;
+    }
+
+    .pilot_round {
+      font-size: calc(4vw + 3vh) !important;
+    }
+
+    @font-face {
+      font-family: digitalFont;
+      src: url(font/digital-7.ttf);
+    }
+  </style>
 </head>
+
 <body>
-    <nav class="light-blue lighten-1" role="navigation">
-        <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">Judge</a>
-         
-        </div>
-      </nav>
   <div class="section no-pad-bot" id="index-banner">
     <div class="container">
-      <br><br>
-      <h1 class="header center orange-text">New Competition</h1>
+      <h1 class=" center orange-text pilot_name">Edit / New Competition</h1>
       <div class="row center">
-        <h5 class="header col s12 light">We couldn't find a current Competition, Lets start a new one!</h5>
+        <h5 class=" col s12 light pilot_name">We couldn't find a current Competition, Lets start a new one!</h5>
       </div>
       <div class="row center">
-        <h5 class="header col s12 light">Rounds</h5>
+        <h5 class=" col s12 light pilot_round">Rounds</h5>
       </div>
       <div class="row center">
         <div id="round-slider"></div>
       </div>
       <br><br>
       <div class="row center">
-        <h5 class="header col s12 light">Sequences Per Round</h5>
+        <h5 class=" col s12 light pilot_round">Sequences Per Round</h5>
       </div>
       <div class="row center">
         <div id="sequence-slider"></div>
       </div>
       <br><br>
       <div class="row center">
-        <h5 class="header col s12 light">Unknown Sequences Per Round</h5>
+        <h5 class=" col s12 light pilot_round">Unknown Sequences Per Round</h5>
       </div>
       <div class="row center">
         <div id="unknown-sequence-slider"></div>
+      </div>
+      <br><br>
+      <div th:if="${isCurrentComp}">
+        <div class="row center">
+          <h5 class=" col s12 light pilot_round">Start New Competition or Edit existing?</h5>
+        </div>
+        <div class="switch center">
+          <label>
+            New
+            <input type="checkbox" id="checkbox">
+            <span class="lever"></span>
+            Edit
+          </label>
+        </div>
+        <br><br>
       </div>
       <div class="row center">
         <a href="#" id="createComp" class="btn-large waves-effect waves-light orange">Create Competition</a>
@@ -58,97 +90,99 @@
   <script src="jquery-3.6.4.min.js"></script>
   <script src="materialize/js/materialize.js"></script>
   <script src="materialize/js/nouislider.js"></script>
-  <script >
-      var roundslider = document.getElementById('round-slider');
-      var sequenceslider = document.getElementById('sequence-slider');
-      var unknownsequenceslider = document.getElementById('unknown-sequence-slider');
-      var valuesForRoundSlider = [1,2,3,4,5,6,7]; // 16 values
-      var valuesForSequenceSlider = [1,2,3,4,5,6,7]; // 16 values
-      var valuesForUnknownSequenceSlider = [0,1,2,3,4,5]; // 16 values
-      var format = {
-    to: function(value) {
+  <script>
+    var roundslider = document.getElementById('round-slider');
+    var sequenceslider = document.getElementById('sequence-slider');
+    var unknownsequenceslider = document.getElementById('unknown-sequence-slider');
+    var valuesForRoundSlider = [1, 2, 3, 4, 5, 6, 7]; // 16 values
+    var valuesForSequenceSlider = [1, 2, 3, 4, 5, 6, 7]; // 16 values
+    var valuesForUnknownSequenceSlider = [0, 1, 2, 3, 4, 5]; // 16 values
+    var format = {
+      to: function (value) {
         return valuesForRoundSlider[Math.round(value)];
-    },
-    from: function (value) {
+      },
+      from: function (value) {
         return valuesForRoundSlider.indexOf(Number(value));
-    }
-    
-};
-var seqformat = {
-    to: function(value) {
+      }
+
+    };
+    var seqformat = {
+      to: function (value) {
         return valuesForSequenceSlider[Math.round(value)];
-    },
-    from: function (value) {
+      },
+      from: function (value) {
         return valuesForSequenceSlider.indexOf(Number(value));
-    }
-    
-};
+      }
 
-var unknownseqformat = {
-    to: function(value) {
+    };
+
+    var unknownseqformat = {
+      to: function (value) {
         return valuesForUnknownSequenceSlider[Math.round(value)];
-    },
-    from: function (value) {
+      },
+      from: function (value) {
         return valuesForUnknownSequenceSlider.indexOf(Number(value));
-    }
-    
-};
-noUiSlider.create(roundslider, {
-    start: 2,
-    // A linear range from 0 to 15 (16 values)
-    range: { min: 0, max: 6 },
-    // steps of 1
-    step: 1,
-    tooltips: true,
-    format: format,
-    pips: { mode: 'steps', format: format },
-});
-noUiSlider.create(sequenceslider, {
-    start: 2,
-    // A linear range from 0 to 15 (16 values)
-    range: { min: 0, max: 6 },
-    // steps of 1
-    step: 1,
-    tooltips: true,
-    format: seqformat,
-    pips: { mode: 'steps', format: seqformat },
-});
-noUiSlider.create(unknownsequenceslider, {
-    start: 0,
-    // A linear range from 0 to 15 (16 values)
-    range: { min: 0, max: 5 },
-    // steps of 1
-    step: 1,
-    tooltips: true,
-    format: unknownseqformat,
-    pips: { mode: 'steps', format: unknownseqformat },
-});
+      }
 
-$( "#createComp" ).click(function() {
+    };
+    noUiSlider.create(roundslider, {
+      start: 2,
+      // A linear range from 0 to 15 (16 values)
+      range: { min: 0, max: 6 },
+      // steps of 1
+      step: 1,
+      tooltips: true,
+      format: format,
+      pips: { mode: 'steps', format: format },
+    });
+    noUiSlider.create(sequenceslider, {
+      start: 2,
+      // A linear range from 0 to 15 (16 values)
+      range: { min: 0, max: 6 },
+      // steps of 1
+      step: 1,
+      tooltips: true,
+      format: seqformat,
+      pips: { mode: 'steps', format: seqformat },
+    });
+    noUiSlider.create(unknownsequenceslider, {
+      start: 0,
+      // A linear range from 0 to 15 (16 values)
+      range: { min: 0, max: 5 },
+      // steps of 1
+      step: 1,
+      tooltips: true,
+      format: unknownseqformat,
+      pips: { mode: 'steps', format: unknownseqformat },
+    });
 
-  var rounds = roundslider.noUiSlider.get();
-  var sequences = sequenceslider.noUiSlider.get();
-  var unknownSequences = unknownsequenceslider.noUiSlider.get();
-    $.ajax({
-    type: "POST",
-    url: "/api/comp",
-    // The key needs to match your method's input parameter (case-sensitive).
-    data: JSON.stringify(
-      { rounds: rounds, sequences: sequences, unknown_sequences: unknownSequences }
-      ),
-    contentType: "application/json; charset=utf-8",
-    dataType: "json",
-    success: function(data){
-        window.location = "/"
-    },
-    error: function(errMsg) {
-        alert(errMsg);
-    }
-});
-});
+    $("#createComp").click(function () {
+      console.log($('#checkbox').is(":checked"));
+      var editComp = $('#checkbox').is(":checked");
+      var rounds = roundslider.noUiSlider.get();
+      var sequences = sequenceslider.noUiSlider.get();
+      var unknownSequences = unknownsequenceslider.noUiSlider.get();
+      $.ajax({
+        type: "POST",
+        url: "/api/comp?edit=" + editComp,
+        // The key needs to match your method's input parameter (case-sensitive).
+        data: JSON.stringify(
+          { rounds: rounds, sequences: sequences, unknown_sequences: unknownSequences }
+        ),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data) {
+          window.location = "/"
+        },
+        error: function (errMsg) {
+          alert(errMsg);
+        }
+      });
+    });
 
 
   </script>
 
-  </body>
+</body>
+
 </html>

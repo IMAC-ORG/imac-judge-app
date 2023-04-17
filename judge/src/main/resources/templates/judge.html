@@ -54,10 +54,11 @@
                     th:text="${pilotScores.activeRound}"></span> Seq <span
                     th:text="${pilotScores.activeSequence}"></span> </p>
             <p class="" style="line-height: 50%; font-weight: 500;">Fig <span th:text="${iterStat.index + 1}"></span>
-                <span th:text="${roundType}"></span></p>
+                <span th:text="${roundType}"></span>
+            </p>
             <h1 style="font-family: digitalFont; font-size: 20vh; line-height: 10vh;  "
                 th:id="'score_'+ ${iterStat.index}">10.0</h1>
-            <img id="my-svg" style="max-width: 80vw; max-height: 30vh;" class="figure-wrapper" th:if="${iterStat.index < 10}"
+            <img th:if="${roundType == 'KNOWN'}" id="my-svg" style="max-width: 80vw; max-height: 30vh;" class="figure-wrapper"
                 th:src="@{/man/known/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index})}">
             <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
                 th:id="'description_'+ ${iterStat.index}">First Panel</h2>
@@ -65,7 +66,11 @@
 
     </div>
 
-
+    <div class="fixed-action-btn">
+        <a class="btn-floating btn-small red"  href="/">
+            <i class="large material-icons">home</i>
+        </a>
+    </div>
 
 
     <!--  Scripts-->
@@ -84,11 +89,18 @@
         const primary_id =  /*[[${pilot.primary_id}]]*/ ;
         const pilot_name =  /*[[${pilot.name}]]*/ ;
         const roundType =  /*[[${roundType}]]*/ ;
-        
+
         const welcome_text = 'Now judging ' + pilot_name + ' round ' + round + ' sequence ' + sequence
         const synth = window.speechSynthesis;
         const voices = synth.getVoices();
-        
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var elems = document.querySelectorAll('.fixed-action-btn');
+            var instances = M.FloatingActionButton.init(elems, {
+                hoverEnabled: false
+            });
+        });
+
         function textToSpeech() {
             var description_id = "#description_" + score_index;
             var description_text = $(description_id).text();
@@ -217,6 +229,7 @@
                 textToSpeechCustomMessage(currentScore);
             }
             console.log(JSON.stringify(scores));
+            carouselNext();
         }
 
         function nextEvent(responseData) {
