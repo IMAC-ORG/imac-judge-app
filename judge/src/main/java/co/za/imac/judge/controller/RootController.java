@@ -84,6 +84,15 @@ public class RootController {
 
         System.out.println("Is there a comp? : " + compService.isCurrentComp());
 		model.addAttribute("isCurrentComp", compService.isCurrentComp());
+        if(compService.isCurrentComp()){
+            model.addAttribute("currentRounds", compService.getComp().getRounds());
+            model.addAttribute("currentSequences", compService.getComp().getSequences());
+            model.addAttribute("currentUnknownSequences", compService.getComp().getUnknown_sequences());
+        }else{
+            model.addAttribute("currentRounds", 2);
+            model.addAttribute("currentSequences", 2);
+            model.addAttribute("currentUnknownSequences", 0);
+        }
 		return "newcomp";
 	}
 }
