@@ -13,12 +13,13 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 
 import co.za.imac.judge.dto.CompDTO;
+import co.za.imac.judge.utils.SettingUtils;
 
 @Service
 public class CompService {
     
 
-private final String COMP_FILE_NAME = "/tmp/comp.json";
+private final String COMP_FILE_NAME = SettingUtils.APPLICATION_CONFIG_PATH + "/comp.json";
 
 public boolean isCurrentComp(){
     File targetFile = new File(COMP_FILE_NAME);

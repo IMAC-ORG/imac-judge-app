@@ -3,6 +3,8 @@ package co.za.imac.judge.service;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +15,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 import org.w3c.dom.Document;
@@ -24,12 +28,34 @@ import org.xml.sax.SAXException;
 import com.google.gson.Gson;
 
 import co.za.imac.judge.dto.FigureDTO;
+import co.za.imac.judge.dto.SettingDTO;
+import co.za.imac.judge.utils.SettingUtils;
 
 @Service
 public class SequenceService {
 
+    private static final String SEQUENCES_DAT_PATH = SettingUtils.APPLICATION_CONFIG_PATH + "/sequences.dat";
+    private String SEQUENCES_DAT_URL = "http://SCORE_HOST:SCORE_HTTP_PORT/scorepad/sequences.dat";
+
+    @Autowired
+    private SettingService settingService;
+
+    public void getSequenceFileFromScore() throws MalformedURLException, IOException {
+        SettingDTO settingDTO = settingService.getSettings();
+        SEQUENCES_DAT_URL = SEQUENCES_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
+        FileUtils.copyURLToFile(new URL(SEQUENCES_DAT_PATH), new File(SEQUENCES_DAT_URL));
+    }
+
+    public boolean isSequence(){
+        File targetFile = new File(SEQUENCES_DAT_PATH);
+        return targetFile.exists();
+    }
     public  Map<String,List<FigureDTO>> getAllSequences()
             throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
+
+        if(!isSequence()){
+            getSequenceFileFromScore();
+        }
         // Get Document Builder
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -37,7 +63,7 @@ public class SequenceService {
         // parse XML file
         DocumentBuilder db = dbf.newDocumentBuilder();
 
-        Document doc = db.parse( new File("/tmp/sequences.dat"));
+        Document doc = db.parse( new File(SEQUENCES_DAT_PATH));
         doc.getDocumentElement().normalize();
         System.out.println("Root Element :" + doc.getDocumentElement().getNodeName());
         System.out.println("------");

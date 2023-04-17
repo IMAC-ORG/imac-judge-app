@@ -42,6 +42,8 @@ import co.za.imac.judge.dto.PScore;
 import co.za.imac.judge.dto.Pilot;
 import co.za.imac.judge.dto.PilotScoreDTO;
 import co.za.imac.judge.dto.PilotScores;
+import co.za.imac.judge.dto.SettingDTO;
+import co.za.imac.judge.utils.SettingUtils;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -50,18 +52,30 @@ import javax.xml.parsers.ParserConfigurationException;
 @Service
 public class PilotService {
 
-    private static final String PILOT_SCORE_DIR = "/tmp/pilots/scores/";
-    private static final String PILOT_DAT_PATH = "/tmp/pilots.dat";
-    private static final String PILOT_DAT_URL = "http://192.168.1.4:8181/scorepad/pilots.dat";
-    private static final String SCORE_UPLOAD_URL = "http://192.168.1.4:8181/scorepadupload/";
+    private static final String PILOT_SCORE_DIR = SettingUtils.APPLICATION_CONFIG_PATH + "/pilots/scores/";
+    private static final String PILOT_DAT_PATH = SettingUtils.APPLICATION_CONFIG_PATH + "/pilots.dat";
+    private String PILOT_DAT_URL = "http://SCORE_HOST:SCORE_HTTP_PORT/scorepad/pilots.dat";
+    private String SCORE_UPLOAD_URL = "http://SCORE_HOST:SCORE_HTTP_PORT/scorepadupload/";
     @Autowired
     private CompService compService;
+    @Autowired
+    private SettingService settingService;
 
     public void getPilotsFileFromScore() throws MalformedURLException, IOException {
+        SettingDTO settingDTO = settingService.getSettings();
+        PILOT_DAT_URL = PILOT_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
         FileUtils.copyURLToFile(new URL(PILOT_DAT_URL), new File(PILOT_DAT_PATH));
     }
 
+    public boolean isPilots(){
+        File targetFile = new File(PILOT_DAT_PATH);
+        return targetFile.exists();
+    }
+
     public List<Pilot> getPilots() throws ParserConfigurationException, SAXException, IOException {
+        if(!isPilots()){
+            getPilotsFileFromScore();
+        }
         // Get Document Builder
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -289,6 +303,9 @@ public class PilotService {
 
         XmlMapper xmlMapper = new XmlMapper();
         String xml = xmlMapper.writeValueAsString(flightsUploadDTO);
+
+        SettingDTO settingDTO = settingService.getSettings();
+        SCORE_UPLOAD_URL = SCORE_UPLOAD_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
 
         String flights_dat_file_name = "LINE1_JUDGE" + 1 + "_flights.dat";
         String flights_dat_file_path = PILOT_SCORE_DIR + flights_dat_file_name;
