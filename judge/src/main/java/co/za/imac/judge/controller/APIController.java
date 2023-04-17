@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.xml.sax.SAXException;
 
@@ -30,35 +31,39 @@ public class APIController {
     private SequenceService sequenceService;
 
     @PostMapping("/api/comp")
-	public CompDTO createEmployee(@RequestBody CompDTO comp) throws IOException, ParserConfigurationException, SAXException {
+    public CompDTO createEmployee(@RequestBody CompDTO comp,
+            @RequestParam(name = "edit", required = true) Boolean editComp)
+            throws IOException, ParserConfigurationException, SAXException {
         System.out.println(new Gson().toJson(comp));
-        //fetch pilots
+        // fetch pilots
         pilotService.getPilotsFileFromScore();
-        pilotService.setupPilotScores();
+        if (!editComp) {
+            pilotService.setupPilotScores();
+        }
         sequenceService.getSequenceFileFromScore();
-		return compService.createComp(comp);
-	}
+        return compService.createComp(comp);
+    }
 
     @GetMapping("/api/pilots/sync")
-	public String syncPilots() throws IOException, ParserConfigurationException, SAXException {
-        //fetch pilots
+    public String syncPilots() throws IOException, ParserConfigurationException, SAXException {
+        // fetch pilots
         pilotService.getPilotsFileFromScore();
         sequenceService.getSequenceFileFromScore();
-       // pilotService.setupPilotScores();
-		return "{'sync':'ok'}";
-	}
-    
+        // pilotService.setupPilotScores();
+        return "{'sync':'ok'}";
+    }
+
     @GetMapping("/api/scores/sync")
-	public String syncScores() throws Exception {
-        //fetch pilots
+    public String syncScores() throws Exception {
+        // fetch pilots
         pilotService.syncPilotsToScoreWebService();
-		return "{'sync':'ok'}";
-	}
-    
+        return "{'sync':'ok'}";
+    }
 
     @PostMapping("/api/score")
-    public PilotScores submitScores(@RequestBody PilotScoreDTO pilotScoreDTO) throws ParserConfigurationException, SAXException, IOException{
-       System.out.println(new Gson().toJson(pilotScoreDTO));
-       return pilotService.submitScore(pilotScoreDTO);
+    public PilotScores submitScores(@RequestBody PilotScoreDTO pilotScoreDTO)
+            throws ParserConfigurationException, SAXException, IOException {
+        System.out.println(new Gson().toJson(pilotScoreDTO));
+        return pilotService.submitScore(pilotScoreDTO);
     }
 }

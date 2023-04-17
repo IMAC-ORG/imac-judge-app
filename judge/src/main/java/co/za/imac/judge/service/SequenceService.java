@@ -43,7 +43,7 @@ public class SequenceService {
     public void getSequenceFileFromScore() throws MalformedURLException, IOException {
         SettingDTO settingDTO = settingService.getSettings();
         SEQUENCES_DAT_URL = SEQUENCES_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
-        FileUtils.copyURLToFile(new URL(SEQUENCES_DAT_PATH), new File(SEQUENCES_DAT_URL));
+        FileUtils.copyURLToFile(new URL(SEQUENCES_DAT_URL), new File(SEQUENCES_DAT_PATH));
     }
 
     public boolean isSequence(){
