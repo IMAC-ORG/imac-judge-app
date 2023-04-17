@@ -18,6 +18,7 @@ import co.za.imac.judge.dto.PilotScoreDTO;
 import co.za.imac.judge.dto.PilotScores;
 import co.za.imac.judge.service.CompService;
 import co.za.imac.judge.service.PilotService;
+import co.za.imac.judge.service.SequenceService;
 
 @RestController
 public class APIController {
@@ -25,6 +26,8 @@ public class APIController {
     private CompService compService;
     @Autowired
     private PilotService pilotService;
+    @Autowired
+    private SequenceService sequenceService;
 
     @PostMapping("/api/comp")
 	public CompDTO createEmployee(@RequestBody CompDTO comp) throws IOException, ParserConfigurationException, SAXException {
@@ -32,6 +35,7 @@ public class APIController {
         //fetch pilots
         pilotService.getPilotsFileFromScore();
         pilotService.setupPilotScores();
+        sequenceService.getSequenceFileFromScore();
 		return compService.createComp(comp);
 	}
 
@@ -39,6 +43,7 @@ public class APIController {
 	public String syncPilots() throws IOException, ParserConfigurationException, SAXException {
         //fetch pilots
         pilotService.getPilotsFileFromScore();
+        sequenceService.getSequenceFileFromScore();
        // pilotService.setupPilotScores();
 		return "{'sync':'ok'}";
 	}
