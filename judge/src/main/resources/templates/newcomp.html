@@ -83,7 +83,14 @@
 
     </div>
   </div>
-
+  <div class="fixed-action-btn">
+    <a class="btn-floating btn-large red">
+      <i class="large material-icons">menu</i>
+    </a>
+    <ul>
+      <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">home</i></a></li>
+    </ul>
+  </div>
 
 
   <!--  Scripts-->
@@ -91,7 +98,7 @@
   <script src="materialize/js/materialize.js"></script>
   <script src="materialize/js/nouislider.js"></script>
   <script th:inline="javascript">
-     /*<![CDATA[*/
+    /*<![CDATA[*/
     var roundslider = document.getElementById('round-slider');
     var sequenceslider = document.getElementById('sequence-slider');
     var unknownsequenceslider = document.getElementById('unknown-sequence-slider');
@@ -99,10 +106,17 @@
     var valuesForSequenceSlider = [1, 2, 3, 4, 5, 6, 7]; // 16 values
     var valuesForUnknownSequenceSlider = [0, 1, 2, 3, 4, 5]; // 16 values
 
-    const isCurrentComp = /*[[${isCurrentComp}]]*/ ; 
-    const currentRound  = /*[[${currentRounds}]]*/ ; 
-    const currentSequences  = /*[[${currentSequences}]]*/ ; 
-    const currentUnknownSequences  = /*[[${currentUnknownSequences}]]*/ ; 
+    const isCurrentComp = /*[[${isCurrentComp}]]*/ ;
+    const currentRound = /*[[${currentRounds}]]*/ ;
+    const currentSequences = /*[[${currentSequences}]]*/ ;
+    const currentUnknownSequences = /*[[${currentUnknownSequences}]]*/ ;
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var elems = document.querySelectorAll('.fixed-action-btn');
+      var instances = M.FloatingActionButton.init(elems, {
+        hoverEnabled: false
+      });
+    });
 
     console.log(isCurrentComp);
     console.log(currentRound);
@@ -165,7 +179,7 @@
       pips: { mode: 'steps', format: unknownseqformat },
     });
 
-    if(isCurrentComp){
+    if (isCurrentComp) {
       roundslider.noUiSlider.set(currentRound);
       sequenceslider.noUiSlider.set(currentSequences);
       unknownsequenceslider.noUiSlider.set(currentUnknownSequences);
@@ -195,7 +209,7 @@
       });
     });
 
- /*]]>*/
+    /*]]>*/
   </script>
 
 </body>

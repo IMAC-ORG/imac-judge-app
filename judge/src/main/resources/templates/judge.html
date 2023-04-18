@@ -39,9 +39,12 @@
 
     <div class="carousel carousel-slider center">
         <div class="carousel-fixed-item center">
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(0.5);" id="btnremovehalf">-0.5</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(0.5);"
+                id="btnremovehalf">-0.5</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(1);" id="btnremoveone">-1</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(0);" id="btnsetzero">0</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(0.5);" id="btnaddhalf">+0.5</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(1);" id="btnaddhalf">+1</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-1);" id="btnsetbreak">Break</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-2);" id="btnsetno">N/O</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="textToSpeech();" id="btnspeak">speak</a>
@@ -67,7 +70,14 @@
 
     </div>
 
-
+    <div class="fixed-action-btn">
+        <a class="btn-floating btn-large red">
+            <i class="large material-icons">menu</i>
+        </a>
+        <ul>
+            <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">home</i></a></li>
+        </ul>
+    </div>
 
 
     <!--  Scripts-->
@@ -89,10 +99,16 @@
         const sequenceJson = JSON.parse( /*[[${sequencesjson}]]*/);
 
 
-        const welcome_text = 'Now judging ' + pilot_name + ' round ' + round + ' sequence ' + sequence
+        const welcome_text = 'Now judging ' + pilot_name + ' round ' + round + ' sequence ' + sequence + ' ' + roundType;
         const synth = window.speechSynthesis;
         const voices = synth.getVoices();
 
+        document.addEventListener('DOMContentLoaded', function () {
+            var elems = document.querySelectorAll('.fixed-action-btn');
+            var instances = M.FloatingActionButton.init(elems, {
+                hoverEnabled: false
+            });
+        });
         function setVirtualButtonVisibility(btnremovehalf, btnaddhalf) {
             if (btnremovehalf) {
                 $('#btnremovehalf').removeAttr('disabled');
@@ -117,6 +133,7 @@
         }
 
         function textToSpeech() {
+            synth.cancel();
             var description_id = "#description_" + score_index;
             var description_text = $(description_id).text();
             const msg = new SpeechSynthesisUtterance();
@@ -125,6 +142,7 @@
         }
 
         function textToSpeechCustomMessage(text) {
+            synth.cancel();
             const msg = new SpeechSynthesisUtterance();
             msg.text = text;
             synth.speak(msg);
@@ -258,8 +276,8 @@
             if (currentScore >= 0) {
                 $(score_id).text(currentScore);
                 textToSpeechCustomMessage(currentScore);
-                if(currentScore == 0){
-                     carouselNext();
+                if (currentScore == 0) {
+                    carouselNext();
                 }
             }
             console.log(JSON.stringify(scores));
@@ -296,28 +314,28 @@
             if (e.which == 57) {
                 addScore(1);
             }
-             //numpad 3
-             if (e.which == 51) {
+            //numpad 3
+            if (e.which == 51) {
                 removeScore(1);
             }
             // numpad 7 
             if (e.which == 55) {
                 setScore(-1);
             }
-             // numpad 1
-             if (e.which == 49) {
+            // numpad 1
+            if (e.which == 49) {
                 setScore(-2);
             }
             //numpad 6
             if (e.which == 54) {
                 carouselNext();
             }
-             //numpad 4
-             if (e.which == 52) {
+            //numpad 4
+            if (e.which == 52) {
                 $('.carousel').carousel('prev');
             }
-             //numpad 0
-             if (e.which == 48) {
+            //numpad 0
+            if (e.which == 48) {
                 textToSpeech();
             }
         });
