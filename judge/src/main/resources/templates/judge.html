@@ -39,13 +39,13 @@
 
     <div class="carousel carousel-slider center">
         <div class="carousel-fixed-item center">
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(0.5);">-0.5</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(0);">0</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(0.5);">+0.5</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-1);">Break</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-2);">N/O</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="textToSpeech();">speak</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();">next</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(0.5);" id="btnremovehalf">-0.5</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(0);" id="btnsetzero">0</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(0.5);" id="btnaddhalf">+0.5</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-1);" id="btnsetbreak">Break</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-2);" id="btnsetno">N/O</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="textToSpeech();" id="btnspeak">speak</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();" id="btnnext">next</a>
         </div>
 
         <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item blue white-text" href="#one!">
@@ -58,7 +58,8 @@
             </p>
             <h1 style="font-family: digitalFont; font-size: 20vh; line-height: 10vh;  "
                 th:id="'score_'+ ${iterStat.index}">10.0</h1>
-            <img th:if="${roundType == 'KNOWN'}" id="my-svg" style="max-width: 80vw; max-height: 30vh;" class="figure-wrapper"
+            <img id="my-svg" style="max-width: 80vw; max-height: 30vh;" class="figure-wrapper"
+                th:if="${iterStat.index < 10}"
                 th:src="@{/man/known/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index})}">
             <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
                 th:id="'description_'+ ${iterStat.index}">First Panel</h2>
@@ -66,14 +67,7 @@
 
     </div>
 
-    <div class="fixed-action-btn">
-        <a class="btn-floating btn-small red">
-          <i class="large material-icons">menu</i>
-        </a>
-        <ul>
-          <li><a class="btn-floating btn-small green" href="/"><i class="material-icons">home</i></a></li>
-        </ul>
-      </div>
+
 
 
     <!--  Scripts-->
@@ -92,17 +86,35 @@
         const primary_id =  /*[[${pilot.primary_id}]]*/ ;
         const pilot_name =  /*[[${pilot.name}]]*/ ;
         const roundType =  /*[[${roundType}]]*/ ;
+        const sequenceJson = JSON.parse( /*[[${sequencesjson}]]*/);
+
 
         const welcome_text = 'Now judging ' + pilot_name + ' round ' + round + ' sequence ' + sequence
         const synth = window.speechSynthesis;
         const voices = synth.getVoices();
 
-        document.addEventListener('DOMContentLoaded', function () {
-            var elems = document.querySelectorAll('.fixed-action-btn');
-            var instances = M.FloatingActionButton.init(elems, {
-                hoverEnabled: false
-            });
-        });
+        function setVirtualButtonVisibility(btnremovehalf, btnaddhalf) {
+            if (btnremovehalf) {
+                $('#btnremovehalf').removeAttr('disabled');
+            } else {
+                $('#btnremovehalf').attr('disabled', 'disabled');
+            }
+            if (btnaddhalf) {
+                $('#btnaddhalf').removeAttr('disabled');
+            } else {
+                $('#btnaddhalf').attr('disabled', 'disabled');
+            }
+        }
+
+        function updateVirtualButtons(index) {
+            var scoring = sequenceJson[index].scoring;
+            console.log(sequenceJson[index].scoring);
+            if (scoring == "HALF") {
+                setVirtualButtonVisibility(true, true);
+            } else {
+                setVirtualButtonVisibility(false, false);
+            }
+        }
 
         function textToSpeech() {
             var description_id = "#description_" + score_index;
@@ -123,7 +135,7 @@
             score_index = i;
             console.log(score_index)
             scores[score_index] = getCurrentScore(score_index);
-
+            updateVirtualButtons(score_index);
         }
 
         function getCurrentScore(index) {
@@ -184,6 +196,13 @@
             });
         }
         function addScore(increment) {
+            if (increment == 0.5) {
+                //check if scoring is half
+                var scoring = sequenceJson[score_index].scoring;
+                if (scoring != "HALF") {
+                    return;
+                }
+            }
             var scoreFloat = getCurrentScore(score_index);
             scoreFloat = scoreFloat + increment
             if (scoreFloat > 10) {
@@ -202,6 +221,13 @@
 
         }
         function removeScore(increment) {
+            if (increment == 0.5) {
+                //check if scoring is half
+                var scoring = sequenceJson[score_index].scoring;
+                if (scoring != "HALF") {
+                    return;
+                }
+            }
             var scoreFloat = getCurrentScore(score_index);
             scoreFloat = scoreFloat - increment
             if (scoreFloat < 0) {
@@ -222,17 +248,21 @@
             if (currentScore == -1) {
                 $(score_id).text('BREAK');
                 textToSpeechCustomMessage('BREAK');
+                carouselNext();
             }
             if (currentScore == -2) {
                 $(score_id).text('N/O');
                 textToSpeechCustomMessage('Not Observed');
+                carouselNext();
             }
             if (currentScore >= 0) {
                 $(score_id).text(currentScore);
                 textToSpeechCustomMessage(currentScore);
+                if(currentScore == 0){
+                     carouselNext();
+                }
             }
             console.log(JSON.stringify(scores));
-            carouselNext();
         }
 
         function nextEvent(responseData) {
@@ -248,9 +278,49 @@
             }
         }
 
-
-
-
+        //add button listeners
+        $(document).on("keypress", function (e) {
+            // numpad 8
+            if (e.which == 54) {
+                addScore(0.5);
+            }
+            // numpad 2
+            if (e.which == 50) {
+                removeScore(0.5);
+            }
+            //numpad 5
+            if (e.which == 53) {
+                setScore(0);
+            }
+            //numpad 9
+            if (e.which == 57) {
+                addScore(1);
+            }
+             //numpad 3
+             if (e.which == 51) {
+                removeScore(1);
+            }
+            // numpad 7 
+            if (e.which == 55) {
+                setScore(-1);
+            }
+             // numpad 1
+             if (e.which == 49) {
+                setScore(-2);
+            }
+            //numpad 6
+            if (e.which == 54) {
+                carouselNext();
+            }
+             //numpad 4
+             if (e.which == 52) {
+                $('.carousel').carousel('prev');
+            }
+             //numpad 0
+             if (e.which == 48) {
+                textToSpeech();
+            }
+        });
         /*]]>*/
     </script>
 
