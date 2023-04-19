@@ -5,7 +5,16 @@ public class SettingDTO {
     private int judge_id = 1;
     private String score_host = "192.168.1.4";
     private int score_http_port = 8181;
+    private int line_number = 1;
     
+    public int getLine_number() {
+        return line_number;
+    }
+
+    public void setLine_number(int line_number) {
+        this.line_number = line_number;
+    }
+
     public SettingDTO() {
     }
     

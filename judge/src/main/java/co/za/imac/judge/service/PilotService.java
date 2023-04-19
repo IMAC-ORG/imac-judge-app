@@ -307,7 +307,7 @@ public class PilotService {
         SettingDTO settingDTO = settingService.getSettings();
         SCORE_UPLOAD_URL = SCORE_UPLOAD_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
 
-        String flights_dat_file_name = "LINE1_JUDGE" + 1 + "_flights.dat";
+        String flights_dat_file_name = "LINE" + settingDTO.getLine_number() + "_JUDGE" + settingDTO.getJudge_id() + "_flights.dat";
         String flights_dat_file_path = PILOT_SCORE_DIR + flights_dat_file_name;
         File flights_dat_file = new File(flights_dat_file_path);
         FileWriter fw = new FileWriter(flights_dat_file.getAbsoluteFile());

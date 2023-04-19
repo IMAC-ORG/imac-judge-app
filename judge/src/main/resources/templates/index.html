@@ -130,6 +130,10 @@
       });
     });
 
+    function carouselNext() {
+      $('.carousel').carousel('next');
+    }
+
 
     function syncPilots() {
       $.ajax({
@@ -155,6 +159,18 @@
         }
       });
     }
+
+      //add button listeners
+      $(document).on("keypress", function (e) {
+            //numpad 6
+            if (e.which == 54) {
+                carouselNext();
+            }
+            //numpad 4
+            if (e.which == 52) {
+                $('.carousel').carousel('prev');
+            }
+        });
   </script>
 
 </body>
