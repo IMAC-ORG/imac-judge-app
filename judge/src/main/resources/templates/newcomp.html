@@ -20,11 +20,11 @@
     }
 
     .pilot_name {
-      font-size: calc(8vw + 3vh) !important;
+      font-size: calc(1vw + 2vh) !important;
     }
 
     .pilot_round {
-      font-size: calc(4vw + 3vh) !important;
+      font-size: calc(1vw + 2vh) !important;
     }
 
     @font-face {
@@ -183,6 +183,7 @@
       roundslider.noUiSlider.set(currentRound);
       sequenceslider.noUiSlider.set(currentSequences);
       unknownsequenceslider.noUiSlider.set(currentUnknownSequences);
+      $('#checkbox').attr('checked','checked')
     }
 
     $("#createComp").click(function () {
