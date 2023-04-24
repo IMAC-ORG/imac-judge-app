@@ -62,7 +62,7 @@
             <h1 style="font-family: digitalFont; font-size: 20vh; line-height: 10vh;  "
                 th:id="'score_'+ ${iterStat.index}">10.0</h1>
             <img id="my-svg" style="max-width: 80vw; max-height: 30vh;" class="figure-wrapper"
-                th:src="@{/man/known/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index})}">
+                th:src="@{/man/{roundType}/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index}, roundType=${roundType.toLowerCase()})}">
             <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
                 th:id="'description_'+ ${iterStat.index}">First Panel</h2>
         </div>
