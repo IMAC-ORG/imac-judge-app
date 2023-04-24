@@ -39,7 +39,8 @@
 
     <div class="carousel carousel-slider center">
         <div class="carousel-fixed-item center" id="buttonsDiv">
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(0.5);" id="btnremovehalf">-0.5</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(0.5);"
+                id="btnremovehalf">-0.5</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(1);" id="btnremoveone">-1</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(0);" id="btnsetzero">0</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(0.5);" id="btnaddhalf">+0.5</a>
@@ -56,7 +57,8 @@
                     th:text="${pilotScores.activeRound}"></span> Seq <span
                     th:text="${pilotScores.activeSequence}"></span> </p>
             <p class="" style="line-height: 50%; font-weight: 500;">Fig <span th:text="${iterStat.index + 1}"></span>
-                <span th:text="${roundType}"></span> </p>
+                <span th:text="${roundType}"></span>
+            </p>
             <h1 style="font-family: digitalFont; font-size: 20vh; line-height: 10vh;  "
                 th:id="'score_'+ ${iterStat.index}">10.0</h1>
             <img id="my-svg" style="max-width: 80vw; max-height: 30vh;" class="figure-wrapper"
@@ -72,7 +74,8 @@
             <i class="large material-icons">menu</i>
         </a>
         <ul>
-            <li><a class="btn-floating btn-large green" onclick="showAllButtons();"><i class="material-icons">view_module</i></a></li>
+            <li><a class="btn-floating btn-large green" onclick="showAllButtons();"><i
+                        class="material-icons">view_module</i></a></li>
             <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">home</i></a></li>
         </ul>
     </div>
@@ -95,7 +98,7 @@
         const pilot_name =  /*[[${pilot.name}]]*/ ;
         const roundType =  /*[[${roundType}]]*/ ;
         const sequenceJson = JSON.parse( /*[[${sequencesjson}]]*/);
-
+        var audio = new Audio();
 
         const welcome_text = 'Now judging ' + pilot_name + ' round ' + round + ' sequence ' + sequence + ' ' + roundType;
         const synth = window.speechSynthesis;
@@ -149,11 +152,39 @@
             synth.speak(msg);
         }
 
+        function isNumber(n) {
+            return Number(n) === n;
+        }
+
         function textToSpeechCustomMessage(text) {
-            synth.cancel();
-            const msg = new SpeechSynthesisUtterance();
-            msg.text = text;
-            synth.speak(msg);
+            if (isNumber(text)) {
+                //this is a number lets build url to wave file
+                audio.pause();
+                audio.currentTime = 0;
+                var audio_url = '/score/' + text + '.wav';
+                audio = new Audio(audio_url);
+                audio.play();
+            } else if (text == 'BREAK') {
+                audio.pause();
+                audio.currentTime = 0;
+                var audio_url = '/score/BREAK.wav';
+                audio = new Audio(audio_url);
+                audio.play();
+
+            } else if (text == 'Not Observed') {
+                audio.pause();
+                audio.currentTime = 0;
+                var audio_url = '/score/NOT_OBSEREVED.wav';
+                audio = new Audio(audio_url);
+                audio.play();
+            } else {
+                synth.cancel();
+                const msg = new SpeechSynthesisUtterance();
+                msg.text = text;
+                synth.speak(msg);
+            }
+
+
         }
         update_index = function () {
             var activeIndicator = this.$indicators.find('.indicator-item.active');
@@ -267,7 +298,7 @@
             textToSpeechCustomMessage(scoreFloat);
         }
         function setScore(score) {
-            if (score == -1 || score == -2 ) {
+            if (score == -1 || score == -2) {
                 //check if scoring is half
                 var scoring = sequenceJson[score_index].scoring;
                 if (scoring != "HALF") {
@@ -311,7 +342,7 @@
             }
         }
         $("#buttonsDiv").hide();
-        function showAllButtons(){
+        function showAllButtons() {
             $("#buttonsDiv").show();
         }
         //add button listeners
