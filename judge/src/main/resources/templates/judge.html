@@ -268,12 +268,12 @@
         }
         function setScore(score) {
             if (score == -1 || score == -2 ) {
-                //check if scoring is half 
-				var scoring = sequenceJson[score_index].scoring;
-				if (scoring != "HALF") {
-					return;
-				}
-			}
+                //check if scoring is half
+                var scoring = sequenceJson[score_index].scoring;
+                if (scoring != "HALF") {
+                    return;
+                }
+            }
             console.log("setting score to > " + score);
             var currentScore = parseFloat(score);
             scores[score_index] = currentScore;
