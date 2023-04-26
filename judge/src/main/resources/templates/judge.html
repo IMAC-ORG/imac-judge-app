@@ -39,8 +39,7 @@
 
     <div class="carousel carousel-slider center">
         <div class="carousel-fixed-item center" id="buttonsDiv">
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(0.5);"
-                id="btnremovehalf">-0.5</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(0.5);"id="btnremovehalf">-0.5</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(1);" id="btnremoveone">-1</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(0);" id="btnsetzero">0</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(0.5);" id="btnaddhalf">+0.5</a>
@@ -150,6 +149,14 @@
             const msg = new SpeechSynthesisUtterance();
             msg.text = description_text;
             synth.speak(msg);
+        }
+
+        function shortdescription() {
+            audio.pause();
+            audio.currentTime = 0;
+            var audio_url = '/man/known/basic/0.wav';
+            audio = new Audio(audio_url);
+            audio.play();
         }
 
         function isNumber(n) {
