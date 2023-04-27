@@ -154,7 +154,7 @@
         function shortdescription() {
             audio.pause();
             audio.currentTime = 0;
-            var audio_url = '/man/known/basic/0.wav';
+            var audio_url = '/man/' + roundType + '/basic/0.wav';
             audio = new Audio(audio_url);
             audio.play();
         }
@@ -168,7 +168,7 @@
                 //this is a number lets build url to wave file
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = '/score/' + text + '.wav';
+                var audio_url = '/score/en/' + text + '.wav';
                 audio = new Audio(audio_url);
                 audio.play();
             } else if (text == 'BREAK') {
@@ -392,7 +392,7 @@
             }
             //numpad 0
             if (e.which == 48) {
-                textToSpeech();
+                shortdescription();
             }
         });
         /*]]>*/
