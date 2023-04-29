@@ -73,6 +73,7 @@ public class RootController {
         model.addAttribute("pilot", pilot);
         model.addAttribute("pilotScores", pilotScores);
         model.addAttribute("roundType", roundType.toUpperCase());
+        model.addAttribute("pilot_class", pilot.getClassString());
         String sequencesJson =  new Gson().toJson(sequences);
         model.addAttribute("sequencesjson",sequencesJson);
         System.out.println(new Gson().toJson(sequences));
