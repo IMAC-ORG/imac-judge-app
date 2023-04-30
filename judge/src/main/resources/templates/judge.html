@@ -96,7 +96,7 @@
         const primary_id =  /*[[${pilot.primary_id}]]*/ ;
         const pilot_name =  /*[[${pilot.name}]]*/ ;
         const roundType =  /*[[${roundType}]]*/ ;
-        const pilot_class =  /*[[${(pilot_class.toLowerCase())}]]*/ ;
+        const pilot_class =  /*[[${pilot_class}]]*/ ;
         const sequenceJson = JSON.parse( /*[[${sequencesjson}]]*/);
         var audio = new Audio();
 
@@ -156,7 +156,7 @@
             audio.pause();
             audio.currentTime = 0;
             var audio_url = '/man/' + roundType + "/" + pilot_class + '/' + score_index + '.wav';
-            audio = new Audio(audio_url);
+            audio = new Audio(audio_url.toLowerCase());
             audio.play();
         }
 
