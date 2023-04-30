@@ -61,7 +61,7 @@
             <h1 style="font-family: digitalFont; font-size: 20vh; line-height: 10vh;  "
                 th:id="'score_'+ ${iterStat.index}">10.0</h1>
             <img id="my-svg" style="max-width: 80vw; max-height: 30vh;" class="figure-wrapper"
-                th:src="@{/man/{roundType}/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index}, roundType=${roundType.toLowerCase()})}">
+                th:src="@{/man/en/{roundType}/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index}, roundType=${roundType.toLowerCase()})}">
             <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
                 th:id="'description_'+ ${iterStat.index}">First Panel</h2>
         </div>
@@ -155,7 +155,15 @@
         function shortdescription() {
             audio.pause();
             audio.currentTime = 0;
-            var audio_url = '/man/' + roundType + "/" + pilot_class + '/' + score_index + '.wav';
+            var audio_url = '/man/en/' + roundType + '/' + pilot_class + '/' + score_index + '.wav';
+            audio = new Audio(audio_url.toLowerCase());
+            audio.play();
+        }
+
+        function NowJudgingMessage() {
+            audio.pause();
+            audio.currentTime = 0;
+            var audio_url = '/man/en/now_judging_' + pilot_class + '_' + roundType + '_sequence.wav';
             audio = new Audio(audio_url.toLowerCase());
             audio.play();
         }
@@ -169,20 +177,20 @@
                 //this is a number lets build url to wave file
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = '/score/en/' + text + '.wav';
+                var audio_url = '/man/en/score/' + text + '.wav';
                 audio = new Audio(audio_url);
                 audio.play();
             } else if (text == 'BREAK') {
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = '/score/en/break.wav';
+                var audio_url = '/man/en/score/break.wav';
                 audio = new Audio(audio_url);
                 audio.play();
 
             } else if (text == 'Not Observed') {
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = '/score/en/not_observed.wav';
+                var audio_url = '/man/en/score/not_observed.wav';
                 audio = new Audio(audio_url);
                 audio.play();
             } else {
@@ -222,7 +230,8 @@
             onCycleTo: update_index
         });
         car.height(windowHeight);
-        textToSpeechCustomMessage(welcome_text);
+        // textToSpeechCustomMessage(welcome_text);
+        NowJudgingMessage();
 
 
         function carouselNext() {
