@@ -49,23 +49,30 @@
             <a class="btn waves-effect white grey-text darken-text-2" onclick="shortdescription();" id="btnspeak">speak</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();" id="btnnext">next</a>
         </div>
+        <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item yellow black-text" href="#one!">
+            <div class="row">
+                <div class="col s4">
+                <p class="" style="line-height: 50%; font-weight: 500;">Pilot: <span th:text="${pilot.name}"></span> </p>
+                <p class="" style="line-height: 50%; font-weight: 500;">Round <span
+                        th:text="${pilotScores.activeRound}"></span> Seq <span
+                        th:text="${pilotScores.activeSequence}"></span> </p>
+                <p class="" style="line-height: 50%; font-weight: 500;">Fig <span th:text="${iterStat.index + 1}"></span>
+                    <span th:text="${roundType}"></span>
+                </p>
+                <br>
+                <h1 style="font-family: digitalFont; font-size: 40vh; line-height: 10vh;  "
+                    th:id="'score_'+ ${iterStat.index}">10.0</h1>
 
-        <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item blue white-text" href="#one!">
-            <p class="" style="line-height: 50%; font-weight: 500;">Pilot: <span th:text="${pilot.name}"></span> </p>
-            <p class="" style="line-height: 50%; font-weight: 500;">Round <span
-                    th:text="${pilotScores.activeRound}"></span> Seq <span
-                    th:text="${pilotScores.activeSequence}"></span> </p>
-            <p class="" style="line-height: 50%; font-weight: 500;">Fig <span th:text="${iterStat.index + 1}"></span>
-                <span th:text="${roundType}"></span>
-            </p>
-            <h1 style="font-family: digitalFont; font-size: 20vh; line-height: 10vh;  "
-                th:id="'score_'+ ${iterStat.index}">10.0</h1>
-            <img id="my-svg" style="max-width: 80vw; max-height: 30vh;" class="figure-wrapper"
-                th:src="@{/man/en/{roundType}/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index}, roundType=${roundType.toLowerCase()})}">
+                </div>
+                <div class="col s8">
+                <br>
+                 <img id="my-svg" style="width:60vw; height:75vh;" class="figure-wrapper"
+                    th:src="@{/man/en/{roundType}/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index}, roundType=${roundType.toLowerCase()})}">
+                </div>
+            </div>
             <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
-                th:id="'description_'+ ${iterStat.index}">First Panel</h2>
+                    th:id="'description_'+ ${iterStat.index}">First Panel</h2>
         </div>
-
     </div>
 
     <div class="fixed-action-btn">
