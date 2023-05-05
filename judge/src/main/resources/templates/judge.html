@@ -49,14 +49,15 @@
             <a class="btn waves-effect white grey-text darken-text-2" onclick="shortdescription();" id="btnspeak">speak</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();" id="btnnext">next</a>
         </div>
-        <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item yellow black-text" href="#one!">
+        <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item blue white-text" href="#one!">
             <div class="row">
                 <div class="col s4">
-                <p class="" style="line-height: 50%; font-weight: 500;">Pilot: <span th:text="${pilot.name}"></span> </p>
-                <p class="" style="line-height: 50%; font-weight: 500;">Round <span
+                <p class="" style="line-height: 50%; font-weight: 500;"><span th:text="${pilot.name}"></span></p>
+                <p class="" style="line-height: 50%; font-weight: 500;"><span th:text="${pilot_class}"></span></p>
+                <p class="" style="line-height: 50%; font-weight: 500;">Round <span 
                         th:text="${pilotScores.activeRound}"></span> Seq <span
                         th:text="${pilotScores.activeSequence}"></span> </p>
-                <p class="" style="line-height: 50%; font-weight: 500;">Fig <span th:text="${iterStat.index + 1}"></span>
+                <p class="" style="line-height: 50%; font-weight: 500;">FIG <span th:text="${iterStat.index + 1}"></span>
                     <span th:text="${roundType}"></span>
                 </p>
                 <br>
