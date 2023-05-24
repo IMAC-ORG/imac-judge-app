@@ -66,6 +66,17 @@ dtoverlay=gpio-key,gpio=27,active_low=1,gpio_pull=up,keycode=8  # break
 dtoverlay=gpio-key,gpio=2,active_low=1,gpio_pull=up,keycode=9   # +0.5
 dtoverlay=gpio-key,gpio=3,active_low=1,gpio_pull=up,keycode=10  # +1
 dtoverlay=gpio-key,gpio=4,active_low=1,gpio_pull=up,keycode=11  #speak
+	
+#define KEY_1			2
+#define KEY_2			3
+#define KEY_3			4
+#define KEY_4			5
+#define KEY_5			6
+#define KEY_6			7
+#define KEY_7			8
+#define KEY_8			9
+#define KEY_9			10
+#define KEY_0			11
 
 
 sudo mkdir /var/opt/judge
