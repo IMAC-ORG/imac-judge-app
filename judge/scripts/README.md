@@ -36,6 +36,7 @@ sudo apt autoremove -y
 vi /boot/cmdline.txt
 now just add ” ipv6.disable=1″ to the end of the line
 
+rm -rf LCD-show
 git clone https://github.com/waveshare/LCD-show.git
 cd LCD-show/
 chmod +x LCD35-show
