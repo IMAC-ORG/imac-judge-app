@@ -80,12 +80,15 @@ dtoverlay=gpio-key,gpio=4,active_low=1,gpio_pull=up,keycode=11  #speak
 
 	
 ------- SA-PI-SCORE
+dtoverlay=disable-bt
+dtparam=speed=42000000
+dtparam=fps=30 
 # gkio-key
 dtoverlay=gpio-key,gpio=19,active_low=1,gpio_pull=up,keycode=2  # Not Observer		
 dtoverlay=gpio-key,gpio=4,active_low=1,gpio_pull=up,keycode=3   # -0.5				
 dtoverlay=gpio-key,gpio=27,active_low=1,gpio_pull=up,keycode=4  # -1                   
 dtoverlay=gpio-key,gpio=5,active_low=1,gpio_pull=up,keycode=5   # encoder up/previous  
-dtoverlay=gpio-key,gpio=2,active_low=1,gpio_pull=up,keycode=6   # zero				
+dtoverlay=gpio-key,gpio=3,active_low=1,gpio_pull=up,keycode=6   # zero				
 dtoverlay=gpio-key,gpio=22,active_low=1,gpio_pull=up,keycode=7  # encoder down/next    
 dtoverlay=gpio-key,gpio=2,active_low=1,gpio_pull=up,keycode=8   # break				
 dtoverlay=gpio-key,gpio=13,active_low=1,gpio_pull=up,keycode=9  # +0.5				
