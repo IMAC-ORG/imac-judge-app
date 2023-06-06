@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
-  <title>Starter Template - Materialize</title>
+  <title>Competition Setup</title>
 
   <!-- CSS  -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -35,52 +35,40 @@
 </head>
 
 <body>
-  <div class="section no-pad-bot" id="index-banner">
-    <div class="container">
-      <h1 class=" center orange-text pilot_name">Edit / New Competition</h1>
-      <div class="row center" th:if="${not isCurrentComp}">
-        <h5 class=" col s12 light pilot_name">We couldn't find a current Competition, Lets start a new one!</h5>
+  <div class="section no-pad-bot blue" id="index-banner">
+    <div class="container blue white-text">
+      <!--<h1 class=" center orange-text pilot_name">Edit / New Competition</h1>-->
+      <div class="row">
+        <div class="col s12"><h5 class="light pilot_round">Competition Rounds</h5></div>
+        
+      </div>
+      <div class="row">
+        <div class="col s12"><div class="white"id="round-slider"></div></div>
       </div>
       <div class="row center">
-        <h5 class=" col s12 light pilot_round">Rounds</h5>
+        <div class="col s4"><h5 class="pilot_round">Known Sequences PR</h5></div>
+        <div class="col s4 offset-s4"><h5 class="pilot_round">Unknown Sequences PR</h5></div>
       </div>
-      <div class="row center">
-        <div id="round-slider"></div>
+      <div class="row">
+        <div class="col s4"><div class="white"id="sequence-slider"></div></div>
+        <div class="col s4 offset-s4"><div class="white" id="unknown-sequence-slider"></div></div>
       </div>
-      <br><br>
-      <div class="row center">
-        <h5 class=" col s12 light pilot_round">Sequences Per Round</h5>
-      </div>
-      <div class="row center">
-        <div id="sequence-slider"></div>
-      </div>
-      <br><br>
-      <div class="row center">
-        <h5 class=" col s12 light pilot_round">Unknown Sequences Per Round</h5>
-      </div>
-      <div class="row center">
-        <div id="unknown-sequence-slider"></div>
-      </div>
-      <br><br>
+      <br>
       <div th:if="${isCurrentComp}">
-        <div class="row center">
-          <h5 class=" col s12 light pilot_round">Start New Competition or Edit existing?</h5>
-        </div>
         <div class="switch center">
-          <label>
+          <label class="white-text">
             New
             <input type="checkbox" id="checkbox">
-            <span class="lever"></span>
-            Edit
+            <span class="lever white"></span>
+            Update
           </label>
         </div>
-        <br><br>
       </div>
+      <br>
       <div class="row center">
-        <a href="#" id="createComp" class="btn-large waves-effect waves-light orange">Start Competition</a>
+        <a href="#" id="createComp" class="waves-effect waves-light btn orange pulse">Start</a>
       </div>
-      <br><br>
-
+      <br>
     </div>
   </div>
   <div class="fixed-action-btn">
@@ -102,9 +90,9 @@
     var roundslider = document.getElementById('round-slider');
     var sequenceslider = document.getElementById('sequence-slider');
     var unknownsequenceslider = document.getElementById('unknown-sequence-slider');
-    var valuesForRoundSlider = [1, 2, 3, 4, 5, 6, 7]; // 16 values
-    var valuesForSequenceSlider = [1, 2, 3, 4, 5, 6, 7]; // 16 values
-    var valuesForUnknownSequenceSlider = [0, 1, 2, 3, 4, 5]; // 16 values
+    var valuesForRoundSlider = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]; // 16 values
+    var valuesForSequenceSlider = [1, 2]; // 16 values
+    var valuesForUnknownSequenceSlider = [0, 1, 2]; // 16 values
 
     const isCurrentComp = /*[[${isCurrentComp}]]*/ ;
     const currentRound = /*[[${currentRounds}]]*/ ;
@@ -151,32 +139,32 @@
     noUiSlider.create(roundslider, {
       start: 2,
       // A linear range from 0 to 15 (16 values)
-      range: { min: 0, max: 6 },
+      range: { min: 0, max: 19 },
       // steps of 1
       step: 1,
       tooltips: true,
       format: format,
-      pips: { mode: 'steps', format: format },
+      //pips: { mode: 'steps', format: format },
     });
     noUiSlider.create(sequenceslider, {
       start: 2,
       // A linear range from 0 to 15 (16 values)
-      range: { min: 0, max: 6 },
+      range: { min: 0, max: 1 },
       // steps of 1
       step: 1,
       tooltips: true,
       format: seqformat,
-      pips: { mode: 'steps', format: seqformat },
+     //pips: { mode: 'steps', format: seqformat },
     });
     noUiSlider.create(unknownsequenceslider, {
       start: 0,
       // A linear range from 0 to 15 (16 values)
-      range: { min: 0, max: 5 },
+      range: { min: 0, max: 2 },
       // steps of 1
       step: 1,
       tooltips: true,
       format: unknownseqformat,
-      pips: { mode: 'steps', format: unknownseqformat },
+      //pips: { mode: 'steps', format: unknownseqformat },
     });
 
     if (isCurrentComp) {

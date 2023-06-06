@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
-    <title>Starter Template - Materialize</title>
+    <title>Scoring</title>
     <style>
         .carousel {
             height: 100vh;
@@ -39,35 +39,41 @@
 
     <div class="carousel carousel-slider center">
         <div class="carousel-fixed-item center" id="buttonsDiv">
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(0.5);"
-                id="btnremovehalf">-0.5</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(0.5);"id="btnremovehalf">-0.5</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="removeScore(1);" id="btnremoveone">-1</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(0);" id="btnsetzero">0</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(0.5);" id="btnaddhalf">+0.5</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(1);" id="btnaddhalf">+1</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-1);" id="btnsetbreak">Break</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-2);" id="btnsetno">N/O</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="textToSpeech();" id="btnspeak">speak</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="shortdescription();" id="btnspeak">speak</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();" id="btnnext">next</a>
         </div>
-
         <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item blue white-text" href="#one!">
-            <p class="" style="line-height: 50%; font-weight: 500;">Pilot: <span th:text="${pilot.name}"></span> </p>
-            <p class="" style="line-height: 50%; font-weight: 500;">Round <span
-                    th:text="${pilotScores.activeRound}"></span> Seq <span
-                    th:text="${pilotScores.activeSequence}"></span> </p>
-            <p class="" style="line-height: 50%; font-weight: 500;">Fig <span th:text="${iterStat.index + 1}"></span>
-                <span th:text="${roundType}"></span>
-            </p>
-            <h1 style="font-family: digitalFont; font-size: 20vh; line-height: 10vh;  "
-                th:id="'score_'+ ${iterStat.index}">10.0</h1>
-            <img id="my-svg" style="max-width: 80vw; max-height: 30vh;" class="figure-wrapper"
-                th:if="${iterStat.index < 10}"
-                th:src="@{/man/known/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index})}">
-            <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
-                th:id="'description_'+ ${iterStat.index}">First Panel</h2>
-        </div>
+            <div class="row">
+                <div class="col s4">
+                <p class="" style="line-height: 50%; font-weight: 500;"><span th:text="${pilot.name}"></span></p>
+                <p class="" style="line-height: 50%; font-weight: 500;"><span th:text="${pilot_class}"></span></p>
+                <p class="" style="line-height: 50%; font-weight: 500;">Round <span 
+                        th:text="${pilotScores.activeRound}"></span> Seq <span
+                        th:text="${pilotScores.activeSequence}"></span> </p>
+                <p class="" style="line-height: 50%; font-weight: 500;">FIG <span th:text="${iterStat.index + 1}"></span>
+                    <span th:text="${roundType}"></span>
+                </p>
+                <br>
+                <h1 style="font-family: digitalFont; font-size: 40vh; line-height: 10vh;  "
+                    th:id="'score_'+ ${iterStat.index}">10.0</h1>
 
+                </div>
+                <div class="col s8">
+                <br>
+                 <img id="my-svg" style="width:60vw; height:75vh;" class="figure-wrapper"
+                    th:src="@{/man/en/{roundType}/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index}, roundType=${roundType.toLowerCase()})}">
+                </div>
+            </div>
+            <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
+                    th:id="'description_'+ ${iterStat.index}">First Panel</h2>
+        </div>
     </div>
 
     <div class="fixed-action-btn">
@@ -75,7 +81,8 @@
             <i class="large material-icons">menu</i>
         </a>
         <ul>
-            <li><a class="btn-floating btn-large green" onclick="showAllButtons();"><i class="material-icons">view_module</i></a></li>
+            <li><a class="btn-floating btn-large green" onclick="showAllButtons();"><i
+                        class="material-icons">view_module</i></a></li>
             <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">home</i></a></li>
         </ul>
     </div>
@@ -97,10 +104,11 @@
         const primary_id =  /*[[${pilot.primary_id}]]*/ ;
         const pilot_name =  /*[[${pilot.name}]]*/ ;
         const roundType =  /*[[${roundType}]]*/ ;
+        const pilot_class =  /*[[${pilot_class}]]*/ ;
         const sequenceJson = JSON.parse( /*[[${sequencesjson}]]*/);
+        var audio = new Audio();
 
-
-        const welcome_text = 'Now judging ' + pilot_name + ' round ' + round + ' sequence ' + sequence + ' ' + roundType;
+        const welcome_text = 'Now judging ' + pilot_name + ' ' + pilot_class + ' round ' + round + ' sequence ' + sequence + ' ' + roundType;
         const synth = window.speechSynthesis;
         const voices = synth.getVoices();
 
@@ -110,7 +118,7 @@
                 hoverEnabled: false
             });
         });
-        function setVirtualButtonVisibility(btnremovehalf, btnaddhalf) {
+        function setVirtualButtonVisibility(btnremovehalf, btnaddhalf, btnsetno, btnsetbreak) {
             if (btnremovehalf) {
                 $('#btnremovehalf').removeAttr('disabled');
             } else {
@@ -121,15 +129,25 @@
             } else {
                 $('#btnaddhalf').attr('disabled', 'disabled');
             }
+            if (btnsetno) {
+                $('#btnsetno').removeAttr('disabled');
+            } else {
+                $('#btnsetno').attr('disabled', 'disabled');
+            }
+            if (btnsetbreak) {
+                $('#btnsetbreak').removeAttr('disabled');
+            } else {
+                $('#btnsetbreak').attr('disabled', 'disabled');
+            }
         }
 
         function updateVirtualButtons(index) {
             var scoring = sequenceJson[index].scoring;
             console.log(sequenceJson[index].scoring);
             if (scoring == "HALF") {
-                setVirtualButtonVisibility(true, true);
+                setVirtualButtonVisibility(true, true, true, true);
             } else {
-                setVirtualButtonVisibility(false, false);
+                setVirtualButtonVisibility(false, false, false, false);
             }
         }
 
@@ -142,11 +160,55 @@
             synth.speak(msg);
         }
 
+        function shortdescription() {
+            audio.pause();
+            audio.currentTime = 0;
+            var audio_url = '/man/en/' + roundType + '/' + pilot_class + '/' + score_index + '.wav';
+            audio = new Audio(audio_url.toLowerCase());
+            audio.play();
+        }
+
+        function NowJudgingMessage() {
+            audio.pause();
+            audio.currentTime = 0;
+            var audio_url = '/man/en/now_judging_' + pilot_class + '_' + roundType + '_sequence.wav';
+            audio = new Audio(audio_url.toLowerCase());
+            audio.play();
+        }
+
+        function isNumber(n) {
+            return Number(n) === n;
+        }
+
         function textToSpeechCustomMessage(text) {
-            synth.cancel();
-            const msg = new SpeechSynthesisUtterance();
-            msg.text = text;
-            synth.speak(msg);
+            if (isNumber(text)) {
+                //this is a number lets build url to wave file
+                audio.pause();
+                audio.currentTime = 0;
+                var audio_url = '/man/en/score/' + text + '.wav';
+                audio = new Audio(audio_url);
+                audio.play();
+            } else if (text == 'BREAK') {
+                audio.pause();
+                audio.currentTime = 0;
+                var audio_url = '/man/en/score/break.wav';
+                audio = new Audio(audio_url);
+                audio.play();
+
+            } else if (text == 'Not Observed') {
+                audio.pause();
+                audio.currentTime = 0;
+                var audio_url = '/man/en/score/not_observed.wav';
+                audio = new Audio(audio_url);
+                audio.play();
+            } else {
+                synth.cancel();
+                const msg = new SpeechSynthesisUtterance();
+                msg.text = text;
+                synth.speak(msg);
+            }
+
+
         }
         update_index = function () {
             var activeIndicator = this.$indicators.find('.indicator-item.active');
@@ -176,13 +238,15 @@
             onCycleTo: update_index
         });
         car.height(windowHeight);
-        textToSpeechCustomMessage(welcome_text);
+        // textToSpeechCustomMessage(welcome_text);
+        NowJudgingMessage();
 
 
         function carouselNext() {
             $('.carousel').carousel('next');
             if (score_index == (numOfManeuvers - 1)) {
                 submitScores();
+                
             }
         }
         function submitScores() {
@@ -260,6 +324,13 @@
             textToSpeechCustomMessage(scoreFloat);
         }
         function setScore(score) {
+            if (score == -1 || score == -2) {
+                //check if scoring is half
+                var scoring = sequenceJson[score_index].scoring;
+                if (scoring != "HALF") {
+                    return;
+                }
+            }
             console.log("setting score to > " + score);
             var currentScore = parseFloat(score);
             scores[score_index] = currentScore;
@@ -297,7 +368,7 @@
             }
         }
         $("#buttonsDiv").hide();
-        function showAllButtons(){
+        function showAllButtons() {
             $("#buttonsDiv").show();
         }
         //add button listeners
@@ -340,7 +411,7 @@
             }
             //numpad 0
             if (e.which == 48) {
-                textToSpeech();
+                shortdescription();
             }
         });
         /*]]>*/
