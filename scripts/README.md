@@ -1,10 +1,9 @@
 # SA-rPI-Score Setup From Pre Build SD.
 
 1. Using the Raspberry Pi Imager write the Raspberry Pi OS (32-bit) to the SD card.
-    <br>
-2. Once the image has complete, remove and re-insert the SD into your PC
-on the bootfs volume rename the file **wpa_supplicant.conf.bak** to  **wpa_supplicant.conf** and open the file for editing.
-	<br>
+   <br>
+2. Once the image has complete, remove and re-insert the SD into your PC on the bootfs volume rename the file **wpa_supplicant.conf.bak** to  **wpa_supplicant.conf** and open the file for editing.
+   <br>
 3. Replace \<Country Code>, \<SSID>, and \<PASSWORD> with your own country code (US), WiFi SSID and password.
    <br>
 4. On the bootfs volume eidt the settings.josn and update with the relivant details:
