@@ -20,3 +20,7 @@
 8. Updated SD image to include all the bugs fixes.
 
 9.  Add button options in place of the touch screen (start, sync, pilot refresh), this will option the ability to use potentially E-Ink screens.
+
+10.  Special char handleing.
+
+11. Bulk audio generation.
