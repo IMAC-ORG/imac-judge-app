@@ -1,5 +1,0 @@
-(sym_lib_table
-  (version 7)
-  (lib (name "pololu")(type "KiCad")(uri "${KIPRJMOD}/libraries/pololu.kicad_sym")(options "")(descr ""))
-  (lib (name "Screens")(type "KiCad")(uri "${KIPRJMOD}/libraries/Screens.kicad_sym")(options "")(descr ""))
-)
