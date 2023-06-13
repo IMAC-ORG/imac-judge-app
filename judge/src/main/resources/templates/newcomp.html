@@ -35,38 +35,37 @@
 </head>
 
 <body>
-  <div class="section no-pad-bot blue" id="index-banner">
-    <div class="container blue white-text">
-      <!--<h1 class=" center orange-text pilot_name">Edit / New Competition</h1>-->
+  <div class="section no-pad-bot yellow" id="index-banner">
+    <div class="container yellow black-text">
       <div class="row">
         <div class="col s12"><h5 class="light pilot_round">Competition Rounds</h5></div>
         
       </div>
       <div class="row">
-        <div class="col s12"><div class="white"id="round-slider"></div></div>
+        <div class="col s12"><div class="black"id="round-slider"></div></div>
       </div>
       <div class="row center">
         <div class="col s4"><h5 class="pilot_round">Known Sequences PR</h5></div>
         <div class="col s4 offset-s4"><h5 class="pilot_round">Unknown Sequences PR</h5></div>
       </div>
       <div class="row">
-        <div class="col s4"><div class="white"id="sequence-slider"></div></div>
-        <div class="col s4 offset-s4"><div class="white" id="unknown-sequence-slider"></div></div>
+        <div class="col s4"><div class="black"id="sequence-slider"></div></div>
+        <div class="col s4 offset-s4"><div class="black" id="unknown-sequence-slider"></div></div>
       </div>
       <br>
       <div th:if="${isCurrentComp}">
         <div class="switch center">
-          <label class="white-text">
+          <label class="black-text">
             New
             <input type="checkbox" id="checkbox">
-            <span class="lever white"></span>
+            <span class="lever black"></span>
             Update
           </label>
         </div>
       </div>
       <br>
       <div class="row center">
-        <a href="#" id="createComp" class="waves-effect waves-light btn orange pulse">Start</a>
+        <a href="#" id="createComp" class="waves-effect waves-light btn orange darken-1 pulse">Start</a>
       </div>
       <br>
     </div>
