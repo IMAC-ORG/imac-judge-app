@@ -38,7 +38,7 @@
   <div class="carousel carousel-slider center">
 
 
-    <div th:each="pilot,iterStat : ${pilots}" class="carousel-item blue white-text"
+    <div th:each="pilot,iterStat : ${pilots}" class="carousel-item yellow black-text"
       th:href="@{/judge(pilot_id=${pilot.primary_id})}">
       <h1 th:text="${pilot.name}" class="pilot_name">First Panel</h1>
       <h2 th:text="${pilot.getClassString()}" class="pilot_class">First Panel</h2>
@@ -47,36 +47,36 @@
           th:text="${pilotScores[pilot.primary_id].activeSequence}" class="pilot_round"></span></h2>
       <h2 th:unless="${pilotScores[pilot.primary_id].isActive}" class="pilot_round"> All Rounds Completed!</h2>
       <a class="pilot_round" th:unless="${pilotScores[pilot.primary_id].isActive}"> <i
-          class="material-icons center white-text">done</i> </a>
+          class="material-icons center black-text">done</i> </a>
       <a th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences == 0}"
-        class="waves-effect waves-light btn orange pulse"
+        class="waves-effect waves-light btn orange darken-1 pulse"
         th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='KNOWN')}"><i
           class="material-icons right">flight_takeoff</i>Judge</a>
 
       <a th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence gt 1 }"
-        class="waves-effect waves-light btn orange pulse"
+        class="waves-effect waves-light btn orange darken-1 pulse"
         th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType=${pilotScores[pilot.primary_id].activeRoundType})}"><i
           class="material-icons right">flight_takeoff</i>Judge</a>
 
       <a th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence == 1}"
-        class="waves-effect waves-light btn modal-trigger orange pulse" th:href="'#modal'+ ${pilot.primary_id}"><i
+        class="waves-effect waves-light btn modal-trigger orange darken-1 pulse" th:href="'#modal'+ ${pilot.primary_id}"><i
           class="material-icons right">flight_takeoff</i>Judge</a>
       <!-- Modal Structure -->
       <div
         th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence == 1 }"
         th:id="'modal'+ ${pilot.primary_id}" class="modal">
         <div class="modal-content">
-          <h5 class="blue-text">SELECT ROUND TYPE</h5>
+          <h5 class="black-text">SELECT ROUND TYPE</h5>
           <br>
           <div class="row">
             <div class="col s6 m3"> <a class="" th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='KNOWN')}"><i
                   class="medium material-icons center">visibility</i></a>
-              <p class="blue-text">KNOWN</p>
+              <p class="black-text">KNOWN</p>
             </div>
             <div class="col s6 m3"> <a class=""
                 th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='UNKNOWN')}"><i
                   class="medium material-icons center">visibility_off</i></a>
-              <p class="blue-text">UNKNOWN</p>
+              <p class="black-text">UNKNOWN</p>
             </div>
           </div>
         </div>
@@ -93,8 +93,8 @@
       <i class="large material-icons">menu</i>
     </a>
     <ul>
-      <li><a class="btn-floating btn-large red" onclick="syncPilots();"><i class="material-icons">sync</i></a></li>
-      <li><a class="btn-floating btn-large yellow darken-1" onclick="syncScores();"><i class="material-icons">publish</i></a></li>
+      <li><a class="btn-floating btn-large purple" onclick="syncPilots();"><i class="material-icons">sync</i></a></li>
+      <li><a class="btn-floating btn-large light-blue darken-1" onclick="syncScores();"><i class="material-icons">publish</i></a></li>
       <li><a class="btn-floating btn-large green" href="/newcomp"><i class="material-icons">edit</i></a></li>
     </ul>
   </div>
