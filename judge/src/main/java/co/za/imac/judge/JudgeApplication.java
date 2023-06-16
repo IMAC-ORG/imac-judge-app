@@ -28,6 +28,7 @@ public class JudgeApplication {
 		String AppConfigPath = System.getProperty("judge.config.path");
 		if (AppConfigPath == null) {
 			String userDirectory = System.getProperty("user.dir");
+			logger.debug("Working directory is : " + userDirectory);
 			File f = new File(userDirectory + File.separator + "settings.json");
 			if(f.exists() && !f.isDirectory()) {
 				logger.info("Settings file found - setting Application Config path to Current Working Dir.");
