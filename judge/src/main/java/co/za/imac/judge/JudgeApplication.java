@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.io.File;
+import java.util.Properties;
 
 @SpringBootApplication
 public class JudgeApplication {
@@ -24,7 +25,6 @@ public class JudgeApplication {
 	 * Finally it defaults to the standard location.
 	 */
 	private static void checkAppConfigDirOverrides() {
-
 		String AppConfigPath = System.getProperty("judge.config.path");
 		if (AppConfigPath == null) {
 			String userDirectory = System.getProperty("user.dir");
