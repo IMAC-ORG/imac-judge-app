@@ -52,8 +52,8 @@ import javax.xml.parsers.ParserConfigurationException;
 @Service
 public class PilotService {
 
-    private static final String PILOT_SCORE_DIR = SettingUtils.APPLICATION_CONFIG_PATH + "/pilots/scores/";
-    private static final String PILOT_DAT_PATH = SettingUtils.APPLICATION_CONFIG_PATH + "/pilots.dat";
+    private static final String PILOT_SCORE_DIR = SettingUtils.getApplicationConfigPath() + "/pilots/scores/";
+    private static final String PILOT_DAT_PATH = SettingUtils.getApplicationConfigPath() + "/pilots.dat";
     private String PILOT_DAT_URL = "http://SCORE_HOST:SCORE_HTTP_PORT/scorepad/pilots.dat";
     private String SCORE_UPLOAD_URL = "http://SCORE_HOST:SCORE_HTTP_PORT/scorepadupload/";
     @Autowired

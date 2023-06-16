@@ -19,7 +19,7 @@ import co.za.imac.judge.utils.SettingUtils;
 public class CompService {
     
 
-private final String COMP_FILE_NAME = SettingUtils.APPLICATION_CONFIG_PATH + "/comp.json";
+private final String COMP_FILE_NAME = SettingUtils.getApplicationConfigPath() + "/comp.json";
 
 public boolean isCurrentComp(){
     File targetFile = new File(COMP_FILE_NAME);
