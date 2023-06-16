@@ -6,14 +6,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
-
-import co.za.imac.judge.utils.CommandLineAppStartupRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
 import com.google.gson.Gson;
-
 import co.za.imac.judge.dto.SettingDTO;
 import co.za.imac.judge.utils.SettingUtils;
 
@@ -46,7 +42,12 @@ public class SettingService {
     public SettingDTO createSettings() throws IOException {
         SettingDTO settingDTO = new SettingDTO();
         File newFile = new File(SETTINGS_FILE_NAME);
-        newFile.createNewFile();
+        try {
+            newFile.createNewFile();
+        } catch (IOException e) {
+            logger.error ("Could not create " + SETTINGS_FILE_NAME);
+            throw(e);
+        }
         String compdtoJson = new Gson().toJson(settingDTO);
         byte[] strToBytes = compdtoJson.getBytes();
         FileOutputStream outputStream = new FileOutputStream(SETTINGS_FILE_NAME);
