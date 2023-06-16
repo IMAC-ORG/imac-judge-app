@@ -34,7 +34,7 @@ import co.za.imac.judge.utils.SettingUtils;
 @Service
 public class SequenceService {
 
-    private static final String SEQUENCES_DAT_PATH = SettingUtils.APPLICATION_CONFIG_PATH + "/sequences.dat";
+    private static final String SEQUENCES_DAT_PATH = SettingUtils.getApplicationConfigPath() + "/sequences.dat";
     private String SEQUENCES_DAT_URL = "http://SCORE_HOST:SCORE_HTTP_PORT/scorepad/sequences.dat";
 
     @Autowired
