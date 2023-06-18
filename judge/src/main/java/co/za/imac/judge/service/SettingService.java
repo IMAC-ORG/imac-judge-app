@@ -6,21 +6,23 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
 import com.google.gson.Gson;
-
 import co.za.imac.judge.dto.SettingDTO;
 import co.za.imac.judge.utils.SettingUtils;
 
 @Service
 public class SettingService {
 
-    private final String SETTINGS_FILE_NAME = SettingUtils.APPLICATION_CONFIG_PATH + "/settings.json";
+    private static final Logger logger =
+            LoggerFactory.getLogger(SettingService.class);
+    private final String SETTINGS_FILE_NAME = SettingUtils.getApplicationConfigPath() + "/settings.json";
 
     public boolean isSettings() {
         File targetFile = new File(SETTINGS_FILE_NAME);
+        logger.debug("Exists: " + SETTINGS_FILE_NAME + " - " + targetFile.exists());
         return targetFile.exists();
     }
 
@@ -40,7 +42,12 @@ public class SettingService {
     public SettingDTO createSettings() throws IOException {
         SettingDTO settingDTO = new SettingDTO();
         File newFile = new File(SETTINGS_FILE_NAME);
-        newFile.createNewFile();
+        try {
+            newFile.createNewFile();
+        } catch (IOException e) {
+            logger.error ("Could not create " + SETTINGS_FILE_NAME);
+            throw(e);
+        }
         String compdtoJson = new Gson().toJson(settingDTO);
         byte[] strToBytes = compdtoJson.getBytes();
         FileOutputStream outputStream = new FileOutputStream(SETTINGS_FILE_NAME);
