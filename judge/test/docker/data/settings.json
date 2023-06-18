@@ -1,0 +1,7 @@
+{
+  "judge_id":1,
+  "score_host":"host.docker.internal",
+  "score_http_port":8181,
+  "line_number":1,
+  "language":"en"
+}
