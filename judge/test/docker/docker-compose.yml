@@ -1,0 +1,13 @@
+version: "3.5"
+services:
+  judge:
+    build:
+      context: ./build
+      args:
+        JAR_FILE: app.jar
+    image: "judge:latest"
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+    volumes:
+      - ./data:/var/opt/judge

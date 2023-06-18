@@ -99,7 +99,5 @@ public class CommandLineAppStartupRunner implements ApplicationRunner {
         logger.info ("Line No.: " + settingDTO.getLine_number());
         logger.info ("Score Host: " + settingDTO.getScore_host());
         logger.info ("Score Port: " + settingDTO.getScore_http_port());
-
     }
-
 }
