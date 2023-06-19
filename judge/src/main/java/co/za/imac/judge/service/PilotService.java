@@ -260,6 +260,7 @@ public class PilotService {
     }
 
     public void syncPilotsToScoreWebService() throws Exception {
+        SettingDTO settingDTO = settingService.getSettings();
         List<FlightUploadDTO> flight = new ArrayList<>();
         int index = 0;
         List<PilotScores> pilotScores = new ArrayList<>();
@@ -289,9 +290,9 @@ public class PilotService {
                     }
                     FiguresUploadDTO figures = new FiguresUploadDTO(figureScores);
                     // create FlightUploadDTO
-                    FlightUploadDTO flightUploadDTO = new FlightUploadDTO(pilotScore.getPrimary_id(), score.getType(),
+                    FlightUploadDTO flightUploadDTO = new FlightUploadDTO(pilotScore.getPrimary_id(), score.getType(), 
                             score.getRound(),
-                            score.getSequence(), pilotScore.getJudge_id(), false, figures, index);
+                            score.getSequence(), pilotScore.getJudge_id(), false, figures, index, settingDTO.getLine_number());
                     flight.add(flightUploadDTO);
                     index++;
                 }
@@ -299,12 +300,12 @@ public class PilotService {
             // create final stupid wrapper
         }
 
-        FlightsUploadDTO flightsUploadDTO = new FlightsUploadDTO(flight);
+        FlightsUploadDTO flightsUploadDTO = new FlightsUploadDTO(flight, settingDTO.getLine_number());
 
         XmlMapper xmlMapper = new XmlMapper();
         String xml = xmlMapper.writeValueAsString(flightsUploadDTO);
 
-        SettingDTO settingDTO = settingService.getSettings();
+        //SettingDTO settingDTO = settingService.getSettings();
         SCORE_UPLOAD_URL = SCORE_UPLOAD_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
 
         String flights_dat_file_name = "LINE" + settingDTO.getLine_number() + "_JUDGE" + settingDTO.getJudge_id() + "_flights.dat";
