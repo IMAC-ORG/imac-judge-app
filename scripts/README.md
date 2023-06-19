@@ -52,7 +52,7 @@
    <br>
 6. SSH to the rPI and run the the folllowing to update the OS
 	```    
-	echo "deb http://mirror.ox.ac.uk/sites/archive.raspbian.org/archive/raspbian bullseye main contrib non-free rpi" >> /etc/apt/sources.list
+	echo "deb http://mirror.ox.ac.uk/sites/archive.raspbian.org/archive/raspbian bullseye main contrib non-free rpi" | sudo tee -a /etc/apt/sources.list
 	sudo apt update
 	sudo apt upgrade -y
 	```
