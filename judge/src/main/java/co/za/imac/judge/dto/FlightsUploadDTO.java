@@ -12,8 +12,8 @@ public class FlightsUploadDTO {
     @JacksonXmlElementWrapper(useWrapping = false)
 	public List<FlightUploadDTO> flight;
     
-    public FlightsUploadDTO(List<FlightUploadDTO> flight) {
-        this.flight = flight;
+    public FlightsUploadDTO(List<FlightUploadDTO> flight, int line_number ) {
+        this.flight = flight; this.flightline = line_number;
     }
     public int getFlightline() {
         return flightline;
