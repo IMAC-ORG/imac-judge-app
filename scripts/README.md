@@ -24,7 +24,7 @@
    <br>
 2. Once the image has complete, remove and re-insert the SD into your PC.
    <br>
-3. If you did not confugre the wifi in the prevous step on the bootfs volume create a filr called wpa_supplicant.conf with the following infromation replace \<Country Code>, \<SSID>, and \<PASSWORD> with your own country code (US), WiFi SSID and password.
+3. If you did not confugre the wifi in the prevous step on the bootfs volume create a filr called **wpa_supplicant.conf** with the following infromation replace **\<Country Code>**, **\<SSID>**, and **\<PASSWORD>** with your own country code **(US)**, WiFi SSID and password.
 	```
 	ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 	update_config=1
@@ -39,7 +39,13 @@
 	<br>
 4. On the bootfs volume creae a settings.josn and add this information ith the relivant details
 	```
-	{"judge_id":1,"score_host":"192.168.1.4","score_http_port":8181,"line_number":1,"language":"en"}
+	{
+		"judge_id":1,
+		"line_number":1,
+		"score_host":"192.168.1.4",
+		"score_http_port":8181,
+		"language":"en"
+	}
 	```
 
     - judge_id = (1-x) We''ll use this id to post the score to Score as judge 1-x
@@ -50,6 +56,17 @@
 	<br>
 5. Once complete insert the SD in to the rPI and boot.
    <br>
+6. SSH to the rPI and configure the system swapfile for improved performace
+    ```
+	sudo dphys-swapfile swapoff
+	sudo vi /etc/dphys-swapfile
+
+	Update the swap to 512MB
+
+	sudo dphys-swapfile setup
+	sudo dphys-swapfile swapon
+	```
+	<br>
 6. SSH to the rPI and run the the folllowing to update the OS
 	```    
 	echo "deb http://mirror.ox.ac.uk/sites/archive.raspbian.org/archive/raspbian bullseye main contrib non-free rpi" | sudo tee -a /etc/apt/sources.list
@@ -70,9 +87,14 @@
    # 4 Performance options --> P2 GPU Memory --> 128
    ```
 9. Install useful packages
-    ```sudo apt install vim openjdk-17-jre xdotool unclutter sed locate vim -y
+    ```
+	sudo apt install vim openjdk-17-jre xdotool unclutter sed locate vim -y
 	sudo apt clean
 	sudo apt autoremove -y
+	```
+	```
+	echo "set mouse-=a" | sudo tee -a /root/.vimrc
+	echo "set mouse-=a" | sudo tee -a /home/judge/.vimrc
 	```
 10. Disable IPV6
     ```
@@ -81,13 +103,25 @@
 	now just add ”ipv6.disable=1″ to the end of the line
 	```
 11. For WaveShare 3.5" Screens
-    ```rm -rf LCD-show
+    ```
 	git clone https://github.com/waveshare/LCD-show.git
 	cd LCD-show/
-	chmod +x LCD35-show
-	./LCD35-show
+	#If 3.5inch RPI IPS LCD (B) rev2.0
+	chmod +x LCD35B-show-V2
+	./LCD35B-show-V2
+	./LCD35B-show-V2 180
+
+	#If 3.5inch RPI IPS LCD (B) rev1.0
+	chmod +x LCD35B-show
+	./LCD35B-show
+
+    # Refrence here https://www.waveshare.com/wiki/Main_Page#Display-LCD-OLEDs
+	```
+	After a reboot run the following
+	```
 	sudo ./LCD35-show 180
 	```
+	
 12. Configre and touch calbrations
     ```
 	sudo apt install xinput-calibrator
@@ -171,16 +205,7 @@
 
 	sudo ln -s /boot/settings.json /var/opt/judge/settings.json
 	```
-18. Configure the system swapfile for improved performace
-    ```
-	sudo dphys-swapfile swapoff
-	sudo vi /etc/dphys-swapfile
 
-	Update the swap to 512GB
-
-	sudo dphys-swapfile setup
-	sudo dphys-swapfile swapon
-	```
 19. Reboot the rPI
     ```
 	sudo reboot
