@@ -58,8 +58,8 @@
 	```
 7. Remove some un-used package to improve perforamce
    ```
-   sudo apt purge wolfram-engine scratch scratch2 nuscratch sonic-pi idle3 -y
-   sudo apt purge smartsim java-common minecraft-pi libreoffice* lxplug-updater -y
+   sudo apt purge wolfram-engine scratch nuscratch sonic-pi idle3 -y
+   sudo apt purge smartsim java-common libreoffice* lxplug-updater -y
    sudo apt clean
    sudo apt autoremove -y
    ```
@@ -67,6 +67,7 @@
    ```
    sudo raspi-config
    # 1 System Options --> S5 Boot / Auto Login --> B4 Desktop Autologin — Desktop GUI --> automatically logged in as ‘judge’ user:
+   # 4 Performance options --> P2 GPU Memory --> 128
    ```
 9. Install useful packages
     ```sudo apt install vim openjdk-17-jre xdotool unclutter sed locate vim -y
