@@ -106,7 +106,8 @@ public class PilotService {
                     secondary_id = Integer
                             .parseInt(element.getElementsByTagName("secondary_id").item(0).getTextContent());
                 }
-                if (element.getElementsByTagName("secondary_id").item(0).getTextContent().length() > 0) {
+                if (element.getElementsByTagName("comp_id").item(0).hasChildNodes() == true && 
+                    element.getElementsByTagName("comp_id").item(0).getTextContent().length() > 0) {
                     comp_id = Integer.parseInt(element.getElementsByTagName("comp_id").item(0).getTextContent());
                 }
                 String name = element.getElementsByTagName("name").item(0).getTextContent();
