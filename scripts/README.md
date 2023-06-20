@@ -37,7 +37,7 @@
 	}
 	```
 	<br>
-4. On the bootfs volume creae a settings.josn and add this information ith the relivant details
+4. On the bootfs volume create a settings.josn and add the information with the relivant details
 	```
 	{
 		"judge_id":1,
