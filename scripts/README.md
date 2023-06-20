@@ -183,7 +183,7 @@
 	dtoverlay=gpio-key,gpio=6,active_low=1,gpio_pull=up,keycode=10  # +1
 	dtoverlay=gpio-key,gpio=26,active_low=1,gpio_pull=up,keycode=11 #speak
 	```
-18. Install the Judging software. Copy the 2 .service file and 2 .sh file into your working directory in the pi
+18. Install the Judging software. Copy the 2 .service files and 2 .sh files into your working directory in the pi
     ```
 	sudo mkdir /var/opt/judge
 	sudo mkdir /var/opt/judge/bin
