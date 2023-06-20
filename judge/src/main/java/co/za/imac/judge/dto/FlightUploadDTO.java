@@ -16,10 +16,23 @@ public class FlightUploadDTO {
 	public int index = 0;
     
     public FlightUploadDTO(int pilot_primary_id, String type, int round, int sequence, int judge,
-            boolean missing_pilot_panel, FiguresUploadDTO figures, int index) {
+            boolean missing_pilot_panel, FiguresUploadDTO figures, int index, int line_number) {
         this.pilot_primary_id = pilot_primary_id;
         this.type = type;
-        this.round = round;
+        if (line_number > 1) {
+            if (round < 10) { 
+                this.round = (line_number * 10)+round;
+            }
+            else {this.round = (line_number * 100)+round;
+            }
+        }
+        else {
+            if (round < 20) {
+                this.round = round;
+            }
+            else {this.round = (line_number * 100)+round;
+            }
+        }
         this.sequence = sequence;
         this.judge = judge;
         this.missing_pilot_panel = missing_pilot_panel;
