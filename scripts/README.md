@@ -84,7 +84,6 @@
    ```
    sudo raspi-config
    # 1 System Options --> S5 Boot / Auto Login --> B4 Desktop Autologin — Desktop GUI --> automatically logged in as ‘judge’ user:
-   # 4 Performance options --> P2 GPU Memory --> 128
    ```
 10. Install useful packages
     ```
