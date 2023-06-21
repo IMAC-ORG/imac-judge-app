@@ -17,10 +17,8 @@
 	<br>  
 7. Auto discovery of Score, right now we are hardcoding it,
 	<br>  
-8. Updated SD image to include all the bugs fixes.
+8.  Add button options in place of the touch screen (start, sync, pilot refresh), this will option the ability to use potentially E-Ink screens.
 	<br>  
-9.  Add button options in place of the touch screen (start, sync, pilot refresh), this will option the ability to use potentially E-Ink screens.
-<	br>  
-10.  Special char handleing.
+9.  Special char handleing.
 	<br>  
-11. Bulk audio generation.
+10. Bulk audio generation.
