@@ -144,7 +144,7 @@
 16. Configure GPIO to Keyboard Mappings edit the config.txt file on the boofs partition,
     sudo vi /boot/config.txt
     ```
-	\# gkio-key
+	\# gpio-key
 	dtoverlay=gpio-key,gpio=22,active_low=1,gpio_pull=up,keycode=2  # Not Observer
 	dtoverlay=gpio-key,gpio=13,active_low=1,gpio_pull=up,keycode=3  # -0.5
 	dtoverlay=gpio-key,gpio=6,active_low=1,gpio_pull=up,keycode=4   # -1
@@ -171,7 +171,7 @@
 	```
 17. SA-PI-SCORE Button layout
     ```
-	\# gkio-key
+	\# gpio-key
 	dtoverlay=gpio-key,gpio=19,active_low=1,gpio_pull=up,keycode=2  # Not Observer
 	dtoverlay=gpio-key,gpio=4,active_low=1,gpio_pull=up,keycode=3   # -0.5
 	dtoverlay=gpio-key,gpio=27,active_low=1,gpio_pull=up,keycode=4  # -1
