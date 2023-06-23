@@ -200,9 +200,12 @@
 	sudo mv kiosk.service /lib/systemd/system/
 	sudo systemctl enable kiosk.service
 
-	sudo chmod 777 -R /var/opt/judge
-
 	sudo ln -s /boot/settings.json /var/opt/judge/settings.json
+    	sudo chmod 777 -R /var/opt/judge
+
+    	chmod +x judge_update.sh
+    	sudo ./judge_update.sh
+        
 	```
 
 19. Reboot the rPI
