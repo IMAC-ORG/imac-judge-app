@@ -12,9 +12,9 @@
    - score_http_port = The port you'll configure Score to listen on
    - line_number = This is the flight line if you are running multiple flight lines ( Leave it as 1 for now)
    - language = This will be used to determine which audio files to use. (Currently on being used)
-  <br>
+   <br>
 5. Once complete insert the SD in to the rPI and boot.
-  <br>
+   <br>
 6. At this point we might need to install drivers for the screen for WaveShare 3.5" Screens follow the commands below, please ensure at the LCD35B-show-V2 lines replace this with the relevant command based on your screen of choice. If your screen is already working correctly please skip this step 
 ***Reference here :*** https://www.waveshare.com/wiki/Main_Page#Display-LCD-OLEDs
     ```
