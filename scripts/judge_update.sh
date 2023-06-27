@@ -2,7 +2,7 @@
 systemctl stop judge.service
 systemctl stop kiosk.service
 
-mv judge*.jar /var/opt/judge/bin/judge.jar
+sudo wget -O /var/opt/judge/bin/judge.jar http://judge.jar
 
 sudo chmod 777 -R /var/opt/judge
 
