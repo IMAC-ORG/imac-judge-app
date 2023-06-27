@@ -19,7 +19,13 @@ A copy of the settings.json can be found under the dockerbuild folder.
 sudo vi /var/opt/judge/settings.json
 
 eg.
-{"judge_id":1,"score_host":"192.168.1.4","score_http_port":8181,"line_number":1,"language":"en"}
+{
+  "judge_id":1,
+  "line_number":1,
+  "score_host":"192.168.1.4",
+  "score_http_port":8181,
+  "language":"en"
+}
 ```
 5. Running the app in the dev container
 ``` 

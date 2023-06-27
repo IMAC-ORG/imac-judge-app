@@ -102,11 +102,13 @@ public class PilotService {
                 int primary_id = Integer.parseInt(element.getElementsByTagName("primary_id").item(0).getTextContent());
                 int secondary_id = 0;
                 int comp_id = 0;
-                if (element.getElementsByTagName("secondary_id").item(0).getTextContent().length() > 0) {
+                if (element.getElementsByTagName("secondary_id").item(0).hasChildNodes() == true && 
+                    element.getElementsByTagName("secondary_id").item(0).getTextContent().length() > 0) {
                     secondary_id = Integer
                             .parseInt(element.getElementsByTagName("secondary_id").item(0).getTextContent());
                 }
-                if (element.getElementsByTagName("secondary_id").item(0).getTextContent().length() > 0) {
+                if (element.getElementsByTagName("comp_id").item(0).hasChildNodes() == true && 
+                    element.getElementsByTagName("comp_id").item(0).getTextContent().length() > 0) {
                     comp_id = Integer.parseInt(element.getElementsByTagName("comp_id").item(0).getTextContent());
                 }
                 String name = element.getElementsByTagName("name").item(0).getTextContent();
