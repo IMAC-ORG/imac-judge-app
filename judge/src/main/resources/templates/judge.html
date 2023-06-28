@@ -160,10 +160,10 @@
             synth.speak(msg);
         }
 
-        function shortdescription() {
+        function shortdescription(caller_index) {
             audio.pause();
             audio.currentTime = 0;
-            var audio_url = '/man/en/' + roundType + '/' + pilot_class + '/' + score_index + '.wav';
+            var audio_url = '/man/en/' + roundType + '/' + pilot_class + '/' + ( score_index + caller_index ) + '.wav';
             audio = new Audio(audio_url.toLowerCase());
             audio.play();
         }
@@ -175,6 +175,8 @@
             audio = new Audio(audio_url.toLowerCase());
             audio.play();
         }
+
+        
 
         function isNumber(n) {
             return Number(n) === n;
@@ -371,6 +373,7 @@
         function showAllButtons() {
             $("#buttonsDiv").show();
         }
+
         //add button listeners
         $(document).on("keypress", function (e) {
             // numpad 8
@@ -404,14 +407,19 @@
             //numpad 6
             if (e.which == 54) {
                 carouselNext();
+                caller_index = 1;
+                shortdescription(caller_index);
             }
             //numpad 4
             if (e.which == 52) {
                 $('.carousel').carousel('prev');
+                caller_index = -1;
+                shortdescription(caller_index);
             }
             //numpad 0
             if (e.which == 48) {
-                shortdescription();
+                shortdescription(0);
+                
             }
         });
         /*]]>*/
