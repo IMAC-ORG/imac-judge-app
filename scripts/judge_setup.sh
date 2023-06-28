@@ -177,13 +177,15 @@ echo -e "${Yellow}Setting up the Judge App..."
 sudo mkdir /var/opt/judge 																										> /dev/null 2>&1
 sudo mkdir /var/opt/judge/bin 																									> /dev/null 2>&1
 
-sudo wget -O /lib/systemd/system/judge.service https://github.com/IMAC-ORG/imac-judge-app/blob/main/scripts/judge.service 		> /dev/null 2>&1
-sudo wget -O /var/opt/judge/bin https://github.com/IMAC-ORG/imac-judge-app/blob/main/scripts/judge.sh							> /dev/null 2>&1
+sudo wget -O /lib/systemd/system/judge.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.service 		> /dev/null 2>&1
+sudo wget -O /var/opt/judge/bin/judge.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.sh							> /dev/null 2>&1
 
-sudo wget -O /home/judge/judge_update.sh https://github.com/IMAC-ORG/imac-judge-app/blob/main/scripts/judge_update.sh			> /dev/null 2>&1
+sudo wget -O /home/judge/judge_update.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_update.sh			> /dev/null 2>&1
 
-sudo wget -O /lib/systemd/system/kiosk.service https://github.com/IMAC-ORG/imac-judge-app/blob/main/scripts/kiosk.service		> /dev/null 2>&1
-sudo wget -O /var/opt/judge/bin/kiosk.sh https://github.com/IMAC-ORG/imac-judge-app/blob/main/scripts/kiosk.sh					> /dev/null 2>&1
+sudo wget -O /lib/systemd/system/kiosk.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.service		> /dev/null 2>&1
+sudo wget -O /var/opt/judge/bin/kiosk.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.sh					> /dev/null 2>&1
+
+sudo wget -O /home/judge/imac.png https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/imac.png
 
 sudo chmod +x /var/opt/judge/bin/judge.sh						> /dev/null 2>&1	
 sudo systemctl enable judge.service								> /dev/null 2>&1
@@ -194,4 +196,5 @@ sudo systemctl enable kiosk.service								> /dev/null 2>&1
 sudo ln -s /boot/settings.json /var/opt/judge/settings.json		> /dev/null 2>&1
 
 sudo chmod 777 -R /var/opt/judge								> /dev/null 2>&1
-sudo ./judge_update.sh											> /dev/null 2>&1
+
+sudo chmod 777 /home/judge/judge_update.sh						> /dev/null 2>&1
