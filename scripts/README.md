@@ -1,3 +1,26 @@
+# SA rPI Bootstrap Script Install
+1. Using the Raspberry Pi Imager available from the Raspberry site write the Raspberry Pi OS (32-bit) to the SD card. Configure the relevant WiFi details, enable SSH and setup the user name judge (required) and password
+	- username : judge
+	- password : <*password*>
+   <br>
+2. Once complete insert the SD in to the rPI and boot. THe inital boot will take some time as the system will expand the SD card's file system and configure the user and wifi details. 
+   <br>
+3. Download latest judge.jar into /home/judge from here  ( until we have it in the repo )
+https://drive.google.com/file/d/1dkYaoU-6ueR7LCX1nh9Kpic7iX_rgmsH/view?usp=sharing
+   <br>
+4. Now run the following commands
+```cd /home/judge
+wget -O judge_setup.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_setup.sh
+chmod +x judge_setup.sh
+./judge_setup.sh
+```
+
+  <br>
+	5. Once the script is complete after about 2min you should be able to borwse to http://rPI-IP:8080 form you PC, if your screen required drivers continue onto step 6
+  <br>
+6. install screen drivers
+
+
 # SA-rPI-Score Setup From Pre Build SD.
 
 1. Using the Raspberry Pi Imager write the Raspberry Pi OS (32-bit) to the SD card.
