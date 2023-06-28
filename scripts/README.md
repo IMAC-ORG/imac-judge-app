@@ -15,7 +15,6 @@ git clone https://github.com/waveshare/LCD-show.git
 cd LCD-show/
 chmod +x LCD35B-show-V2
 ./LCD35B-show-V2
-./LCD35B-show-V2 180
 ```
 <br>
 
