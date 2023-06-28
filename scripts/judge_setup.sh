@@ -178,27 +178,30 @@ sudo mkdir /var/opt/judge 																													> /dev/null 2>&1
 sudo mkdir /var/opt/judge/bin 																												> /dev/null 2>&1
 
 sudo wget -O /lib/systemd/system/judge.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.service 		> /dev/null 2>&1
-sudo wget -O /var/opt/judge/bin/judge.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.sh					> /dev/null 2>&1
-
-sudo wget -O /home/judge/judge_update.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_update.sh				> /dev/null 2>&1
-
+sudo wget -O /var/opt/judge/bin/judge.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.sh					      > /dev/null 2>&1
+sudo wget -O /home/judge/judge_update.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_update.sh				  > /dev/null 2>&1
 sudo wget -O /lib/systemd/system/kiosk.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.service			> /dev/null 2>&1
-sudo wget -O /var/opt/judge/bin/kiosk.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.sh					> /dev/null 2>&1
+sudo wget -O /var/opt/judge/bin/kiosk.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.sh					      > /dev/null 2>&1
+sudo wget -O /home/judge/imac.png https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/imac.png							          > /dev/null 2>&1
+sudo chmod +x /var/opt/judge/bin/judge.sh			> /dev/null 2>&1	
+sudo systemctl enable judge.service				    > /dev/null 2>&1
+sudo chmod +x /var/opt/judge/bin/kiosk.sh			> /dev/null 2>&1
+sudo systemctl enable kiosk.service				    > /dev/null 2>&1
+sudo ln -s /boot/settings.json /var/opt/judge/settings.json	> /dev/null 2>&1
 
-sudo wget -O /home/judge/imac.png https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/imac.png							> /dev/null 2>&1
 
 sudo chmod +x /var/opt/judge/bin/judge.sh						> /dev/null 2>&1	
-sudo systemctl enable judge.service								> /dev/null 2>&1
+sudo systemctl enable judge.service								  > /dev/null 2>&1
 sudo chmod +x /var/opt/judge/bin/kiosk.sh						> /dev/null 2>&1
-sudo systemctl enable kiosk.service								> /dev/null 2>&1
+sudo systemctl enable kiosk.service								  > /dev/null 2>&1
 sudo ln -s /boot/settings.json /var/opt/judge/settings.json		> /dev/null 2>&1
 
 
 echo -e "${Yellow}Creating Dummy Pilots"
-sudo mkdir /var/opt/judge/pilots								> /dev/null 2>&1
+sudo mkdir /var/opt/judge/pilots								    > /dev/null 2>&1
 sudo mkdir /var/opt/judge/pilots/scores							> /dev/null 2>&1
-sudo wget -O /var/opt/judge/comp.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/comp.json						> /dev/null 2>&1	 							
-sudo wget -O /var/opt/judge/pilots.dat https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/pilots.dat						> /dev/null 2>&1
+sudo wget -O /var/opt/judge/comp.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/comp.json						    > /dev/null 2>&1	 							
+sudo wget -O /var/opt/judge/pilots.dat https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/pilots.dat					  	> /dev/null 2>&1
 sudo wget -O /var/opt/judge/sequences.dat https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/sequences.dat				> /dev/null 2>&1
 sudo wget -O /var/opt/judge/pilots/scores/1.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/pilots/scores/1.json	> /dev/null 2>&1
 sudo wget -O /var/opt/judge/pilots/scores/2.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/pilots/scores/2.json > /dev/null 2>&1
@@ -207,5 +210,5 @@ sudo wget -O /var/opt/judge/pilots/scores/4.json https://raw.githubusercontent.c
 sudo wget -O /var/opt/judge/pilots/scores/5.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/pilots/scores/5.json > /dev/null 2>&1
 
 sudo chmod 777 -R /var/opt/judge								> /dev/null 2>&1
-sudo chmod 777 /home/judge/judge_update.sh						> /dev/null 2>&1
+sudo chmod 777 /home/judge/judge_update.sh			> /dev/null 2>&1
 sudo /home/judge/judge_update.sh								> /dev/null 2>&1
