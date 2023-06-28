@@ -46,8 +46,9 @@
             <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(1);" id="btnaddhalf">+1</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-1);" id="btnsetbreak">Break</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-2);" id="btnsetno">N/O</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="shortdescription();" id="btnspeak">speak</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();" id="btnnext">next</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="shortdescription(0);" id="btnspeak">speak</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="$('.carousel').carousel('prev');shortdescription(-1);" id="btnnext">prev</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();shortdescription(1);" id="btnnext">next</a>
         </div>
         <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item yellow black-text" href="#one!">
             <div class="row">
@@ -407,14 +408,12 @@
             //numpad 6
             if (e.which == 54) {
                 carouselNext();
-                caller_index = 1;
-                shortdescription(caller_index);
+                shortdescription(1);
             }
             //numpad 4
             if (e.which == 52) {
                 $('.carousel').carousel('prev');
-                caller_index = -1;
-                shortdescription(caller_index);
+                shortdescription(-1);
             }
             //numpad 0
             if (e.which == 48) {
