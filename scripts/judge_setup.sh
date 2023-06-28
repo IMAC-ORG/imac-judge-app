@@ -197,7 +197,4 @@ sudo ln -s /boot/settings.json /var/opt/judge/settings.json		> /dev/null 2>&1
 
 sudo chmod 777 -R /var/opt/judge								> /dev/null 2>&1
 
-sudo chmod 777 /home/judge/judge_update.sh											> /dev/null 2>&1
-
-wget -O /var/opt/judge/bin/judge.jar https://drive.google.com/file/d/1dkYaoU-6ueR7LCX1nh9Kpic7iX_rgmsH/view?usp=drive_link > /dev/null 2>&1
-sudo /home/judge_update.sh											> /dev/null 2>&1
+sudo chmod 777 /home/judge/judge_update.sh						> /dev/null 2>&1
