@@ -195,9 +195,16 @@ sudo ln -s /boot/settings.json /var/opt/judge/settings.json		> /dev/null 2>&1
 sudo chmod 777 -R /var/opt/judge								> /dev/null 2>&1
 
 echo -e "${Yellow}Creating Dummy Pilots"
-sudo mkdir /var/opt/judge/pilots
-sudo mkdir /var/opt/judge/pilots/scores
-w
+sudo mkdir /var/opt/judge/pilots								> /dev/null 2>&1
+sudo mkdir /var/opt/judge/pilots/scores							> /dev/null 2>&1
+sudo wget -O /var/opt/judge/comp.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/Audio-Patch-Update/scripts/data/comp.json	 							
+sudo wget -O /var/opt/judge/pilots.dat https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/Audio-Patch-Update/scripts/data/pilots.dat
+sudo wget -O /var/opt/judge/sequences.dat https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/Audio-Patch-Update/scripts/data/sequences.dat
+sudo wget -O /var/opt/judge/pilots/scores/1.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/Audio-Patch-Update/scripts/data/pilots/scores/1.json
+sudo wget -O /var/opt/judge/pilots/scores/2.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/Audio-Patch-Update/scripts/data/pilots/scores/2.json
+sudo wget -O /var/opt/judge/pilots/scores/3.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/Audio-Patch-Update/scripts/data/pilots/scores/3.json
+sudo wget -O /var/opt/judge/pilots/scores/4.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/Audio-Patch-Update/scripts/data/pilots/scores/4.json
+sudo wget -O /var/opt/judge/pilots/scores/5.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/Audio-Patch-Update/scripts/data/pilots/scores/5.json
 
 
 sudo chmod 777 /home/judge/judge_update.sh						> /dev/null 2>&1
