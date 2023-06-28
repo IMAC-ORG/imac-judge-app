@@ -1,3 +1,5 @@
+# SA rPI Bootstrap Script Install
+
 # SA-rPI-Score Setup From Pre Build SD.
 
 1. Using the Raspberry Pi Imager write the Raspberry Pi OS (32-bit) to the SD card.

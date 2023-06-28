@@ -57,7 +57,7 @@ echo "dtoverlay=disable-bt" 	| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 
 
 #Overclocking Pi to 800mhz
-echo -e "${Yellow}Overclocking Pi to 800mhz..."		> /dev/null 2>&1
+echo -e "${Yellow}Overclocking Pi to 800mhz..."					> /dev/null 2>&1
 sudo sed -i 's/#arm_freq=800/arm_freq=800/g' /boot/config.txt 	> /dev/null 2>&1
 
 
@@ -174,27 +174,31 @@ echo '}'										| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 
 
 echo -e "${Yellow}Setting up the Judge App..."
-sudo mkdir /var/opt/judge 																										> /dev/null 2>&1
-sudo mkdir /var/opt/judge/bin 																									> /dev/null 2>&1
+sudo mkdir /var/opt/judge 																													> /dev/null 2>&1
+sudo mkdir /var/opt/judge/bin 																												> /dev/null 2>&1
 
 sudo wget -O /lib/systemd/system/judge.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.service 		> /dev/null 2>&1
-sudo wget -O /var/opt/judge/bin/judge.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.sh							> /dev/null 2>&1
+sudo wget -O /var/opt/judge/bin/judge.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.sh					> /dev/null 2>&1
 
-sudo wget -O /home/judge/judge_update.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_update.sh			> /dev/null 2>&1
+sudo wget -O /home/judge/judge_update.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_update.sh				> /dev/null 2>&1
 
-sudo wget -O /lib/systemd/system/kiosk.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.service		> /dev/null 2>&1
+sudo wget -O /lib/systemd/system/kiosk.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.service			> /dev/null 2>&1
 sudo wget -O /var/opt/judge/bin/kiosk.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.sh					> /dev/null 2>&1
 
-sudo wget -O /home/judge/imac.png https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/imac.png
+sudo wget -O /home/judge/imac.png https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/imac.png							> /dev/null 2>&1
 
 sudo chmod +x /var/opt/judge/bin/judge.sh						> /dev/null 2>&1	
 sudo systemctl enable judge.service								> /dev/null 2>&1
-
 sudo chmod +x /var/opt/judge/bin/kiosk.sh						> /dev/null 2>&1
 sudo systemctl enable kiosk.service								> /dev/null 2>&1
-
 sudo ln -s /boot/settings.json /var/opt/judge/settings.json		> /dev/null 2>&1
-
 sudo chmod 777 -R /var/opt/judge								> /dev/null 2>&1
 
+echo -e "${Yellow}Creating Dummy Pilots"
+sudo mkdir /var/opt/judge/pilots
+sudo mkdir /var/opt/judge/pilots/scores
+w
+
+
 sudo chmod 777 /home/judge/judge_update.sh						> /dev/null 2>&1
+sudo /home/judge/judge_update.sh								> /dev/null 2>&1
