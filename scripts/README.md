@@ -8,6 +8,7 @@
    <br>
 3. Some screens require drivers to work, if your sreen needs this then install it now. Installing at the end will overwrite the gpio key bindings needs for the buttons to work, if you dont't require screen drivers skip to #5
 <br>
+
 4. These screen installation instructions are for WaveShare screens, the example below is for for the 3.5" IPS v2 screen.
 ```
 git clone https://github.com/waveshare/LCD-show.git
