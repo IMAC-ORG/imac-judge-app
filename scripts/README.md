@@ -1,25 +1,38 @@
 # SA rPI Bootstrap Script Install
+
 1. Using the Raspberry Pi Imager available from the Raspberry site write the Raspberry Pi OS (32-bit) to the SD card. Configure the relevant WiFi details, enable SSH and setup the user name judge (required) and password
 	- username : judge
 	- password : <*password*>
    <br>
-2. Once complete insert the SD in to the rPI and boot. THe inital boot will take some time as the system will expand the SD card's file system and configure the user and wifi details. 
+2. Once complete insert the SD in to the rPI and boot. The initial boot will take some time as the system will expand the SD card's file system and configure the user and wifi details. 
    <br>
-3. Download latest judge.jar into /home/judge from here  ( until we have it in the repo )
-https://drive.google.com/file/d/1dkYaoU-6ueR7LCX1nh9Kpic7iX_rgmsH/view?usp=sharing
-   <br>
-4. Now run the following commands
-```cd /home/judge
+3. Some screens require drivers to work, if your sreen needs this then install it now. Installing at the end will overwrite the gpio key bindings needs for the buttons to work, if you dont't require screen drivers skip to #5
+<br>
+4. These screen installation instructions are for WaveShare screens, the example below is for for the 3.5" IPS v2 screen.
+```
+git clone https://github.com/waveshare/LCD-show.git
+cd LCD-show/
+chmod +x LCD35B-show-V2
+./LCD35B-show-V2
+./LCD35B-show-V2 180
+```
+<br>
+
+5. Download latest judge.jar into /home/judge from here  ( until we have it in the repo )
+https://drive.google.com/file/d/14jn4Pf4TS9QVzBtxkqzQwLeGzqiGQuSc/view?usp=sharing
+<br><br>
+6. Now run the following commands
+```
+cd /home/judge
 wget -O judge_setup.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_setup.sh
 chmod +x judge_setup.sh
 ./judge_setup.sh
 ```
+<br>
 
-  <br>
-	5. Once the script is complete after about 2min you should be able to borwse to http://rPI-IP:8080 form you PC, if your screen required drivers continue onto step 6
-  <br>
-6. install screen drivers
-
+7. Once the script is complete after about 2min you should be able to browse to **http://rPI-IP:8080** form you PC. Or if your screen is connected you should see the Judge-App load after a short while.
+<br>
+<br>
 
 # SA-rPI-Score Setup From Pre Build SD.
 
