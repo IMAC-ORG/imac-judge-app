@@ -341,18 +341,18 @@
             if (currentScore == -1) {
                 $(score_id).text('BREAK');
                 textToSpeechCustomMessage('BREAK');
-                carouselNext();
+                //carouselNext();
             }
             if (currentScore == -2) {
                 $(score_id).text('N/O');
                 textToSpeechCustomMessage('Not Observed');
-                carouselNext();
+                //carouselNext();
             }
             if (currentScore >= 0) {
                 $(score_id).text(currentScore);
                 textToSpeechCustomMessage(currentScore);
                 if (currentScore == 0) {
-                    carouselNext();
+                    //carouselNext();
                 }
             }
             console.log(JSON.stringify(scores));
@@ -418,7 +418,6 @@
             //numpad 0
             if (e.which == 48) {
                 shortdescription(0);
-                
             }
         });
         /*]]>*/
