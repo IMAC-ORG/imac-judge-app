@@ -18,10 +18,7 @@ chmod +x LCD35B-show-V2
 ```
 <br>
 
-5. Download latest judge.jar into /home/judge from here  ( until we have it in the repo )
-https://drive.google.com/file/d/14jn4Pf4TS9QVzBtxkqzQwLeGzqiGQuSc/view?usp=sharing
-<br><br>
-6. Now run the following commands
+5. Now run the following commands
 ```
 cd /home/judge
 wget -O judge_setup.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_setup.sh
@@ -30,7 +27,7 @@ chmod +x judge_setup.sh
 ```
 <br>
 
-7. Once the script is complete after about 2min you should be able to browse to **http://rPI-IP:8080** form you PC. Or if your screen is connected you should see the Judge-App load after a short while.
+6. Once the script is complete after about 2min you should be able to browse to **http://rPI-IP:8080** form you PC. Or if your screen is connected you should see the Judge-App load after a short while.
 <br>
 <br>
 
