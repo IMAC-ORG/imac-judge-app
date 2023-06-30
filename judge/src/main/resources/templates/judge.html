@@ -46,9 +46,15 @@
             <a class="btn waves-effect white grey-text darken-text-2" onclick="addScore(1);" id="btnaddhalf">+1</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-1);" id="btnsetbreak">Break</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-2);" id="btnsetno">N/O</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="longDescription();" id="btnspeak">speak</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="$('.carousel').carousel('prev');audiolongd.pause();audiolongd.currentTime = 0;shortdescription(-1);setLongDescription(-1);" id="btnnext">prev</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();audiolongd.pause();audiolongd.currentTime = 0;shortdescription(1);setLongDescription(1);" id="btnnext">next</a>
+<!-- 
             <a class="btn waves-effect white grey-text darken-text-2" onclick="shortdescription(0);" id="btnspeak">speak</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="$('.carousel').carousel('prev');shortdescription(-1);" id="btnnext">prev</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();shortdescription(1);" id="btnnext">next</a>
+-->
+
         </div>
         <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item yellow black-text" href="#one!">
             <div class="row">
@@ -169,6 +175,19 @@
             audio.play();
         }
 
+        function longDescription() {
+            if (audiolongd.paused) {
+                audiolongd.play();
+            } else {
+                audiolongd.pause();
+            }
+        }  
+        
+        function setLongDescription(caller_index) {
+            var audiolongurl = '/man/en/' + roundType + '/' + pilot_class + '/f' + ( score_index + caller_index ) + '.wav';
+            audiolongd = new Audio(audiolongurl.toLowerCase());
+        }
+
         function NowJudgingMessage() {
             audio.pause();
             audio.currentTime = 0;
@@ -176,8 +195,6 @@
             audio = new Audio(audio_url.toLowerCase());
             audio.play();
         }
-
-        
 
         function isNumber(n) {
             return Number(n) === n;
@@ -243,7 +260,7 @@
         car.height(windowHeight);
         // textToSpeechCustomMessage(welcome_text);
         NowJudgingMessage();
-
+        setLongDescription(0);
 
         function carouselNext() {
             $('.carousel').carousel('next');
@@ -408,16 +425,23 @@
             //numpad 6
             if (e.which == 54) {
                 carouselNext();
+                audiolongd.pause();
+                audiolongd.currentTime = 0;
                 shortdescription(1);
+                setLongDescription(1);
             }
             //numpad 4
             if (e.which == 52) {
                 $('.carousel').carousel('prev');
+                audiolongd.pause();
+                audiolongd.currentTime = 0;
                 shortdescription(-1);
+                setLongDescription(-1);
             }
             //numpad 0
             if (e.which == 48) {
-                shortdescription(0);
+                //shortdescription(0);
+                longDescription();
             }
         });
         /*]]>*/
