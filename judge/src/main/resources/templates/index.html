@@ -43,8 +43,8 @@
       <h1 th:text="${pilot.name}" class="pilot_name">First Panel</h1>
       <h2 th:text="${pilot.getClassString()}" class="pilot_class">First Panel</h2>
       <h2 th:if="${pilotScores[pilot.primary_id].isActive}" class="pilot_round">Round: <span
-          th:text="${pilotScores[pilot.primary_id].activeRound}" class="pilot_round"></span> Sequence: <span
-          th:text="${pilotScores[pilot.primary_id].activeSequence}" class="pilot_round"></span></h2>
+          th:text="${pilotScores[pilot.primary_id].activeRound}" class="pilot_round">
+          <!--</span> Sequence: <span th:text="${pilotScores[pilot.primary_id].activeSequence}" class="pilot_round"></span> --></h2>
       <h2 th:unless="${pilotScores[pilot.primary_id].isActive}" class="pilot_round"> All Rounds Completed!</h2>
       <a class="pilot_round" th:unless="${pilotScores[pilot.primary_id].isActive}"> <i
           class="material-icons center black-text">done</i> </a>
