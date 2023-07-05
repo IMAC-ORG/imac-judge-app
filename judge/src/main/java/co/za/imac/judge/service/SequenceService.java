@@ -65,8 +65,7 @@ public class SequenceService {
 
         Document doc = db.parse( new File(SEQUENCES_DAT_PATH));
         doc.getDocumentElement().normalize();
-        System.out.println("Root Element :" + doc.getDocumentElement().getNodeName());
-        System.out.println("------");
+        System.out.println("Sequence file root Element :" + doc.getDocumentElement().getNodeName());
 
         NodeList list = doc.getElementsByTagName("sequences");
         NodeList newList = (NodeList) list.item(0);
@@ -98,7 +97,7 @@ public class SequenceService {
                         int k_factor = Integer
                                 .parseInt(figureElement.getElementsByTagName("k_factor").item(0).getTextContent());
                         String scoring = figureElement.getElementsByTagName("scoring").item(0).getTextContent();
-                        figures.add(new FigureDTO(k_factor, description, scoring));
+                        figures.add(new FigureDTO((temp2+1), k_factor, description, scoring));
                     }
                 }
                 String key = _class.toUpperCase().trim() + ":" + type.toUpperCase().trim();

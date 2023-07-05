@@ -1,12 +1,58 @@
 package co.za.imac.judge.dto;
 
 public class CompDTO {
-    
-    public int rounds;
-    public int sequences;
-    public int unknown_sequences = 0;
-    public int judge_id = 1;
 
+    /**********
+     *  This is the comp preferences object.
+     *
+     *  Here's some of the things we should store here.
+     *   - Comp ID.
+     *   - Comp Name.
+     *   - Scoring Mode:
+     *         - global         - as originally coded.   Just score all pilots together regardless of class.
+     *         - round          - We choose a round from the list and only those pilots are available for scoring.
+     *                            Round number and round type are supplied.
+     *   - More to come...
+     */
+
+    private int comp_id;
+    private String comp_name;
+    private String score_mode;
+    private int sequences;
+    private int unknown_sequences = 0;
+    private int judge_id = 1;
+
+    public CompDTO() {
+        this.comp_id = 0;
+        this.score_mode = null;
+        this.comp_name = null;
+    }
+
+    public CompDTO(String score_mode, int sequences, int unknown_sequences) {
+        this();
+        this.score_mode = score_mode;
+        this.sequences = sequences;
+        this.unknown_sequences = unknown_sequences;
+    }
+
+
+    public int getComp_id() {
+        return comp_id;
+    }
+
+    public CompDTO setComp_id(int comp_id) {
+        this.comp_id = comp_id;
+        return this;
+    }
+
+    public String getComp_name() {
+        return comp_name;
+    }
+    public void setComp_name(String comp_name) { this.comp_name = comp_name; }
+    public String getScore_mode() {
+        return score_mode;
+    }
+    public void setScore_mode(String score_mode) { this.score_mode = score_mode; }
     public int getJudge_id() {
         return judge_id;
     }
@@ -18,17 +64,6 @@ public class CompDTO {
     }
     public void setUnknown_sequences(int unknown_sequences) {
         this.unknown_sequences = unknown_sequences;
-    }
-    public CompDTO(int rounds, int sequences, int unknown_sequences) {
-        this.rounds = rounds;
-        this.sequences = sequences;
-        this.unknown_sequences = unknown_sequences;
-    }
-    public int getRounds() {
-        return rounds;
-    }
-    public void setRounds(int rounds) {
-        this.rounds = rounds;
     }
     public int getSequences() {
         return sequences;
