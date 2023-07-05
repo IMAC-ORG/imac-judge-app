@@ -18,12 +18,23 @@ public class SettingService {
 
     private static final Logger logger =
             LoggerFactory.getLogger(SettingService.class);
+
     private final String SETTINGS_FILE_NAME = SettingUtils.getApplicationConfigPath() + "/settings.json";
+    private boolean firstRun = true;
 
     public boolean isSettings() {
         File targetFile = new File(SETTINGS_FILE_NAME);
         logger.debug("Exists: " + SETTINGS_FILE_NAME + " - " + targetFile.exists());
         return targetFile.exists();
+    }
+
+    public boolean isFirstRun() {
+        return firstRun;
+    }
+
+    public SettingService setFirstRun(boolean firstRun) {
+        this.firstRun = firstRun;
+        return this;
     }
 
     public SettingDTO updateSettings(SettingDTO settingDTO) throws IOException {

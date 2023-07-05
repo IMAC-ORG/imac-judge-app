@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
+  <title>New Round</title>
+
+  <!-- CSS  -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+  <link href="materialize/css/nouislider.css" type="text/css" rel="stylesheet" />
+  <style>
+
+    .row {
+      margin-bottom: 5px;
+      margin-top: 5px;
+    }
+
+    .heading {
+      font-size: calc(2vw + 3vh) !important;
+      margin-bottom: 10px;
+      margin-top: 5px;
+    }
+
+    .dropdown-trigger,
+    .dropdown-content li>span,
+    .input-field label input,
+    label.lever {
+      color: #000000;
+      font-size: calc(1vw + 2vh) !important;
+    }
+
+    .select-dropdown
+
+    .switch label input[type=checkbox]:checked+.lever:after {
+      background-color: #26a69a;
+    }
+    .switch label input[type=checkbox]+.lever:after {
+      background-color: #26a69a;
+    }
+
+    @font-face {
+      font-family: digitalFont;
+      src: url(font/digital-7.ttf);
+    }
+  </style>
+</head>
+
+<body class="yellow">
+<div class="section no-pad-bot yellow" id="index-banner">
+  <div class="container yellow black-text">
+    <div class="row">
+      <div class="col s12"><h2 class="heading">New Round</h2></div>
+    </div>
+    <div class="row center">
+      <div class="input-field col s4">
+        <select id="class_sel" class="schedFilter">
+          <option value="" disabled selected>Choose Class</option>
+          <option value="BASIC">Basic</option>
+          <option value="SPORTSMAN">Sportsman</option>
+          <option value="INTERMEDIATE">Intermediate</option>
+          <option value="ADVANCED">Advanced</option>
+          <option value="UNLIMITED">Unlimited</option>
+        </select>
+        <label class="black-text">Class</label>
+      </div>
+      <div class="input-field col s4">
+        <select id="type_sel" class="schedFilter">
+          <option value="" disabled selected>Choose Type</option>
+          <option value="KNOWN">Known</option>
+          <option value="UNKNOWN">Unknown</option>
+          <option value="FREESTYLE">Freestyle</option>
+        </select>
+        <label class="black-text">Round Type</label>
+      </div>
+    </div>
+    <div class="row center">
+      <div class="input-field col s12">
+        <select id="sched_sel" disabled>
+          <option value="" disabled selected>Select Type and/or Class</option>
+        </select>
+        <label class="black-text">Schedule</label>
+      </div>
+    </div>
+    <div class="row center">
+      <div class="col s12 switch center">
+        <label class="black-text">Sequence Count</label><br>
+        <label class="light black-text lever">
+          Single
+          <input type="checkbox" id="seqs">
+          <span class="lever black"></span>
+          Double
+        </label>
+      </div>
+    </div>
+    <div class="row center">
+      <a href="#" id="createRound" class="waves-effect waves-light btn orange darken-1 pulse">Save Round</a>
+    </div>
+    <br>
+  </div>
+</div>
+<div class="fixed-action-btn">
+  <a class="btn-floating btn-large red">
+    <i class="large material-icons">menu</i>
+  </a>
+  <ul>
+    <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">home</i></a></li>
+  </ul>
+</div>
+
+
+<!--  Scripts-->
+<script src="jquery-3.6.4.min.js"></script>
+<script src="materialize/js/materialize.js"></script>
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  M.AutoInit();
+
+  const rounds = /*[[${rounds}]]*/ ;
+  const schedules = /*[[${schedules}]]*/ ;
+
+  $('.schedFilter').change(function () {
+    if (this.id === "type_sel" && $('#type_sel').val() === 'FREESTYLE') {
+      $('#class_sel').attr('disabled', true);
+    } else {
+      $('#class_sel').attr('disabled', false);
+    }
+    M.FormSelect.init(document.querySelectorAll('#class_sel'));
+
+    $('#sched_sel').attr('disabled',true);
+    $('#sched_sel').find('option').remove().end()
+            .append('<option value="" disabled selected>Select Type and/or Class</option>');
+    M.FormSelect.init(document.querySelectorAll('#sched_sel'));
+
+    if ( $('#type_sel').val() === 'FREESTYLE' || ($('#type_sel').val() !== null && $('#class_sel').val() !== null) ) {
+      // User selected freestyle type or a class+type.
+      buildScheduleSelect($('#type_sel').val(), $('#class_sel').val());
+    }
+  });
+
+  function buildScheduleSelect(typeSel, classSel) {
+    //var typeSel = $('#type_sel').val();
+    //var classSel = $('#class_sel').val()
+    console.log("Building Schedule Selection for " + classSel + " " + typeSel);
+
+    $('#sched_sel').attr('disabled',false);
+    $('#sched_sel').find('option').remove().end();
+
+    // Iterate through schedules and just add the right ones.
+    for (let schedIndex in schedules) {
+      //console.log(schedIndex + ": "+ schedules[schedIndex]["comp_class"] + " - " + schedules[schedIndex]["type"]);
+      if (typeSel === "FREESTYLE" && schedules[schedIndex]["type"] === "FREESTYLE") {
+        addOptionToSchedSel($('#sched_sel'), schedules[schedIndex], schedIndex)
+        //$('#sched_sel').append('<option value="' + schedIndex + '">' + schedules[schedIndex]["comp_class"] + ' - ' + schedules[schedIndex]["type"] + '(' + schedules[schedIndex]["description"] + ')' + '</option>');
+      } else if ( (typeSel === schedules[schedIndex]["type"]) && (classSel === schedules[schedIndex]["comp_class"]) ) {
+        addOptionToSchedSel($('#sched_sel'), schedules[schedIndex], schedIndex)
+      }
+    }
+    M.FormSelect.init(document.querySelectorAll('#sched_sel'));
+  }
+
+  function addOptionToSchedSel(sel, schedule, schedIndex) {
+    if (schedule["description"] === "") {
+      sel.append('<option value="' + schedIndex + '">' + schedule["comp_class"] + ' - ' + schedule["type"] + '</option>');
+    } else {
+      sel.append('<option value="' + schedIndex + '">' + schedule["description"] + '</option>');
+    }
+  }
+
+
+  $("#createRound").click(function () {
+
+    var seqs = $("#seqs").attr('checked') ? 2 : 1;
+
+    $.ajax({
+      type: "POST",
+      url: "/api/rounds",
+      // The key needs to match your method's input parameter (case-sensitive).
+      data: JSON.stringify(
+        {
+          type: $("#type_sel").val(),
+          comp_class: $("#class_sel").val(),
+          sched_id: $("#sched_sel").val(),
+          sched_desc: $("#sched_sel option:selected").text(),
+          seqs: seqs
+        }
+      ),
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      success: function (data) {
+        console.log(data.result + ":" + data.message);
+        newRound = JSON.parse(data.new_round);
+        M.toast({ html: 'Round ' + newRound.round_id + " created."})
+        location.replace("/rounds");
+      },
+      error: function (err) {
+        try {
+          // If we were able to return a proper JSON Object, get the message from there.
+          M.toast({ html: 'Add round error: ' + JSON.parse(err.responseText).message})
+        } catch {
+          // Otherwise just use the default jquery way...
+          console.log("There was an error in the ajax operation: " + err.statusText);
+          console.log("ResponseText: " + err.responseText);
+          M.toast({ html: 'Add round error: ' + err.responseText.substring(0, 80)})
+        }
+      },
+      complete: function() {}
+    });
+  });
+
+  /*]]>*/
+</script>
+</body>
+</html>

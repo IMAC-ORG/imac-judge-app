@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
+  <title>Pilot Index</title>
+  <style>
+    .carousel {
+      height: 100vh;
+    }
+
+    .pilot_class {
+      font-size: calc(6vw + 3vh) !important;
+    }
+
+    .pilot_name {
+      font-size: calc(8vw + 3vh) !important;
+    }
+
+    .pilot_round {
+      font-size: calc(4vw + 3vh) !important;
+    }
+
+    @font-face {
+      font-family: digitalFont;
+      src: url(font/digital-7.ttf);
+    }
+  </style>
+  <!-- CSS  -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+</head>
+
+<body style="height: 100vh !important;" class="yellow">
+
+
+  <div class="carousel carousel-slider center">
+
+
+    <div th:each="pilot,iterStat : ${pilots}" class="carousel-item yellow black-text"
+      th:href="@{/judge(pilot_id=${pilot.primary_id})}">
+      <h1 th:text="${pilot.name}" class="pilot_name">First Panel</h1>
+      <h2 th:text="${pilot.getClassString()}" class="pilot_class">First Panel</h2>
+      <h2 th:if="${pilotScores[pilot.primary_id].isActive}" class="pilot_round">Round: <span
+          th:text="${pilotScores[pilot.primary_id].activeRound}" class="pilot_round">
+          <!--</span> Sequence: <span th:text="${pilotScores[pilot.primary_id].activeSequence}" class="pilot_round"></span> --></h2>
+      <h2 th:unless="${pilotScores[pilot.primary_id].isActive}" class="pilot_round"> All Rounds Completed!</h2>
+      <a class="pilot_round" th:unless="${pilotScores[pilot.primary_id].isActive}"> <i
+          class="material-icons center black-text">done</i> </a>
+      <a th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences == 0}"
+        class="waves-effect waves-light btn orange darken-1 pulse"
+        th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='KNOWN')}"><i
+          class="material-icons right">flight_takeoff</i>Judge</a>
+
+      <a th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence gt 1 }"
+        class="waves-effect waves-light btn orange darken-1 pulse"
+        th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType=${pilotScores[pilot.primary_id].activeRoundType})}"><i
+          class="material-icons right">flight_takeoff</i>Judge</a>
+
+      <a th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence == 1}"
+        class="waves-effect waves-light btn modal-trigger orange darken-1 pulse" th:href="'#modal'+ ${pilot.primary_id}"><i
+          class="material-icons right">flight_takeoff</i>Judge</a>
+      <!-- Modal Structure -->
+      <div
+        th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence == 1 }"
+        th:id="'modal'+ ${pilot.primary_id}" class="modal">
+        <div class="modal-content">
+          <h5 class="black-text">SELECT ROUND TYPE</h5>
+          <br>
+          <div class="row">
+            <div class="col s6 m3"> <a class="" th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='KNOWN')}"><i
+                  class="medium material-icons center">visibility</i></a>
+              <p class="black-text">KNOWN</p>
+            </div>
+            <div class="col s6 m3"> <a class=""
+                th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='UNKNOWN')}"><i
+                  class="medium material-icons center">visibility_off</i></a>
+              <p class="black-text">UNKNOWN</p>
+            </div>
+          </div>
+        </div>
+       <!-- <div class="modal-footer">
+          <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+        </div>-->
+      </div>
+    </div>
+  </div>
+
+
+  <div class="fixed-action-btn">
+    <a class="btn-floating btn-large red">
+      <i class="large material-icons">menu</i>
+    </a>
+    <ul>
+      <li><a class="btn-floating btn-large purple" onclick="syncPilots();"><i class="material-icons">sync</i></a></li>
+      <li><a class="btn-floating btn-large light-blue darken-1" onclick="syncScores();"><i class="material-icons">publish</i></a></li>
+      <li><a class="btn-floating btn-large green" href="/newcomp"><i class="material-icons">edit</i></a></li>
+    </ul>
+  </div>
+
+
+
+  <!--  Scripts-->
+  <script src="jquery-3.6.4.min.js"></script>
+  <script src="materialize/js/materialize.js"></script>
+  <script>
+    // Or with jQuery
+    var windowHeight = window.innerHeight;
+    $('.carousel.carousel-slider').carousel({
+      fullWidth: true,
+      indicators: false
+    }).height(windowHeight);
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var elems = document.querySelectorAll('.modal');
+      var instances = M.Modal.init(elems);
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+      var elems = document.querySelectorAll('.fixed-action-btn');
+      var instances = M.FloatingActionButton.init(elems, {
+        hoverEnabled: false
+      });
+    });
+
+    function carouselNext() {
+      $('.carousel').carousel('next');
+    }
+
+
+    function syncPilots() {
+      $.ajax({
+        url: "/api/pilots/sync",
+        success: function (data) {
+          M.toast({ html: 'Pilot Sync Success' })
+          window.location.replace("/");
+        },
+        failure: function (errMsg) {
+          M.toast({ html: 'Pilot Sync Error' })
+        }
+      });
+    }
+
+    function syncScores() {
+      $.ajax({
+        url: "/api/scores/sync",
+        success: function (data) {
+          M.toast({ html: 'Scores Sync Success' })
+        },
+        failure: function (errMsg) {
+          M.toast({ html: 'Scores Sync Error' })
+        }
+      });
+    }
+
+      //add button listeners
+      $(document).on("keypress", function (e) {
+            //numpad 6
+            if (e.which == 54) {
+                carouselNext();
+            }
+            //numpad 4
+            if (e.which == 52) {
+                $('.carousel').carousel('prev');
+            }
+            // numpad 8
+            //if (e.which == 56) {
+            //    syncPilots();
+            //}
+            //numpad 9
+            //if (e.which == 57) {
+            //    syncScores();
+            //}
+        });
+  </script>
+
+</body>
+
+</html>
