@@ -49,10 +49,11 @@ public class RootController {
         }
         model.addAttribute("pilotScores", pilotScores);
         model.addAttribute("comp", compService.getComp());
+        model.addAttribute("dirflip", false);
 		return "index";
 	}
     @GetMapping("/judge")
-	public String judge(@RequestParam(name="pilot_id", required=true) int pilot_id,@RequestParam(name="roundType", required=true) String roundType, Model model) throws IOException, ParserConfigurationException, SAXException {
+	public String judge(@RequestParam(name="pilot_id", required=true) int pilot_id, @RequestParam(name="roundType", required=true) String roundType, @RequestParam(name="dirflip", required=true, defaultValue = "false") Boolean dirflip, Model model) throws IOException, ParserConfigurationException, SAXException {
 
         System.out.println("Is there a comp? : " + compService.isCurrentComp());
         if(!compService.isCurrentComp()){
@@ -77,6 +78,7 @@ public class RootController {
         String sequencesJson =  new Gson().toJson(sequences);
         model.addAttribute("sequencesjson",sequencesJson);
         System.out.println(new Gson().toJson(sequences));
+        model.addAttribute("dirletter", (dirflip==true ? "C" : "B"));
 		return "judge";
 	}
     

@@ -68,17 +68,33 @@
         <div class="modal-content">
           <h5 class="black-text">SELECT ROUND TYPE</h5>
           <br>
+          <form th:id="'judgeknown'+${pilot.primary_id}" action="/judge" method="get">
           <div class="row">
-            <div class="col s6 m3"> <a class="" th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='KNOWN')}"><i
-                  class="medium material-icons center">visibility</i></a>
-              <p class="black-text">KNOWN</p>
-            </div>
-            <div class="col s6 m3"> <a class=""
-                th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='UNKNOWN')}"><i
+              <input type="hidden" name="pilot_id" th:value="${pilot.primary_id}"/>
+              <input type="hidden" name="roundType" value="KNOWN"/>
+              <input type="hidden" th:id="'dirflip'+${pilot.primary_id}" name="dirflip" value="false" />
+
+              <div class="col s6"> <a class="" th:href="'javascript:$(\'#judgeknown'+${pilot.primary_id}+'\').submit()'" ><i
+                    class="medium material-icons center">visibility</i></a>
+                <p class="black-text">KNOWN</p>
+              </div>
+
+            <div class="col s6"> <a class=""
+                th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='UNKNOWN', dirflip=false)}"><i
                   class="medium material-icons center">visibility_off</i></a>
               <p class="black-text">UNKNOWN</p>
             </div>
           </div>
+          <div class="switch center">
+            <label class="black-text" style="font-size: 20pt" th:for="'cb_dirflip'+${pilot.primary_id}">
+              Left to Right (B)
+              <input type="checkbox" th:id="'cb_dirflip'+${pilot.primary_id}" th:onchange="'javascript:$(\'#dirflip'+${pilot.primary_id}+'\').val(this.checked)'"/>
+              <span class="lever"></span>
+              (C) Right to Left
+            </label>
+          </div>
+        </form>
+
         </div>
        <!-- <div class="modal-footer">
           <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
