@@ -61,9 +61,11 @@
                 <div class="col s4">
                 <p class="" style="line-height: 50%; font-weight: 500;"><span th:text="${pilot.name}"></span></p>
                 <p class="" style="line-height: 50%; font-weight: 500;"><span th:text="${pilot_class}"></span></p>
-                <p class="" style="line-height: 50%; font-weight: 500;">Round <span 
-                        th:text="${pilotScores.activeRound}"></span> Seq <span
-                        th:text="${pilotScores.activeSequence}"></span> </p>
+                <p class="" style="line-height: 50%; font-weight: 500;">
+                    Round <span th:text="${pilotScores.activeRound}"></span> 
+                    Seq <span th:text="${pilotScores.activeSequence}"></span> 
+                    <span th:if="${roundType eq 'KNOWN'}">Dir <span th:text="${dirletter}"></span></span>
+                </p>
                 <p class="" style="line-height: 50%; font-weight: 500;">FIG <span th:text="${iterStat.index + 1}"></span>
                     <span th:text="${roundType}"></span>
                 </p>
@@ -75,7 +77,7 @@
                 <div class="col s8">
                 <br>
                  <img id="my-svg" style="width:60vw; height:75vh;" class="figure-wrapper"
-                    th:src="@{/man/en/{roundType}/{class}/{index}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index}, roundType=${roundType.toLowerCase()})}">
+                    th:src="@{/man/en/{roundType}/{class}/{index}{dirletter}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index}, roundType=${roundType.toLowerCase()}, dirletter=${iterStat.index<10 ? (dirletter=='C'?'C':'') : ''})}">
                 </div>
             </div>
             <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
