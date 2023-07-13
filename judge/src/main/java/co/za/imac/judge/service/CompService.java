@@ -94,7 +94,7 @@ public class CompService {
         File targetFile = new File(COMP_FILE_NAME);
         if (targetFile.exists())
             try {
-                compDTO = this.getCompFromFile();
+                this.getCompFromFile();
                 return true;
             } catch (IOException e) {
                 try {
@@ -110,6 +110,14 @@ public class CompService {
     public CompDTO createCompFromRequest(CompDTO compDTO) throws IOException, SAXException, ParserConfigurationException {
         // We have a new comp from the API.
 
+        this.compDTO = compDTO;
+        this.saveCompToFile();
+        return this.compDTO;
+    }
+
+    public boolean saveCompToFile() throws IOException, SAXException, ParserConfigurationException {
+        // We have a new comp from the API.
+
         if (compDTO.getComp_id() == 0)
             enrichCompWithCompInfoFromScore(compDTO);  // Get the comp name and event ID from score! if we can...
         File newFile = new File(COMP_FILE_NAME);
@@ -120,9 +128,8 @@ public class CompService {
         outputStream.write(strToBytes);
         outputStream.close();
 
-        this.compDTO = compDTO;
+        return true;
 
-        return compDTO;
     }
 
     public CompDTO getComp() {
@@ -132,16 +139,32 @@ public class CompService {
     public CompDTO getCompFromFile() throws IOException {
         FileInputStream inputStream = new FileInputStream(COMP_FILE_NAME);
         StringBuilder resultStringBuilder = new StringBuilder();
-        CompDTO newCompDTO = null;
+
         try (BufferedReader br
           = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = br.readLine()) != null) {
                 resultStringBuilder.append(line).append("\n");
             }
-            newCompDTO = new Gson().fromJson(resultStringBuilder.toString(),CompDTO.class);
-            logger.info("Loaded comp " + newCompDTO.getComp_name() + " (" + newCompDTO.getComp_id() + ") from file.");
-            enrichCompWithCompInfoFromScore(newCompDTO);
+            this.compDTO = new Gson().fromJson(resultStringBuilder.toString(),CompDTO.class);
+
+            // Double check there's no null strings.
+            boolean saveFile = false;
+            if (this.compDTO.getComp_name() == null) {
+                this.compDTO.setComp_name("Untitled Comp");
+                saveFile = true;
+            }
+
+            if (this.compDTO.getScore_mode() == null) {
+                this.compDTO.setScore_mode("byRound");
+                saveFile = true;
+            }
+
+            logger.info("Loaded comp " + this.compDTO.getComp_name() + " (" + this.compDTO.getComp_id() + ") from file.");
+            enrichCompWithCompInfoFromScore(this.compDTO);
+            if (saveFile)
+                this.saveCompToFile();
+
         } catch( Exception e) {
             try {
                 logger.error("There was an error loading the comp data..");
@@ -153,7 +176,7 @@ public class CompService {
             }
         }
 
-        return newCompDTO;
+        return this.compDTO;
     }
 
     public void enrichCompWithCompInfoFromScore(CompDTO compDTO)
@@ -182,7 +205,7 @@ public class CompService {
             compDTO.setComp_id(Integer.parseInt(e.getElementsByTagName("id").item(0).getTextContent()));
         } catch (FileNotFoundException e) {
             logger.warn("Could not get comp info.  Giving generic names for now.");
-            compDTO.setComp_name("Unknown Comp");
+            compDTO.setComp_name("Untitled Comp");
             compDTO.setComp_id(0);
         }
         roundsService.setupRounds(compDTO.getComp_id());
