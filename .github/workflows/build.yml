@@ -49,6 +49,8 @@ jobs:
       uses: Roang-zero1/github-create-release-action@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        created_tag: ${{ steps.get-version.outputs.version }}
     - name: Upload release artifacts
       uses: Roang-zero1/github-upload-release-artifacts-action@v2
       with:
