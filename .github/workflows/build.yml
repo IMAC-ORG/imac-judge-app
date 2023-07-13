@@ -38,3 +38,9 @@ jobs:
       with:
         pom: ./judge/pom.xml
     - run: echo ${{ steps.get-version.outputs.version }}
+    - name: Create Tag
+      uses: negz/create-tag@v1
+      with:
+        version: ${{ steps.get-version.outputs.version }}
+        message: "Testing automation"
+        token: ${{ secrets.GITHUB_TOKEN }}
