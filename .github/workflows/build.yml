@@ -29,6 +29,7 @@ jobs:
     - run: |
           cd judge
           mvn clean package
+    - run: ls judge/target/
     - run: mkdir staging && cp judge/target/*.jar staging
     - uses: actions/upload-artifact@v3
       with:
