@@ -35,3 +35,7 @@ jobs:
       with:
         name: Package
         path: staging
+    - id: bump
+      uses: zwaldowski/match-label-action@v4
+      with:
+        allowed: major,minor,patch
