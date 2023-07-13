@@ -61,7 +61,7 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: judge/target/judge-${{ steps.get-version.outputs.version }}.jar
           asset_name: judge-${{ steps.get-version.outputs.version }}.jar
-          asset_content_type: application/java
+          asset_content_type: application/zip
     - name: Upload release artifacts
       uses: Roang-zero1/github-upload-release-artifacts-action@v3.0.0
       with:
