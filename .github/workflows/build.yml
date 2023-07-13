@@ -35,7 +35,8 @@ jobs:
       with:
         name: Package
         path: staging
-    - id: bump
-      uses: zwaldowski/match-label-action@v4
+    - id: get-version
+      uses: jactions/maven-version@v1
       with:
-        allowed: major,minor,patch
+        pom: ./judge/pom.xml
+    - run: echo ${{ steps.get-version.outputs.version }}
