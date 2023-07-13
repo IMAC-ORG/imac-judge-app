@@ -17,9 +17,7 @@ on:
   workflow_dispatch:
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-java@v3
@@ -36,7 +34,7 @@ jobs:
         name: Package
         path: staging
     - id: get-version
-      uses: jactions/maven-version@v1
+      uses: jactions/maven-version@v1.2.0
       with:
         pom: ./judge/pom.xml
     - run: echo ${{ steps.get-version.outputs.version }}
