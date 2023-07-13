@@ -52,7 +52,7 @@ jobs:
       with:
         created_tag: ${{ steps.get-version.outputs.version }}
     - name: Upload release artifacts
-      uses: Roang-zero1/github-upload-release-artifacts-action@v2
+      uses: Roang-zero1/github-upload-release-artifacts-action@v3.0.0
       with:
         args: "staging/"
         created_tag: ${{ steps.get-version.outputs.version }}
