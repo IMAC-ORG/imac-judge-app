@@ -55,5 +55,6 @@ jobs:
       uses: Roang-zero1/github-upload-release-artifacts-action@v2
       with:
         args: "staging/"
+        created_tag: ${{ steps.get-version.outputs.version }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
