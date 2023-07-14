@@ -106,6 +106,7 @@ public class SequenceService {
         }
        return figuresMap;
     }
+
     public  List<FigureDTO> getAllSequenceForClass(String _class, String type) throws FileNotFoundException, SAXException, IOException, ParserConfigurationException{
         Map<String,List<FigureDTO>> sequencesMap = getAllSequences();
         String key = _class.toUpperCase().trim() + ":" + type.toUpperCase().trim();

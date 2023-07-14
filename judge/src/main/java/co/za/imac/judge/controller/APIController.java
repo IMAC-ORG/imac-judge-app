@@ -1,6 +1,7 @@
 package co.za.imac.judge.controller;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -56,7 +57,18 @@ public class APIController {
         logger.debug(new Gson().toJson(comp));
 
         // fetch pilots
-        pilotService.getPilotsFileFromScore();  // Reloading here means we can add pilots mid comp.   But if their id/name changes :-(
+        try {
+            pilotService.getPilotsFileFromScore();  // Reloading here means we can add pilots mid comp.   But if their id/name changes :-(
+        } catch (ConnectException e) {
+            if (pilotService.isPilots())
+                logger.warn("Could not refresh pilots list - using existing file.");
+            else {
+                logger.error("Could not download pilots, and no local file exists");
+                result.put("result",  "fail");
+                result.put("message",  "Could contact Score.");
+                return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+            }
+        }
 
         compService.enrichCompWithCompInfoFromScore(comp);  // Add the names and ID.
 
@@ -64,7 +76,20 @@ public class APIController {
             pilotService.setupPilotScores();
         }
 
-        sequenceService.getSequenceFileFromScore();
+        // fetch seqs
+        try {
+            sequenceService.getSequenceFileFromScore();
+        } catch (ConnectException e) {
+            if (sequenceService.isSequence())
+                logger.warn("Could not refresh sequences - using existing file.");
+            else {
+                logger.error("Could not download sequences, and no local file exists.");
+                result.put("result",  "fail");
+                result.put("message",  "Could contact Score.");
+                return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+            }
+        }
+
         CompDTO newComp = compService.createCompFromRequest(comp);
         if (newComp == null) {
             result.put("result",  "fail");
