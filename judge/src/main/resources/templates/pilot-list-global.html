@@ -30,6 +30,7 @@
   <!-- CSS  -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
 
 <body style="height: 100vh !important;" class="yellow">
@@ -44,7 +45,7 @@
       <h2 th:text="${pilot.getClassString()}" class="pilot_class">First Panel</h2>
       <h2 th:if="${pilotScores[pilot.primary_id].isActive}" class="pilot_round">Round: <span
           th:text="${pilotScores[pilot.primary_id].activeRound}" class="pilot_round">
-          <!--</span> Sequence: <span th:text="${pilotScores[pilot.primary_id].activeSequence}" class="pilot_round"></span> --></h2>
+          </span> Sequence: <span th:text="${pilotScores[pilot.primary_id].activeSequence}" class="pilot_round"></span></h2>
       <h2 th:unless="${pilotScores[pilot.primary_id].isActive}" class="pilot_round"> All Rounds Completed!</h2>
       <a class="pilot_round" th:unless="${pilotScores[pilot.primary_id].isActive}"> <i
           class="material-icons center black-text">done</i> </a>
@@ -61,46 +62,63 @@
       <a th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence == 1}"
         class="waves-effect waves-light btn modal-trigger orange darken-1 pulse" th:href="'#modal'+ ${pilot.primary_id}"><i
           class="material-icons right">flight_takeoff</i>Judge</a>
-      <!-- Modal Structure -->
-      <div
-        th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence == 1 }"
-        th:id="'modal'+ ${pilot.primary_id}" class="modal">
-        <div class="modal-content">
-          <h5 class="black-text">SELECT ROUND TYPE</h5>
-          <br>
-          <form th:id="'judgeknown'+${pilot.primary_id}" action="/judge" method="get">
-          <div class="row">
+<!-- Modal Structure -->
+<div
+th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence == 1 }"
+th:id="'modal'+ ${pilot.primary_id}" class="modal">
+<div class="modal-content">
+  <h6 class="black-text">SELECT ROUND DIRECTION & TYPE</h6>
+  <form th:id="'judgeknown'+${pilot.primary_id}" action="/judge" method="get">
+    <input type="hidden" name="pilot_id" th:value="${pilot.primary_id}"/>
+    <input type="hidden" name="roundType" value="KNOWN"/>
+    <input type="hidden" th:id="'dirflip'+${pilot.primary_id}" name="dirflip" value="false" />
+  <div class="row">
+    <div class="col s3"><a class="">
+      <i class="small material-symbols-outlined">line_end_arrow_notch</i>
+      <i class="small material-symbols-outlined">line_end_arrow_notch</i></a>
+    </div>
+    
+    <div class="col s6 switch">
+      <label class="black-text" style="font-size: 12pt" th:for="'cb_dirflip'+${pilot.primary_id}">
+        <br>
+        (B)
+        <input type="checkbox" th:id="'cb_dirflip'+${pilot.primary_id}" th:onchange="'javascript:$(\'#dirflip'+${pilot.primary_id}+'\').val(this.checked)'"/>
+        <span class="lever"></span>
+        (C)
+      </label>
+    </div>
 
-            <input type="hidden" name="pilot_id" th:value="${pilot.primary_id}"/>
-            <input type="hidden" name="roundType" value="KNOWN"/>
-            <input type="hidden" th:id="'dirflip'+${pilot.primary_id}" name="dirflip" value="false" />
+    <div class="col s3"><a class="">
+      <i class="small material-symbols-outlined">line_start_arrow_notch</i>
+      <i class="small material-symbols-outlined">line_start_arrow_notch</i></a>
+    </div>
 
-            <div class="col s6"> <a class="" th:href="'javascript:$(\'#judgeknown'+${pilot.primary_id}+'\').submit()'" ><i
-                    class="medium material-icons center">visibility</i></a>
-              <p class="black-text">KNOWN</p>
-            </div>
+  </div>
+  
+  <div class="row">
+    <div class="col s4"> <a class="" th:href="'javascript:$(\'#judgeknown'+${pilot.primary_id}+'\').submit()'" >
+      <i class="medium material-icons center">visibility</i></a>
+      <p class="black-text">KNOWN</p>
+    </div>
 
-            <div class="col s6"> <a class=""
-                  th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='UNKNOWN', dirflip=false)}"><i
+    <div class="col s4"> <a class="" th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='UNKNOWN', dirflip=false)}">
+      <i class="medium material-icons center">visibility_off</i></a>
+      <p class="black-text">UNKNOWN</p>
+    </div>
 
-                  class="medium material-icons center">visibility_off</i></a>
-              <p class="black-text">UNKNOWN</p>
-            </div>
-          </div>
-            <div class="switch center">
-              <label class="black-text" style="font-size: 20pt" th:for="'cb_dirflip'+${pilot.primary_id}">
-                Left to Right (B)
-                <input type="checkbox" th:id="'cb_dirflip'+${pilot.primary_id}" th:onchange="'javascript:$(\'#dirflip'+${pilot.primary_id}+'\').val(this.checked)'"/>
-                <span class="lever"></span>
-                (C) Right to Left
-              </label>
-            </div>
-          </form>
-        </div>
-       <!-- <div class="modal-footer">
-          <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
-        </div>-->
-      </div>
+    <!-- <div class="col s4"> <a class="" th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='FREESTYLE', dirflip=false)}"> -->
+      <div class="col s4"> <a class="" href="#"></a>
+      <i class="medium material-icons center">diversity_2</i></a>
+      <p class="black-text">FREESTYLE</p>
+    </div>
+  </div>
+
+  </form>
+</div>
+<!-- <div class="modal-footer">
+  <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+</div>-->
+</div>
     </div>
   </div>
 
