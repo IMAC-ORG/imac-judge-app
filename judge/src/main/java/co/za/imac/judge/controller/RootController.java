@@ -55,9 +55,40 @@ public class RootController {
         }
 
 
-        // Check first if we have a valid comp
+        /**********
+         *  Ok.   Lets check out the stuff we *need* to proceed.
+         *
+         *  settings:      settings.json via settingsService.getSettings().
+         *                 We dont need to check this because we create an empty
+         *                 one if it does not exist.
+         *
+         *  comp:          If there's no file, then we ask to create one.
+         *                 Score wont tell us how many unknown rounds to score
+         *                 so we need to have it configured.
+         *
+         *  pilots:        Fail if we cant get it or it does not exist.
+         *
+         *  sequences:     Fail if we cant get it or it does not exist.
+         *
+         *  contest_prefs: We only need it for name (now and then it's not that important).
+         */
+
+        settingService.getSettings();
         logger.info("Is there a comp? : " + compService.isCurrentComp());
-        List<Pilot> pilots = pilotService.getPilots();
+
+        List<Pilot> pilots = null;
+        try {
+            pilots = pilotService.getPilots();
+            sequenceService.getAllSequences();  // We're not doing anything with it just yet.
+        } catch (Exception e) {
+            try {
+                logger.error("Could not get contest data.  " + e.getMessage());
+                return"/needscore";
+            } catch (Exception logger_e) {
+                logger_e.printStackTrace();
+            }
+        }
+
         if(!compService.isCurrentComp()){
             logger.debug("Redirect to newcomp page.");
             return "redirect:/newcomp";
