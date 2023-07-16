@@ -16,7 +16,10 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import co.za.imac.judge.controller.RootController;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
@@ -51,6 +54,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 @Service
 public class PilotService {
+    private static final Logger logger =
+            LoggerFactory.getLogger(PilotService.class);
 
     private static final String PILOT_SCORE_DIR = SettingUtils.getApplicationConfigPath() + "/pilots/scores/";
     private static final String PILOT_DAT_PATH = SettingUtils.getApplicationConfigPath() + "/pilots.dat";
@@ -87,12 +92,12 @@ public class PilotService {
         // optional, but recommended
         // http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
         doc.getDocumentElement().normalize();
-        System.out.println("Root Element :" + doc.getDocumentElement().getNodeName());
-        System.out.println("------");
+        logger.debug ("Pilot file root Element :" + doc.getDocumentElement().getNodeName());
         // get <staff>
         NodeList list = doc.getElementsByTagName("pilots");
         NodeList newList = (NodeList) list.item(0);
-        System.out.println(newList.getLength());
+
+        logger.debug ("Pilot count: " + newList.getLength());
         List<Pilot> pilots = new ArrayList<>();
         for (int temp = 0; temp < newList.getLength(); temp++) {
             Node node = newList.item(temp);
@@ -131,8 +136,7 @@ public class PilotService {
                 Pilot pilot = new Pilot(freestyle, comments, addr2, addr1, _class, index, active, comp_id, frequency,
                         spread_spectrum, secondary_id, airplane, name, missing_pilot_panel, primary_id);
                 pilots.add(pilot);
-                System.out.println(new Gson().toJson(pilot));
-
+                logger.debug(new Gson().toJson(pilot));
             }
         }
         return pilots;
@@ -155,7 +159,11 @@ public class PilotService {
             String filepath = PILOT_SCORE_DIR + pilot.getPrimary_id() + ".json";
             File pilotScoreFile = new File(filepath);
             pilotScoreFile.getParentFile().mkdirs();
-            pilotScoreFile.createNewFile();
+            boolean createResult = pilotScoreFile.createNewFile();
+            if (createResult)
+                logger.debug("File created: " + filepath);
+            else
+                logger.warn("File exists: " + filepath);
 
             FileWriter fw = new FileWriter(pilotScoreFile.getAbsoluteFile());
             BufferedWriter bw = new BufferedWriter(fw);
@@ -164,6 +172,8 @@ public class PilotService {
             bw.write(new Gson().toJson(pilotScores));
             bw.close();
         } catch (Exception e) {
+            logger.error("Could not create pilot file for pilot " + pilot.getName() + " (" + pilot.getPrimary_id() + ").");
+            logger.error("Error: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -244,6 +254,18 @@ public class PilotService {
             return pilotScore;
         }
         if (pilotScore.getActiveSequence() == compSequences) {
+
+            // Just reset the seq back to 1 and increment the round counter.
+            pilotScore.setActiveRound((pilotScore.getActiveRound() + 1));
+            pilotScore.setActiveSequence(1);
+            return pilotScore;
+
+
+            /************************************
+             * The logic below is a little off...
+             * It works but There's really no reason to keep a max rounds option.
+             * Just let the pilots keep flying until you are done...
+             *
             // sequences for round is complete advanced round
             if (pilotScore.getActiveRound() < compDTO.getRounds()) {
                 // theres a next round advance round
@@ -256,6 +278,8 @@ public class PilotService {
                 pilotScore.setIsActive(false);
             }
             return pilotScore;
+             */
+
 
         }
         return pilotScore;

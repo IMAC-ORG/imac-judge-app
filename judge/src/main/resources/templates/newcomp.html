@@ -11,20 +11,36 @@
   <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
   <link href="materialize/css/nouislider.css" type="text/css" rel="stylesheet" />
   <style>
-    .carousel {
-      height: 100vh;
+    .row {
+      margin-bottom: 5px;
+      margin-top: 5px;
     }
 
-    .pilot_class {
-      font-size: calc(6vw + 3vh) !important;
+    p {
+      margin-bottom: 0px;
+      margin-top: 0px;
     }
 
-    .pilot_name {
+    .heading {
+      font-size: calc(2vw + 3vh) !important;
+      margin-bottom: 10px;
+      margin-top: 5px;
+    }
+
+    .comp_info {
       font-size: calc(1vw + 2vh) !important;
+      margin-bottom: 5px;
+      margin-top: 5px;
     }
 
-    .pilot_round {
-      font-size: calc(1vw + 2vh) !important;
+    .switch label input[type=checkbox]:checked+.lever:after {
+      background-color: #26a69a;
+    }
+    .switch label input[type=checkbox]+.lever:after {
+      background-color: #26a69a;
+    }
+    [type="radio"]:not(:checked)+span, [type="radio"]:checked+span {
+      padding-left: 25px;
     }
 
     @font-face {
@@ -34,32 +50,57 @@
   </style>
 </head>
 
-<body>
+<body class="yellow">
   <div class="section no-pad-bot yellow" id="index-banner">
     <div class="container yellow black-text">
       <div class="row">
-        <div class="col s12"><h5 class="light pilot_round">Competition Rounds</h5></div>
-        
+        <div class="col s12 center-align"><h2 id="comp_name" th:text="${compName}" class="heading">Competition Name</h2></div>
+      </div>
+      <div class="row" hidden>
+        <div class="col s12 center-align"><span>Comp Id:</span>&nbsp;<span id="comp_id" th:text="${compId}" class="light">Competition ID</span></div>
       </div>
       <div class="row">
-        <div class="col s12"><div class="black"id="round-slider"></div></div>
-      </div>
-      <div class="row center">
-        <div class="col s4"><h5 class="pilot_round">Known Sequences PR</h5></div>
-        <div class="col s4 offset-s4"><h5 class="pilot_round">Unknown Sequences PR</h5></div>
+        <div class="col s12 left"><span class="header">Sequence count</span></div>
       </div>
       <div class="row">
-        <div class="col s4"><div class="black"id="sequence-slider"></div></div>
-        <div class="col s4 offset-s4"><div class="black" id="unknown-sequence-slider"></div></div>
+        <div class="col s6 left-align"><h5 class="comp_info">Known Seq / Round</h5></div>
+        <div class="col s6 right-align"><h5 class="comp_info">Unknown Seq / Round</h5></div>
+      </div>
+      <div class="row">
+        <div class="col s4 center"><div class="black" id="sequence-slider"></div></div>
+        <div class="col s4 offset-s4 center"><div class="black" id="unknown-sequence-slider"></div></div>
       </div>
       <br>
-      <div th:if="${isCurrentComp}">
-        <div class="switch center">
+      <div class="row">
+        <div class="col s6 left-align">Scoring Mode</div>
+      </div>
+      <div class="row">
+        <div class="col s4 switch left-align">
+          <label class="black-text comp_info">
+            <input class="with-gap" name="score_mode" value="global" type="radio" checked />
+            <span class="comp_info">Global</span>
+          </label>
+        </div>
+        <div class="col s4 switch left-align">
           <label class="black-text">
-            New
-            <input type="checkbox" id="checkbox">
+            <input class="with-gap" name="score_mode" value="byRound" type="radio"/>
+            <span class="comp_info">Round by Round</span>
+          </label>
+        </div>
+        <div class="col s4 switch left-align">
+          <label class="black-text">
+            <input class="with-gap" name="score_mode" value="flightline" type="radio"/>
+            <span class="comp_info">Defined Rounds</span>
+          </label>
+        </div>
+      </div>
+      <div th:if="${isCurrentComp}" class="row">
+        <div class="col s12 switch center">
+          <label class="black-text">
+            <span class="comp_info">New</span>
+            <input type="checkbox" id="updateMode">
             <span class="lever black"></span>
-            Update
+            <span class="comp_info">Update</span>
           </label>
         </div>
       </div>
@@ -67,7 +108,6 @@
       <div class="row center">
         <a href="#" id="createComp" class="waves-effect waves-light btn orange darken-1 pulse">Start</a>
       </div>
-      <br>
     </div>
   </div>
   <div class="fixed-action-btn">
@@ -86,7 +126,6 @@
   <script src="materialize/js/nouislider.js"></script>
   <script th:inline="javascript">
     /*<![CDATA[*/
-    var roundslider = document.getElementById('round-slider');
     var sequenceslider = document.getElementById('sequence-slider');
     var unknownsequenceslider = document.getElementById('unknown-sequence-slider');
     var valuesForRoundSlider = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50]; // 16 values
@@ -95,8 +134,9 @@
 
     const isCurrentComp = /*[[${isCurrentComp}]]*/ ;
     const currentRound = /*[[${currentRounds}]]*/ ;
-    const currentSequences = /*[[${currentSequences}]]*/ ;
-    const currentUnknownSequences = /*[[${currentUnknownSequences}]]*/ ;
+    const scoreMode = /*[[${scoreMode}]]*/ ;
+    const maxSeqPerRound = /*[[${maxSeqPerRound}]]*/ ;
+    const maxUnknownSeqPerRound = /*[[${maxUnknownSeqPerRound}]]*/ ;
 
     document.addEventListener('DOMContentLoaded', function () {
       var elems = document.querySelectorAll('.fixed-action-btn');
@@ -107,15 +147,7 @@
 
     console.log(isCurrentComp);
     console.log(currentRound);
-    var format = {
-      to: function (value) {
-        return valuesForRoundSlider[Math.round(value)];
-      },
-      from: function (value) {
-        return valuesForRoundSlider.indexOf(Number(value));
-      }
 
-    };
     var seqformat = {
       to: function (value) {
         return valuesForSequenceSlider[Math.round(value)];
@@ -135,16 +167,7 @@
       }
 
     };
-    noUiSlider.create(roundslider, {
-      start: 50,
-      // A linear range from 0 to 15 (16 values)
-      range: { min: 0, max: 49 },
-      // steps of 1
-      step: 1,
-      tooltips: true,
-      format: format,
-      //pips: { mode: 'steps', format: format },
-    });
+
     noUiSlider.create(sequenceslider, {
       start: 2,
       // A linear range from 0 to 15 (16 values)
@@ -167,32 +190,55 @@
     });
 
     if (isCurrentComp) {
-      roundslider.noUiSlider.set(currentRound);
-      sequenceslider.noUiSlider.set(currentSequences);
-      unknownsequenceslider.noUiSlider.set(currentUnknownSequences);
-      $('#checkbox').attr('checked','checked')
+      sequenceslider.noUiSlider.set(maxSeqPerRound);
+      unknownsequenceslider.noUiSlider.set(maxUnknownSeqPerRound);
+      $('#updateMode').attr('checked','checked')
+      $("input[name=score_mode][value=" + scoreMode + "]").prop('checked', true);
     }
 
     $("#createComp").click(function () {
-      console.log($('#checkbox').is(":checked"));
-      var editComp = $('#checkbox').is(":checked");
-      var rounds = roundslider.noUiSlider.get();
+      var editComp = $('#updateMode').is(":checked");
       var sequences = sequenceslider.noUiSlider.get();
       var unknownSequences = unknownsequenceslider.noUiSlider.get();
+      var scoreMode = $('input[name="score_mode"]:checked').val();
+              //$("#score_mode").val();
       $.ajax({
         type: "POST",
         url: "/api/comp?edit=" + editComp,
         // The key needs to match your method's input parameter (case-sensitive).
         data: JSON.stringify(
-          { rounds: rounds, sequences: sequences, unknown_sequences: unknownSequences }
+          {
+            score_mode: scoreMode,
+            sequences: sequences,
+            unknown_sequences: unknownSequences
+          }
         ),
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (data) {
-          window.location = "/"
+          console.log(data.result + ":" + data.message);
+          compData = JSON.parse(data.comp);
+          if (data.result === "ok") {
+            $('#comp_name').text(compData.comp_name);
+            $('#comp_id').text(compData.comp_id);
+            M.toast({ html: data.message, completeCallback: function(){window.location = '/rounds'}});
+
+          } else {
+            // We got back a data.result that is not OK but we still gave a good HTTP response (1xx, 2xx, 3xx)
+            M.toast({ html: 'Error: ' + data.message});
+          }
         },
-        error: function (errMsg) {
-          alert(errMsg);
+        error: function (errObj, ajaxStatus, thrownError) {
+          // We got back a HTTP error response.
+          if (typeof errObj.responseJSON != "undefined") {
+            M.toast({html: 'Error: ' + errObj.responseJSON.message});
+          } else {
+            // We really have no idea what went wrong.   Log to console..
+            console.log("Ajax Options:" + ajaxStatus)
+            console.log("Thrown Error:" + thrownError)
+            console.log("Error Object:" + JSON.stringify(errObj))
+            M.toast({html: 'Error: Unknown error'});
+          }
         }
       });
     });

@@ -16,6 +16,8 @@ public class PilotScores {
     private int activeSequence = 1;
     private String activeRoundType;
     private int judge_id;
+    private List<PScore> scores = new ArrayList<>();
+
     public String getActiveRoundType() {
         return activeRoundType;
     }
@@ -23,8 +25,6 @@ public class PilotScores {
     public void setActiveRoundType(String activeRoundType) {
         this.activeRoundType = activeRoundType;
     }
-
-    private List<PScore> scores = new ArrayList<>();
 
     public PilotScores(String name, int primary_id, String _class,int judge_id) {
         this.name = name;

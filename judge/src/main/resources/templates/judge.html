@@ -62,7 +62,7 @@
                 <p class="" style="line-height: 50%; font-weight: 500;"><span th:text="${pilot.name}"></span></p>
                 <p class="" style="line-height: 50%; font-weight: 500;"><span th:text="${pilot_class}"></span></p>
                 <p class="" style="line-height: 50%; font-weight: 500;">
-                    Round <span th:text="${pilotScores.activeRound}"></span> 
+                    Round <span th:text="${pilotScores.activeRound}"></span>
                     Seq <span th:text="${pilotScores.activeSequence}"></span> 
                     <span th:if="${roundType eq 'KNOWN'}">Dir <span th:text="${dirletter}"></span></span>
                 </p>
@@ -77,7 +77,7 @@
                 <div class="col s8">
                 <br>
                  <img id="my-svg" style="width:60vw; height:75vh;" class="figure-wrapper"
-                    th:src="@{/man/en/{roundType}/{class}/{index}{dirletter}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index}, roundType=${roundType.toLowerCase()}, dirletter=${iterStat.index<10 ? (dirletter=='C'?'C':'') : ''})}">
+                    th:src="@{/man/en/{roundType}/{class}/{index}{dirletter}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index + 1}, roundType=${roundType.toLowerCase()}, dirletter=${dirletter})}">
                 </div>
             </div>
             <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
@@ -172,7 +172,7 @@
         function shortdescription(caller_index) {
             audio.pause();
             audio.currentTime = 0;
-            var audio_url = '/man/en/' + roundType + '/' + pilot_class + '/' + ( score_index + caller_index ) + '.wav';
+            var audio_url = '/man/en/' + roundType + '/' + pilot_class + '/fig' + ( score_index + caller_index + 1 ) + '.mp3';
             audio = new Audio(audio_url.toLowerCase());
             audio.play();
         }
@@ -186,7 +186,7 @@
         }  
         
         function setLongDescription(caller_index) {
-            var audiolongurl = '/man/en/' + roundType + '/' + pilot_class + '/f' + ( score_index + caller_index ) + '.wav';
+            var audiolongurl = '/man/en/' + roundType + '/' + pilot_class + '/call' + ( score_index + caller_index + 1 ) + '.mp3';
             audiolongd = new Audio(audiolongurl.toLowerCase());
         }
 
