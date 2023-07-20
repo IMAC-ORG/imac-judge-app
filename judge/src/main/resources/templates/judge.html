@@ -267,11 +267,12 @@
         function carouselNext() {
             $('.carousel').carousel('next');
             if (score_index == (numOfManeuvers - 1)) {
-                submitScores();
-                
+                submitScores(true);
+            } else {
+                submitScores(false);
             }
         }
-        function submitScores() {
+        function submitScores(done = false) {
             for (i in scores) {
                 console.log(scores[i]);
                 if (scores[i] == null) {
@@ -293,7 +294,8 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (data) {
-                    nextEvent(data);
+                    if (done)
+                        nextEvent(data);
                 },
                 failure: function (errMsg) {
                     alert(errMsg);
