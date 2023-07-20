@@ -30,7 +30,7 @@
   <!-- CSS  -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+ 
 </head>
 
 <body style="height: 100vh !important;" class="yellow">
@@ -74,13 +74,12 @@ th:id="'modal'+ ${pilot.primary_id}" class="modal">
     <input type="hidden" th:id="'dirflip'+${pilot.primary_id}" name="dirflip" value="false" />
   <div class="row">
     <div class="col s3"><a class="">
-      <i class="small material-symbols-outlined">line_end_arrow_notch</i>
-      <i class="small material-symbols-outlined">line_end_arrow_notch</i></a>
+      <i class="small material-icons">east</i>
+      <i class="small material-icons">east</i></a>
     </div>
     
     <div class="col s6 switch">
       <label class="black-text" style="font-size: 12pt" th:for="'cb_dirflip'+${pilot.primary_id}">
-        <br>
         (B)
         <input type="checkbox" th:id="'cb_dirflip'+${pilot.primary_id}" th:onchange="'javascript:$(\'#dirflip'+${pilot.primary_id}+'\').val(this.checked)'"/>
         <span class="lever"></span>
@@ -89,8 +88,8 @@ th:id="'modal'+ ${pilot.primary_id}" class="modal">
     </div>
 
     <div class="col s3"><a class="">
-      <i class="small material-symbols-outlined">line_start_arrow_notch</i>
-      <i class="small material-symbols-outlined">line_start_arrow_notch</i></a>
+      <i class="small material-icons">west</i>
+      <i class="small material-icons">west</i></a>
     </div>
 
   </div>
