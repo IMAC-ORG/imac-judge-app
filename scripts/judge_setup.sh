@@ -12,16 +12,16 @@ echo -e "${Red}Please note this script should only be run once !!!"
 # Setup Swap to 512MB
 echo -e "${Yellow}Setting swapfile to 512MB..."
 sudo dphys-swapfile swapoff 					> /dev/null 2>&1
-sudo sed -i 's/100/512/g' /etc/dphys-swapfile 	> /dev/null 2>&1
-sudo dphys-swapfile setup 						> /dev/null 2>&1
-sudo dphys-swapfile swapon 						> /dev/null 2>&1
+sudo sed -i 's/100/512/g' /etc/dphys-swapfile 			> /dev/null 2>&1
+sudo dphys-swapfile setup 					> /dev/null 2>&1
+sudo dphys-swapfile swapon 					> /dev/null 2>&1
 
 
 # Updating the OS
 echo -e "${Yellow}Updating the OS..."
 #echo "deb http://mirror.ox.ac.uk/sites/archive.raspbian.org/archive/raspbian bullseye main contrib non-free rpi" | sudo tee -a /etc/apt/sources.list > /dev/null 2>&1
 sudo apt update 		> /dev/null 2>&1
-sudo apt upgrade -y 	> /dev/null 2>&1
+sudo apt upgrade -y 		> /dev/null 2>&1
 
 
 # Removing any unwanted packages
@@ -33,18 +33,18 @@ sudo apt purge smartsim java-common libreoffice* lxplug-updater -y 	> /dev/null 
 # Install required packages
 echo -e "${Yellow}Install required packages..."
 sudo apt install vim openjdk-17-jre xdotool unclutter sed locate vim xinput-calibrator -y 	> /dev/null 2>&1
-sudo apt clean 																				> /dev/null 2>&1
-sudo apt autoremove -y 																		> /dev/null 2>&1
+sudo apt clean 											> /dev/null 2>&1
+sudo apt autoremove -y 										> /dev/null 2>&1
 
 # Configure vim mouse preferances
 echo -e "${Yellow}Configure vim..."
-echo "set mouse-=a" | sudo tee -a /root/.vimrc 												> /dev/null 2>&1
-echo "set mouse-=a" | sudo tee -a /home/judge/.vimrc 										> /dev/null 2>&1
+echo "set mouse-=a" | sudo tee -a /root/.vimrc 				> /dev/null 2>&1
+echo "set mouse-=a" | sudo tee -a /home/judge/.vimrc 			> /dev/null 2>&1
 
 # Disable IPV6
 echo -e "${Yellow}Disabling IPV6..."
 echo "net.ipv6.conf.all.disable_ipv6 = 1" 		| sudo tee -a /etc/sysctl.conf 		> /dev/null 2>&1
-echo "net.ipv6.conf.default.disable_ipv6 = 1" 	| sudo tee -a /etc/sysctl.conf 		> /dev/null 2>&1
+echo "net.ipv6.conf.default.disable_ipv6 = 1" 		| sudo tee -a /etc/sysctl.conf 		> /dev/null 2>&1
 echo "net.ipv6.conf.lo.disable_ipv6 = 1" 		| sudo tee -a /etc/sysctl.conf 		> /dev/null 2>&1
 sudo sysctl -p > /dev/null 2>&1
 
@@ -52,13 +52,20 @@ sudo sysctl -p > /dev/null 2>&1
 # Disabling bluetooth
 echo -e "${Yellow}Disabling bluetooth..."
 echo "" 						| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
-echo "#Disabling Bluetooth"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
-echo "dtoverlay=disable-bt" 	| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+echo "#Disabling Bluetooth"				| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+echo "dtoverlay=disable-bt" 				| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 
 
 #Overclocking Pi to 800mhz
 echo -e "${Yellow}Overclocking Pi to 800mhz..."					> /dev/null 2>&1
-sudo sed -i 's/#arm_freq=800/arm_freq=800/g' /boot/config.txt 	> /dev/null 2>&1
+sudo sed -i 's/#arm_freq=800/arm_freq=800/g' /boot/config.txt 			> /dev/null 2>&1
+
+#Setting Screen refresh Rate
+echo -e "${Yellow}Setting Screen refresh Rate..."
+echo "" 						| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+echo "#Setting Screen refresh Rate"			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1	
+echo "dtparam=speed=41000000" 				| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+echo "dtparam=fps=30" 					| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 
 
 #Confgiuring gpio to key mappings
@@ -84,8 +91,8 @@ read response
 case $response in
 	y|Y)
 		echo "Setting up default gpio to key mappings"
-		echo ""																		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
-		echo "gpip key mappings" 													| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo ""										| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo "#gpip key mappings" 							| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 		echo "dtoverlay=gpio-key,gpio=22,active_low=1,gpio_pull=up,keycode=7"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # encoder down/next
 		echo "dtoverlay=gpio-key,gpio=6,active_low=1,gpio_pull=up,keycode=9"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # +0.5
 		echo "dtoverlay=gpio-key,gpio=13,active_low=1,gpio_pull=up,keycode=10"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # +1
@@ -133,9 +140,9 @@ case $response in
 		echo "Zero 			:"$zero
 		echo "Break 			:"$break
 		echo ""
-		echo ""																			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
-		echo "gpip key mappings" 														| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
-		echo "dtoverlay=gpio-key,gpio=$previous,active_low=1,gpio_pull=up,keycode=7"	| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # encoder down/next
+		echo ""											| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo "#gpip key mappings" 								| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo "dtoverlay=gpio-key,gpio=$previous,active_low=1,gpio_pull=up,keycode=7"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # encoder down/next
 		echo "dtoverlay=gpio-key,gpio=$plus5,active_low=1,gpio_pull=up,keycode=9"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # +0.5
 		echo "dtoverlay=gpio-key,gpio=$plus1,active_low=1,gpio_pull=up,keycode=10"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # +1
 		echo "dtoverlay=gpio-key,gpio=$caller,active_low=1,gpio_pull=up,keycode=11"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # caller
@@ -164,13 +171,13 @@ read scoreport
 
 echo -e "${Yellow}Creating settings.json file..."
 
-echo '{'										| sudo tee -a /boot/settings.json	> /dev/null 2>&1
-echo '	"judge_id":'$judgeid','					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
-echo '	"line_number":'$flightline','			| sudo tee -a /boot/settings.json	> /dev/null 2>&1
-echo '	"score_host":"'$scoreip'",'				| sudo tee -a /boot/settings.json	> /dev/null 2>&1
-echo '	"score_http_port":'$scoreport','		| sudo tee -a /boot/settings.json	> /dev/null 2>&1
-echo '	"language":"en"'						| sudo tee -a /boot/settings.json	> /dev/null 2>&1
-echo '}'										| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '{'					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"judge_id":'$judgeid','			| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"line_number":'$flightline','		| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"score_host":"'$scoreip'",'		| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"score_http_port":'$scoreport','	| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"language":"en"'			| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '}'					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 
 
 echo -e "${Yellow}Setting up the Judge App..."
