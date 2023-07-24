@@ -7,7 +7,7 @@ import java.util.Map;
 public class RoundsDTO {
 
     private Integer comp_id;                // Stored in the compDTO but lets keep it here so we know the rounds are from this comp.
-    private Integer scoringRoundNum;        // Multiple rounds can be 'Flying' but we can only score a round at a time.
+    private Integer scoringRoundId;         // Multiple rounds can be 'Flying' but we can only score a round at a time.
     private List<RoundDTO> rounds = null;   // The schedules for this instance.
 
     public RoundsDTO() {
@@ -16,11 +16,11 @@ public class RoundsDTO {
 
     public RoundsDTO(Integer scoringRoundNum) {
         this();
-        this.scoringRoundNum = scoringRoundNum;
+        this.scoringRoundId = scoringRoundNum;
     }
 
-    public Integer getScoringRoundNum() { return scoringRoundNum; }
-    public void setScoringRoundNum(Integer scoringRoundNum) { this.scoringRoundNum = scoringRoundNum; }
+    public Integer getScoringRoundNum() { return scoringRoundId; }
+    public void setScoringRoundNum(Integer scoringRoundNum) { this.scoringRoundId = scoringRoundNum; }
     public List<RoundDTO> getRounds() { return rounds; }
     public void setRounds(List<RoundDTO> roundsDTO) { this.rounds = roundsDTO; }
     public Integer getComp_id() { return comp_id; }

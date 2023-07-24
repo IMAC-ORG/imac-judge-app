@@ -120,8 +120,13 @@
 <!--  Scripts-->
 <script src="jquery-3.6.4.min.js"></script>
 <script src="materialize/js/materialize.js"></script>
-<script>
+<script th:inline="javascript">
     // Or with jQuery
+    const round =  /*[[${round}]]*/ ;
+    const pilots =  /*[[${pilots}]]*/ ;
+    const pilotScores =  /*[[${pilotScores}]]*/ ;
+    const comp = /*[[${comp}]]*/ ;
+
     var windowHeight = window.innerHeight;
     $('.carousel.carousel-slider').carousel({
         fullWidth: true,

@@ -159,6 +159,7 @@ public class RootController {
         }
 
         model.addAttribute("pilots", filteredPilots);
+        model.addAttribute("round", roundToScore);
         HashMap<Integer, PilotScores> pilotScores = new HashMap<>();
         for (Pilot pilot : filteredPilots) {
             pilotScores.put(pilot.getPrimary_id(), pilotService.getPilotScores(pilot));
@@ -226,7 +227,7 @@ public class RootController {
     }
 
     @GetMapping("/rounds")
-    public String showRounds(@RequestParam(defaultValue = "completed", required = false) String mode, Model model)
+    public String rounds(@RequestParam(defaultValue = "completed", required = false) String mode, Model model)
             throws IOException {
 
         model.addAttribute("isCurrentComp", compService.isCurrentComp());
@@ -276,7 +277,7 @@ public class RootController {
     }
 
     @GetMapping("/newround")
-    public String newRound(Model model) throws IOException {
+    public String newround(Model model) throws IOException {
 
         // We need to send the list of rounds and available schedules to the page.
         model.addAttribute("rounds", roundService.getRounds());
