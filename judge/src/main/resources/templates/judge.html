@@ -360,13 +360,18 @@
             }
         }
         function submitScores(done = false) {
+            console.log("Scores: " + JSON.stringify(scores));
+            if (done !== true) {
+                return;
+            }
+
             for (i in scores) {
-                console.log(scores[i]);
                 if (scores[i] == null) {
                     scores[i] = 10;
                 }
             }
-            console.log(JSON.stringify(scores));
+            console.log("Cleaned scores: " + JSON.stringify(scores));
+
             var postData = {
                 primary_id: primary_id,
                 round: round,
