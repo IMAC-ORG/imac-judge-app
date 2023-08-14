@@ -53,7 +53,7 @@ sudo sysctl -p > /dev/null 2>&1
 echo -e "${Yellow}Disabling bluetooth..."
 echo "" 								| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 echo "#Disabling Bluetooth"				| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
-echo "#dtoverlay=disable-bt" 			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+echo "dtoverlay=disable-bt" 			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 
 
 #Overclocking Pi to 800mhz
