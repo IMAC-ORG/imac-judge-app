@@ -219,3 +219,5 @@ sudo wget -O /var/opt/judge/pilots/scores/5.json https://raw.githubusercontent.c
 sudo chmod 777 -R /var/opt/judge								> /dev/null 2>&1
 sudo chmod 777 /home/judge/judge_update.sh						> /dev/null 2>&1
 sudo /home/judge/judge_update.sh								> /dev/null 2>&1
+
+sudo reboot
