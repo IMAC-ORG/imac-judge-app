@@ -22,6 +22,8 @@ jobs:
     - name: Git Version
       id: version
       uses: codacy/git-version@2.7.1
+      with:
+        prefix: v
     - name: Create Tag
       uses: negz/create-tag@v1
       with:
