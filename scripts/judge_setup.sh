@@ -6,7 +6,7 @@ Blue='\033[0;34m'         # Blue
 Red='\033[0;31m'          # Red
 NC="\033[0m" 			  # No Color
 
-echo -e "${Green}Setting up your PI-Judge Scoring Device"
+echo -e "${Green}Setting up your AeroJudge Scoring Device"
 echo -e "${Red}Please note this script should only be run once !!!"
 
 # Setup Swap to 512MB
