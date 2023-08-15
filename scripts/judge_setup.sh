@@ -213,6 +213,10 @@ sudo chmod 777 -R /var/opt/judge								> /dev/null 2>&1
 sudo chmod 777 /home/judge/judge_update.sh						> /dev/null 2>&1
 sudo /home/judge/judge_update.sh								> /dev/null 2>&1
 
+sudo systemctl restart kiosk.service
+
+sleep 60
+
 echo -e "${Red}Rebooting to complete setup..."
 
 sudo reboot
