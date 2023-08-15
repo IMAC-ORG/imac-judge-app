@@ -22,6 +22,21 @@
             fill: green !important;
         }
 
+        .modal {
+            border-radius: 20px !important;
+            max-height: 98% !important;
+            top: 1% !important;
+        }
+
+        .modal-content {
+            padding: 10px !important;
+        }
+
+        .scoresummary {
+            font-size: calc(1vw + 1.5vh) !important;
+            margin-bottom: 0px !important;
+            border-bottom: 1px solid #ff43002e;
+        }
         @font-face {
             font-family: digitalFont;
             src: url(font/digital-7.ttf);
@@ -59,20 +74,20 @@
         <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item yellow black-text" href="#one!">
             <div class="row">
                 <div class="col s4">
-                <p class="" style="line-height: 50%; font-weight: 500;"><span th:text="${pilot.name}"></span></p>
-                <p class="" style="line-height: 50%; font-weight: 500;"><span th:text="${pilot_class}"></span></p>
-                <p class="" style="line-height: 50%; font-weight: 500;">
-                    Round <span th:text="${pilotScores.activeRound}"></span>
-                    Seq <span th:text="${pilotScores.activeSequence}"></span> 
-                    <span th:if="${roundType eq 'KNOWN'}">Dir <span th:text="${dirletter}"></span></span>
-                </p>
-                <p class="" style="line-height: 50%; font-weight: 500;">FIG <span th:text="${iterStat.index + 1}"></span>
-                    <span th:text="${roundType}"></span>
-                </p>
-                <br>
-                <h1 style="font-family: digitalFont; font-size: 40vh; line-height: 10vh;  "
-                    th:id="'score_'+ ${iterStat.index}">10.0</h1>
-
+                    <!-- <button data-target="modal_summary" class="btn modal-trigger">Modal</button> -->
+                    <p class="" style="line-height: 50%; font-weight: 500;"><span th:text="${pilot.name}"></span></p>
+                    <p class="" style="line-height: 50%; font-weight: 500;"><span th:text="${pilot_class}"></span></p>
+                    <p class="" style="line-height: 50%; font-weight: 500;">
+                        Round <span th:text="${pilotScores.activeRound}"></span>
+                        Seq <span th:text="${pilotScores.activeSequence}"></span>
+                        <span th:if="${roundType eq 'KNOWN'}">Dir <span th:text="${dirletter}"></span></span>
+                    </p>
+                    <p class="" style="line-height: 50%; font-weight: 500;">FIG <span th:text="${iterStat.index + 1}"></span>
+                        <span th:text="${roundType}"></span>
+                    </p>
+                    <br>
+                    <h1 style="font-family: digitalFont; font-size: 40vh; line-height: 10vh;  "
+                        th:id="'score_'+ ${iterStat.index}">10.0</h1>
                 </div>
                 <div class="col s8">
                 <br>
@@ -84,6 +99,42 @@
                     th:id="'description_'+ ${iterStat.index}">First Panel</h2>
         </div>
     </div>
+
+    <!-- Summary Modal -->
+    <div id="modal_summary" class="modal">
+        <div class="modal-content yellow">
+            <h6 class="black-text hide-on-small-only">Score Summary</h6>
+            <h7 class="black-text hide-on-med-and-up">Score Summary</h7>
+            <div class="row scoresummary" style="font-weight: bold;">
+                <div class="col s3 right-align">Figure</div>
+                <div class="col s7">Desc</div>
+                <div class="col s2 right-align">Score</div>
+            </div>
+            <div class="row scoresummary"><div class="col s3 right-align">Fig 1</div><div class="col s7" id="ss_0_desc">Desc</div><div class="col s2 right-align" id="ss_0_text">-</div></div>
+            <div class="row scoresummary"><div class="col s3 right-align">Fig 2</div><div class="col s7" id="ss_1_desc">Desc</div><div class="col s2 right-align" id="ss_1_text">-</div></div>
+            <div class="row scoresummary"><div class="col s3 right-align">Fig 3</div><div class="col s7" id="ss_2_desc">Desc</div><div class="col s2 right-align" id="ss_2_text">-</div></div>
+            <div class="row scoresummary"><div class="col s3 right-align">Fig 4</div><div class="col s7" id="ss_3_desc">Desc</div><div class="col s2 right-align" id="ss_3_text">-</div></div>
+            <div class="row scoresummary"><div class="col s3 right-align">Fig 5</div><div class="col s7" id="ss_4_desc">Desc</div><div class="col s2 right-align" id="ss_4_text">-</div></div>
+            <div class="row scoresummary"><div class="col s3 right-align">Fig 6</div><div class="col s7" id="ss_5_desc">Desc</div><div class="col s2 right-align" id="ss_5_text">-</div></div>
+            <div class="row scoresummary"><div class="col s3 right-align">Fig 7</div><div class="col s7" id="ss_6_desc">Desc</div><div class="col s2 right-align" id="ss_6_text">-</div></div>
+            <div class="row scoresummary"><div class="col s3 right-align">Fig 8</div><div class="col s7" id="ss_7_desc">Desc</div><div class="col s2 right-align" id="ss_7_text">-</div></div>
+            <div class="row scoresummary"><div class="col s3 right-align">Fig 9</div><div class="col s7" id="ss_8_desc">Desc</div><div class="col s2 right-align" id="ss_8_text">-</div></div>
+            <div class="row scoresummary"><div class="col s3 right-align">Fig 10</div><div class="col s7" id="ss_9_desc">Desc</div><div class="col s2 right-align" id="ss_9_text">-</div></div>
+            <div class="row scoresummary"><div class="col s3 right-align"></div><div class="col s7" id="ss_10_desc">Sound</div><div class="col s2 right-align" id="ss_10_text">-</div></div>
+            <div class="row scoresummary"><div class="col s3 right-align"></div><div class="col s7" id="ss_11_desc">Airspace</div><div class="col s2 right-align" id="ss_11_text">-</div></div>
+            <div class="modal-footer yellow">
+                <div class="row">
+                    <div class="col s4 center-align">
+                        <button data-target="modal_summary" class="modal-action modal-close orange darken-1 btn-small">Review</button>
+                    </div>
+                    <div class="col s4 offset-s4 center-align">
+                        <button data-target="modal_summary" class="modal-action modal-close orange darken-1 btn-small" onclick="submitScores(true);">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <div class="fixed-action-btn">
         <a class="btn-floating btn-large red">
@@ -120,6 +171,34 @@
         const welcome_text = 'Now judging ' + pilot_name + ' ' + pilot_class + ' round ' + round + ' sequence ' + sequence + ' ' + roundType;
         const synth = window.speechSynthesis;
         const voices = synth.getVoices();
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var elems = document.querySelectorAll('.modal');
+            for (var i in sequenceJson) {
+                $('#ss_' + i + '_desc').text(sequenceJson[i].description);
+            }
+            var instances = M.Modal.init(elems, {
+                dismissible:false,
+                startingTop: '1%',
+                startingBottom: '1%',
+                onOpenStart: function (){
+                    for (var i in scores) {
+                        var currentScore = '#ss_' + i + '_text';
+                        switch (scores[i]) {
+                            case -1:
+                                $(currentScore).text('Break');
+                                break;
+                            case -2:
+                                $(currentScore).text('N/O');
+                                break;
+                            default:
+                                $(currentScore).text(scores[i]);
+                                break;
+                        }
+                    }
+                }
+            });
+        });
 
         document.addEventListener('DOMContentLoaded', function () {
             var elems = document.querySelectorAll('.fixed-action-btn');
@@ -174,6 +253,7 @@
             audio.currentTime = 0;
             var audio_url = '/man/en/' + roundType + '/' + pilot_class + '/fig' + ( score_index + caller_index + 1 ) + '.mp3';
             audio = new Audio(audio_url.toLowerCase());
+            audio.volume = 0.5;
             audio.play();
         }
 
@@ -193,8 +273,9 @@
         function NowJudgingMessage() {
             audio.pause();
             audio.currentTime = 0;
-            var audio_url = '/man/en/now_judging_' + pilot_class + '_' + roundType + '_sequence.wav';
+            var audio_url = '/man/en/now_judging_' + pilot_class + '_' + roundType + '_sequence.mp3';
             audio = new Audio(audio_url.toLowerCase());
+            audio.volume = 0.5;
             audio.play();
         }
 
@@ -207,22 +288,27 @@
                 //this is a number lets build url to wave file
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = '/man/en/score/' + text + '.wav';
+                var audio_url = '/man/en/score/' + text + '.mp3';
                 audio = new Audio(audio_url);
+                audio.volume = 0.5;
                 audio.play();
+
             } else if (text == 'BREAK') {
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = '/man/en/score/break.wav';
+                var audio_url = '/man/en/score/break.mp3';
                 audio = new Audio(audio_url);
+                audio.volume = 0.5;
                 audio.play();
 
             } else if (text == 'Not Observed') {
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = '/man/en/score/not_observed.wav';
+                var audio_url = '/man/en/score/not_observed.mp3';
                 audio = new Audio(audio_url);
+                audio.volume = 0.5;
                 audio.play();
+
             } else {
                 synth.cancel();
                 const msg = new SpeechSynthesisUtterance();
@@ -266,19 +352,26 @@
 
         function carouselNext() {
             $('.carousel').carousel('next');
+            submitScores(false);
             if (score_index == (numOfManeuvers - 1)) {
-                submitScores();
-                
+                $('#modal_summary').modal('open');
+                // This is done for every score now...
+                //submitScores();
             }
         }
-        function submitScores() {
+        function submitScores(done = false) {
+            console.log("Scores: " + JSON.stringify(scores));
+            if (done !== true) {
+                return;
+            }
+
             for (i in scores) {
-                console.log(scores[i]);
                 if (scores[i] == null) {
                     scores[i] = 10;
                 }
             }
-            console.log(JSON.stringify(scores));
+            console.log("Cleaned scores: " + JSON.stringify(scores));
+
             var postData = {
                 primary_id: primary_id,
                 round: round,
@@ -293,7 +386,8 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (data) {
-                    nextEvent(data);
+                    if (done)
+                        nextEvent(data);
                 },
                 failure: function (errMsg) {
                     alert(errMsg);
@@ -356,7 +450,7 @@
             console.log("setting score to > " + score);
             var currentScore = parseFloat(score);
             scores[score_index] = currentScore;
-            score_id = "#score_" + score_index
+            score_id = "#score_" + score_index;
             if (currentScore == -1) {
                 $(score_id).text('BREAK');
                 textToSpeechCustomMessage('BREAK');
