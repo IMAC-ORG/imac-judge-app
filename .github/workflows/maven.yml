@@ -24,6 +24,7 @@ jobs:
       uses: codacy/git-version@2.7.1
       with:
         prefix: v
+        release-branch: main
     - name: Create Tag
       uses: negz/create-tag@v1
       with:
