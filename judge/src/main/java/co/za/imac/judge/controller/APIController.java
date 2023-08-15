@@ -29,8 +29,7 @@ import co.za.imac.judge.service.SequenceService;
 
 @RestController
 public class APIController {
-    private static final Logger logger =
-            LoggerFactory.getLogger(RootController.class);
+    private static final Logger logger = LoggerFactory.getLogger(RootController.class);
 
     @Autowired
     private CompService compService;
@@ -47,7 +46,7 @@ public class APIController {
     }
 
     @PostMapping("/api/comp")
-    public ResponseEntity<String>  createComp(@RequestBody CompDTO comp,
+    public ResponseEntity<String> createComp(@RequestBody CompDTO comp,
             @RequestParam(name = "edit", required = true) Boolean editComp)
             throws IOException, ParserConfigurationException, SAXException, URISyntaxException {
 
@@ -57,46 +56,23 @@ public class APIController {
         logger.debug(new Gson().toJson(comp));
 
         // fetch pilots
-        try {
-            pilotService.getPilotsFileFromScore();  // Reloading here means we can add pilots mid comp.   But if their id/name changes :-(
-        } catch (ConnectException e) {
-            if (pilotService.isPilots())
-                logger.warn("Could not refresh pilots list - using existing file.");
-            else {
-                logger.error("Could not download pilots, and no local file exists");
-                result.put("result",  "fail");
-                result.put("message",  "Could contact Score.");
-                return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
-            }
-        }
-
-        compService.enrichCompWithCompInfoFromScore(comp);  // Add the names and ID.
+        pilotService.getPilotsFileFromScore(); // Reloading here means we can add pilots mid comp. But if their id/name
+        compService.enrichCompWithCompInfoFromScore(comp); // Add the names and ID.
 
         if (!editComp) {
             pilotService.setupPilotScores();
         }
 
         // fetch seqs
-        try {
-            sequenceService.getSequenceFileFromScore();
-        } catch (ConnectException e) {
-            if (sequenceService.isSequence())
-                logger.warn("Could not refresh sequences - using existing file.");
-            else {
-                logger.error("Could not download sequences, and no local file exists.");
-                result.put("result",  "fail");
-                result.put("message",  "Could contact Score.");
-                return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
-            }
-        }
+        sequenceService.getSequenceFileFromScore();
 
         CompDTO newComp = compService.createCompFromRequest(comp);
         if (newComp == null) {
-            result.put("result",  "fail");
+            result.put("result", "fail");
             if (editComp)
-                result.put("message",  "Could not edit comp.");
+                result.put("message", "Could not edit comp.");
             else
-                result.put("message",  "Could not create new comp.");
+                result.put("message", "Could not create new comp.");
             return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
 
         } else {
@@ -109,7 +85,7 @@ public class APIController {
                 result.put("message", "New comp " + newComp.getComp_name() + " is created.");
             }
 
-            result.put("comp",  new Gson().toJson(newComp));
+            result.put("comp", new Gson().toJson(newComp));
 
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("Location", "/api/comp");
@@ -120,7 +96,7 @@ public class APIController {
 
     @PostMapping("/api/rounds")
     public ResponseEntity<String> createRound(@RequestBody RoundDTO round,
-                                 @RequestParam(name = "edit", required = false, defaultValue = "false") Boolean editRound)
+            @RequestParam(name = "edit", required = false, defaultValue = "false") Boolean editRound)
             throws IOException, ParserConfigurationException, SAXException {
 
         Map<String, Object> result = new HashMap<>();
@@ -130,8 +106,8 @@ public class APIController {
 
         if (editRound) {
             // Do edit...
-            result.put("result",  "fail");
-            result.put("message",  "editing of rounds is not yet implemented.");
+            result.put("result", "fail");
+            result.put("message", "editing of rounds is not yet implemented.");
             return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.NOT_IMPLEMENTED);
         } else {
             // Before we can add a new round, we need to get round number / round ID
@@ -140,9 +116,9 @@ public class APIController {
             RoundDTO newRound = roundsService.addRound(round);
             if (newRound != null) {
                 roundsService.saveRoundsToFile();
-                result.put("result",  "ok");
-                result.put("message",  "New round created.");
-                result.put("new_round",  new Gson().toJson(newRound));
+                result.put("result", "ok");
+                result.put("message", "New round created.");
+                result.put("new_round", new Gson().toJson(newRound));
 
                 // Set it active if we are in byRound mode.
                 if ("byRound".equalsIgnoreCase(compService.getComp().getScore_mode())) {
@@ -150,46 +126,44 @@ public class APIController {
                 }
 
                 return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
-            }
-            else
+            } else
                 return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/api/rounds/phase")
-
     public ResponseEntity<String> adjustRound(@RequestBody Map<String, Object> payload)
             throws IOException, ParserConfigurationException, SAXException {
         logger.debug("Performing action " + payload.get("action") + " on round " + payload.get("round_id") + ".");
         Map<String, Object> result = new HashMap<>();
-        result.put("action",  payload.get("action"));
-        result.put("message",  "");
+        result.put("action", payload.get("action"));
+        result.put("message", "");
 
         Map<String, Object> res;
-        switch((String) payload.get("action")) {
+        switch ((String) payload.get("action")) {
             case "fly":
                 res = roundsService.activateRoundForScoring(Integer.parseInt((String) payload.get("round_id")));
                 if ((Boolean) res.get("success")) {
-                    result.put("result",  "ok");
+                    result.put("result", "ok");
                 } else {
-                    result.put("result",  "fail");
-                    result.put("message",  res.get("message"));
+                    result.put("result", "fail");
+                    result.put("message", res.get("message"));
                     return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
                 }
                 break;
             case "close":
                 res = roundsService.closeRound(Integer.parseInt((String) payload.get("round_id")));
                 if ((Boolean) res.get("success")) {
-                    result.put("result",  "ok");
+                    result.put("result", "ok");
                 } else {
-                    result.put("result",  "fail");
-                    result.put("message",  res.get("message"));
+                    result.put("result", "fail");
+                    result.put("message", res.get("message"));
                     return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
                 }
                 break;
             default:
-                result.put("result",  "fail");
-                result.put("message",  "Unknown action.");
+                result.put("result", "fail");
+                result.put("message", "Unknown action.");
                 return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
@@ -202,7 +176,7 @@ public class APIController {
         sequenceService.getSequenceFileFromScore();
         // pilotService.setupPilotScores();
         Map<String, Object> result = new HashMap<>();
-        result.put("sync",  "ok");
+        result.put("sync", "ok");
         return new Gson().toJson(result);
     }
 
@@ -211,7 +185,7 @@ public class APIController {
         // fetch pilots
         pilotService.syncPilotsToScoreWebService();
         Map<String, Object> result = new HashMap<>();
-        result.put("sync",  "ok");
+        result.put("sync", "ok");
         return new Gson().toJson(result);
     }
 
