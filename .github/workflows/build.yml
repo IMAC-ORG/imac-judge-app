@@ -27,7 +27,7 @@ jobs:
           cd judge
           mvn clean package
     - run: ls judge/target/
-    - run: mkdir staging && cp judge/target/*.jar staging
+    - run: mkdir staging && cp judge/target/*.jar staging/judge.jar
     - uses: actions/upload-artifact@v3
       with:
         name: Package
@@ -41,3 +41,9 @@ jobs:
         version: ${{ steps.version.outputs.version }}
         message: "Testing automation"
         token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Release
+      uses: docker://antonyurchenko/git-release:v5
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: staging/judge.jar
