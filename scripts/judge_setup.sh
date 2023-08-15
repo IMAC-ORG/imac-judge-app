@@ -180,7 +180,7 @@ echo '	"language":"en"'					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 echo '}'									| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 
 
-echo -e "${Yellow}Setting up the Judge App..."
+echo -e "${Yellow}Setting up the AeroJudge App..."
 sudo mkdir /var/opt/judge 																													> /dev/null 2>&1
 sudo mkdir /var/opt/judge/bin 																												> /dev/null 2>&1
 
