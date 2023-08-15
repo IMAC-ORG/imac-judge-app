@@ -19,15 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Git Version
-      id: version
-      uses: codacy/git-version@2.7.1
-      with:
-        prefix: v
-        release-branch: main
     - name: Create Tag
       uses: negz/create-tag@v1
       with:
-        version: ${{ steps.version.outputs.version }}
+        version: v1.0.${{github.run_number}}
         message: "Testing automation"
         token: ${{ secrets.GITHUB_TOKEN }}
