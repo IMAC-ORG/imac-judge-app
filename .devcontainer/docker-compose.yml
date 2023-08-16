@@ -16,9 +16,9 @@ services:
     build: 
       context: .
       dockerfile: score/Dockerfile
-    volumes:
+  #  volumes:
       # This is where VS Code should expect to find your project's source code and the value of "workspaceFolder" in .devcontainer/devcontainer.json
-      - ./app:/score
+  #    - ./app:/score
     ports:
       - 8181:8181
       - 3000:3000
