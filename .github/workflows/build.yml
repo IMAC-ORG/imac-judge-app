@@ -6,11 +6,12 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java build
+name: Create Release
 
 on:
   push:
-    branches: [ "main" ]
+    tags: 
+      - 'v[0-9]+.[0-9]+.[0-9]+'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 jobs:
@@ -27,19 +28,16 @@ jobs:
           cd judge
           mvn clean package
     - run: ls judge/target/
-    - run: mkdir staging && cp judge/target/*.jar staging
+    - run: mkdir staging && cp judge/target/*.jar staging/judge.jar
     - uses: actions/upload-artifact@v3
       with:
         name: Package
         path: staging
-    - id: get-version
-      uses: jactions/maven-version@v1.2.0
+    - name: Release
+      uses: docker://antonyurchenko/git-release:v5
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CHANGELOG_FILE: none
+        ALLOW_EMPTY_CHANGELOG: true
       with:
-        pom: ./judge/pom.xml
-    - run: echo ${{ steps.get-version.outputs.version }}
-    - name: Create Tag
-      uses: negz/create-tag@v1
-      with:
-        version: ${{ steps.get-version.outputs.version }}
-        message: "Testing automation"
-        token: ${{ secrets.GITHUB_TOKEN }}
+        args: staging/judge.jar
