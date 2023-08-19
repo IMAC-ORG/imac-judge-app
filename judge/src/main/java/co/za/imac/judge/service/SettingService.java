@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +18,7 @@ import co.za.imac.judge.utils.SettingUtils;
 @Service
 public class SettingService {
 
-    private static final Logger logger =
-            LoggerFactory.getLogger(SettingService.class);
+    private static final Logger logger = LoggerFactory.getLogger(SettingService.class);
 
     private final String SETTINGS_FILE_NAME = SettingUtils.getApplicationConfigPath() + "/settings.json";
     private boolean firstRun = true;
@@ -56,8 +57,8 @@ public class SettingService {
         try {
             newFile.createNewFile();
         } catch (IOException e) {
-            logger.error ("Could not create " + SETTINGS_FILE_NAME);
-            throw(e);
+            logger.error("Could not create " + SETTINGS_FILE_NAME);
+            throw (e);
         }
         String compdtoJson = new Gson().toJson(settingDTO);
         byte[] strToBytes = compdtoJson.getBytes();
@@ -82,5 +83,15 @@ public class SettingService {
         } else {
             return createSettings();
         }
+    }
+
+    public void backupAllFiles() throws IOException{
+        String sourceFile = SettingUtils.DEFAULT_APPLICATION_CONFIG_PATH + "/pilots";
+        FileOutputStream fos = new FileOutputStream(SettingUtils.DEFAULT_APPLICATION_CONFIG_PATH + "/" + "judge.backup.zip");
+        ZipOutputStream zipOut = new ZipOutputStream(fos);
+        File fileToZip = new File(sourceFile);
+        SettingUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
+        zipOut.close();
+        fos.close();
     }
 }
