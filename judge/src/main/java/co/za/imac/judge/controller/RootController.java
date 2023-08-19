@@ -47,11 +47,13 @@ public class RootController {
             throws IOException, ParserConfigurationException, SAXException, UnirestException {
 
         // Check if we have seen the splash-screen.
-        if (settingService.isFirstRun()) {
-            logger.info("This is our first run.");
-            settingService.setFirstRun(false);
-            return "index";
-        }
+        // unnecessary 
+        // if (settingService.isFirstRun()) {
+        //     logger.info("This is our first run.");
+        //     settingService.setFirstRun(false);
+        //     return "index";
+        // }
+
 
         /**********
          * Ok. Lets check out the stuff we *need* to proceed.
