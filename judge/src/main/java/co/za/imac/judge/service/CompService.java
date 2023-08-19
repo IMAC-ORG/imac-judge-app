@@ -60,7 +60,7 @@ public class CompService {
         SettingDTO settingDTO = settingService.getSettings();
         COMP_INFO_DAT_URL = COMP_INFO_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
         try {
-            FileUtils.copyURLToFile(new URL(COMP_INFO_DAT_URL), new File(COMP_INFO_DAT_PATH));
+            FileUtils.copyURLToFile(new URL(COMP_INFO_DAT_URL), new File(COMP_INFO_DAT_PATH),1000,1000);
         } catch (Exception e) {
             try {
                 // Score is probably turned off.
@@ -75,7 +75,7 @@ public class CompService {
         SettingDTO settingDTO = settingService.getSettings();
         COMP_PREFS_DAT_URL = COMP_PREFS_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
         try {
-            FileUtils.copyURLToFile(new URL(COMP_PREFS_DAT_URL), new File(COMP_PREFS_DAT_PATH));
+            FileUtils.copyURLToFile(new URL(COMP_PREFS_DAT_URL), new File(COMP_PREFS_DAT_PATH),1000,1000);
         } catch (Exception e) {
             try {
                 // Score is probably turned off.

@@ -84,7 +84,7 @@ public class ScheduleService {
         logger.info("Loading sequences from Score.");
         SettingDTO settingDTO = settingService.getSettings();
         SEQUENCES_DAT_URL = SEQUENCES_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
-        FileUtils.copyURLToFile(new URL(SEQUENCES_DAT_URL), new File(SEQUENCES_DAT_PATH));
+        FileUtils.copyURLToFile(new URL(SEQUENCES_DAT_URL), new File(SEQUENCES_DAT_PATH),1000,1000);
     }
 
     /************

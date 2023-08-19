@@ -58,14 +58,14 @@ public class APIController {
         // fetch pilots
         pilotService.getPilotsFileFromScore(); // Reloading here means we can add pilots mid comp. But if their id/name
         compService.enrichCompWithCompInfoFromScore(comp); // Add the names and ID.
-
+       
         if (!editComp) {
             pilotService.setupPilotScores();
         }
 
         // fetch seqs
         sequenceService.getSequenceFileFromScore();
-
+         //TODO archive exising comp
         CompDTO newComp = compService.createCompFromRequest(comp);
         if (newComp == null) {
             result.put("result", "fail");
