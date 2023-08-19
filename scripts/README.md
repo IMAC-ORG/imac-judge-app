@@ -1,15 +1,15 @@
 # SA rPI Bootstrap Script Install
 
-1. Using the Raspberry Pi Imager available from the Raspberry site write the Raspberry Pi OS (32-bit) to the SD card. Configure the relevant WiFi details, enable SSH and setup the user name judge (required) and password
+1. Using the Raspberry Pi Imager available from the Raspberry site write the Raspberry Pi OS (32-bit) Desktop version to the SD card. Configure the relevant WiFi details, enable SSH and setup the user name judge (required) and password
 	- username : judge
 	- password : <*password*>
    <br>
 2. Once complete insert the SD in to the rPI and boot. The initial boot will take some time as the system will expand the SD card's file system and configure the user and wifi details. 
    <br>
-3. Some screens require drivers to work, if your sreen needs this then install it now. Installing at the end will overwrite the gpio key bindings needs for the buttons to work, if you dont't require screen drivers skip to #5
+3. Some screens require drivers to work, if your sreen needs this then install it now. Installing at the end will overwrite the gpio key bindings needed for the buttons to work, if you dont't require screen drivers skip to #5
 <br>
 
-4. These screen installation instructions are for WaveShare screens, the example below is for for the 3.5" IPS v2 screen.
+4. These screen installation instructions are for WaveShare screens, the example below is for for the 3.5" IPS v2 screen. In the LCD-show folder once downlaoded you'll fine the relivant WaveShare SPI drivers for your screen
 ```
 git clone https://github.com/waveshare/LCD-show.git
 cd LCD-show/
@@ -27,7 +27,7 @@ chmod +x judge_setup.sh
 ```
 <br>
 
-6. Once the script is complete after about 2min you should be able to browse to **http://rPI-IP:8080** form you PC. Or if your screen is connected you should see the Judge-App load after a short while.
+6. Once the script is complete and the system is rebooted it will take about 2min for AeroJudge to start, then you should be able to browse to **http://rPI-IP:8080** form you PC. Or if your screen is connected you should see AeroJudge loaded.
 <br>
 <br>
 

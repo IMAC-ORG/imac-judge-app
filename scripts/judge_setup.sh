@@ -6,21 +6,21 @@ Blue='\033[0;34m'         # Blue
 Red='\033[0;31m'          # Red
 NC="\033[0m" 			  # No Color
 
-echo -e "${Green}Setting up your PI-Judge Scoring Device"
+echo -e "${Green}Setting up your AeroJudge Scoring Device"
 echo -e "${Red}Please note this script should only be run once !!!"
 
 # Setup Swap to 512MB
 echo -e "${Yellow}Setting swapfile to 512MB..."
 sudo dphys-swapfile swapoff 					> /dev/null 2>&1
-sudo sed -i 's/100/512/g' /etc/dphys-swapfile 			> /dev/null 2>&1
-sudo dphys-swapfile setup 					> /dev/null 2>&1
-sudo dphys-swapfile swapon 					> /dev/null 2>&1
+sudo sed -i 's/100/512/g' /etc/dphys-swapfile 	> /dev/null 2>&1
+sudo dphys-swapfile setup 						> /dev/null 2>&1
+sudo dphys-swapfile swapon 						> /dev/null 2>&1
 
 
 # Updating the OS
 echo -e "${Yellow}Updating the OS..."
 #echo "deb http://mirror.ox.ac.uk/sites/archive.raspbian.org/archive/raspbian bullseye main contrib non-free rpi" | sudo tee -a /etc/apt/sources.list > /dev/null 2>&1
-sudo apt update 		> /dev/null 2>&1
+sudo apt update 			> /dev/null 2>&1
 sudo apt upgrade -y 		> /dev/null 2>&1
 
 
@@ -33,39 +33,39 @@ sudo apt purge smartsim java-common libreoffice* lxplug-updater -y 	> /dev/null 
 # Install required packages
 echo -e "${Yellow}Install required packages..."
 sudo apt install vim openjdk-17-jre xdotool unclutter sed locate vim xinput-calibrator -y 	> /dev/null 2>&1
-sudo apt clean 											> /dev/null 2>&1
-sudo apt autoremove -y 										> /dev/null 2>&1
+sudo apt clean 																				> /dev/null 2>&1
+sudo apt autoremove -y 																		> /dev/null 2>&1
 
 # Configure vim mouse preferances
 echo -e "${Yellow}Configure vim..."
-echo "set mouse-=a" | sudo tee -a /root/.vimrc 				> /dev/null 2>&1
+echo "set mouse-=a" | sudo tee -a /root/.vimrc 					> /dev/null 2>&1
 echo "set mouse-=a" | sudo tee -a /home/judge/.vimrc 			> /dev/null 2>&1
 
 # Disable IPV6
 echo -e "${Yellow}Disabling IPV6..."
-echo "net.ipv6.conf.all.disable_ipv6 = 1" 		| sudo tee -a /etc/sysctl.conf 		> /dev/null 2>&1
+echo "net.ipv6.conf.all.disable_ipv6 = 1" 		| sudo tee -a /etc/sysctl.conf 			> /dev/null 2>&1
 echo "net.ipv6.conf.default.disable_ipv6 = 1" 		| sudo tee -a /etc/sysctl.conf 		> /dev/null 2>&1
-echo "net.ipv6.conf.lo.disable_ipv6 = 1" 		| sudo tee -a /etc/sysctl.conf 		> /dev/null 2>&1
+echo "net.ipv6.conf.lo.disable_ipv6 = 1" 		| sudo tee -a /etc/sysctl.conf 			> /dev/null 2>&1
 sudo sysctl -p > /dev/null 2>&1
 
 
 # Disabling bluetooth
 echo -e "${Yellow}Disabling bluetooth..."
-echo "" 						| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+echo "" 								| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 echo "#Disabling Bluetooth"				| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
-echo "dtoverlay=disable-bt" 				| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+echo "dtoverlay=disable-bt" 			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 
 
 #Overclocking Pi to 800mhz
-echo -e "${Yellow}Overclocking Pi to 800mhz..."					> /dev/null 2>&1
-sudo sed -i 's/#arm_freq=800/arm_freq=800/g' /boot/config.txt 			> /dev/null 2>&1
+echo -e "${Yellow}Overclocking Pi to 800mhz..."						> /dev/null 2>&1
+sudo sed -i 's/#arm_freq=800/arm_freq=800/g' /boot/config.txt 		> /dev/null 2>&1
 
 #Setting Screen refresh Rate
 echo -e "${Yellow}Setting Screen refresh Rate..."
-echo "" 						| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+echo "" 									| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 echo "#Setting Screen refresh Rate"			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1	
 echo "dtparam=speed=41000000" 				| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
-echo "dtparam=fps=30" 					| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+echo "dtparam=fps=30" 						| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 
 
 #Confgiuring gpio to key mappings
@@ -91,8 +91,8 @@ read response
 case $response in
 	y|Y)
 		echo "Setting up default gpio to key mappings"
-		echo ""										| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
-		echo "#gpip key mappings" 							| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo ""																		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo "#gpip key mappings" 													| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 		echo "dtoverlay=gpio-key,gpio=22,active_low=1,gpio_pull=up,keycode=7"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # encoder down/next
 		echo "dtoverlay=gpio-key,gpio=6,active_low=1,gpio_pull=up,keycode=9"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # +0.5
 		echo "dtoverlay=gpio-key,gpio=13,active_low=1,gpio_pull=up,keycode=10"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # +1
@@ -140,9 +140,9 @@ case $response in
 		echo "Zero 			:"$zero
 		echo "Break 			:"$break
 		echo ""
-		echo ""											| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
-		echo "#gpip key mappings" 								| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
-		echo "dtoverlay=gpio-key,gpio=$previous,active_low=1,gpio_pull=up,keycode=7"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # encoder down/next
+		echo ""																			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo "#gpip key mappings" 														| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo "dtoverlay=gpio-key,gpio=$previous,active_low=1,gpio_pull=up,keycode=7"	| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # encoder down/next
 		echo "dtoverlay=gpio-key,gpio=$plus5,active_low=1,gpio_pull=up,keycode=9"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # +0.5
 		echo "dtoverlay=gpio-key,gpio=$plus1,active_low=1,gpio_pull=up,keycode=10"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # +1
 		echo "dtoverlay=gpio-key,gpio=$caller,active_low=1,gpio_pull=up,keycode=11"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # caller
@@ -171,51 +171,52 @@ read scoreport
 
 echo -e "${Yellow}Creating settings.json file..."
 
-echo '{'					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
-echo '	"judge_id":'$judgeid','			| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '{'									| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"judge_id":'$judgeid','				| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 echo '	"line_number":'$flightline','		| sudo tee -a /boot/settings.json	> /dev/null 2>&1
-echo '	"score_host":"'$scoreip'",'		| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"score_host":"'$scoreip'",'			| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 echo '	"score_http_port":'$scoreport','	| sudo tee -a /boot/settings.json	> /dev/null 2>&1
-echo '	"language":"en"'			| sudo tee -a /boot/settings.json	> /dev/null 2>&1
-echo '}'					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"language":"en"'					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '}'									| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 
 
-echo -e "${Yellow}Setting up the Judge App..."
+echo -e "${Yellow}Setting up the AeroJudge App..."
 sudo mkdir /var/opt/judge 																													> /dev/null 2>&1
 sudo mkdir /var/opt/judge/bin 																												> /dev/null 2>&1
 
 sudo wget -O /lib/systemd/system/judge.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.service 		> /dev/null 2>&1
-sudo wget -O /var/opt/judge/bin/judge.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.sh					      > /dev/null 2>&1
-sudo wget -O /home/judge/judge_update.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_update.sh				  > /dev/null 2>&1
+sudo wget -O /var/opt/judge/bin/judge.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.sh					> /dev/null 2>&1
+sudo wget -O /home/judge/judge_update.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_update.sh				> /dev/null 2>&1
 sudo wget -O /lib/systemd/system/kiosk.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.service			> /dev/null 2>&1
-sudo wget -O /var/opt/judge/bin/kiosk.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.sh					      > /dev/null 2>&1
-sudo wget -O /home/judge/imac.png https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/imac.png							          > /dev/null 2>&1
-sudo chmod +x /var/opt/judge/bin/judge.sh			> /dev/null 2>&1	
-sudo systemctl enable judge.service				    > /dev/null 2>&1
-sudo chmod +x /var/opt/judge/bin/kiosk.sh			> /dev/null 2>&1
-sudo systemctl enable kiosk.service				    > /dev/null 2>&1
+sudo wget -O /var/opt/judge/bin/kiosk.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.sh					> /dev/null 2>&1
+sudo wget -O /home/judge/imac.png https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/imac.png							> /dev/null 2>&1
+sudo chmod +x /var/opt/judge/bin/judge.sh					> /dev/null 2>&1	
+sudo systemctl enable judge.service				    		> /dev/null 2>&1
+sudo chmod +x /var/opt/judge/bin/kiosk.sh					> /dev/null 2>&1
+sudo systemctl enable kiosk.service				    		> /dev/null 2>&1
 sudo ln -s /boot/settings.json /var/opt/judge/settings.json	> /dev/null 2>&1
 
 
 sudo chmod +x /var/opt/judge/bin/judge.sh						> /dev/null 2>&1	
-sudo systemctl enable judge.service								  > /dev/null 2>&1
+sudo systemctl enable judge.service								> /dev/null 2>&1
 sudo chmod +x /var/opt/judge/bin/kiosk.sh						> /dev/null 2>&1
-sudo systemctl enable kiosk.service								  > /dev/null 2>&1
+sudo systemctl enable kiosk.service								> /dev/null 2>&1
 sudo ln -s /boot/settings.json /var/opt/judge/settings.json		> /dev/null 2>&1
 
 
 echo -e "${Yellow}Creating Dummy Pilots"
-sudo mkdir /var/opt/judge/pilots								    > /dev/null 2>&1
-sudo mkdir /var/opt/judge/pilots/scores							> /dev/null 2>&1
-sudo wget -O /var/opt/judge/comp.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/comp.json						    > /dev/null 2>&1	 							
-sudo wget -O /var/opt/judge/pilots.dat https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/pilots.dat					  	> /dev/null 2>&1
-sudo wget -O /var/opt/judge/sequences.dat https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/sequences.dat				> /dev/null 2>&1
-sudo wget -O /var/opt/judge/pilots/scores/1.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/pilots/scores/1.json	> /dev/null 2>&1
-sudo wget -O /var/opt/judge/pilots/scores/2.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/pilots/scores/2.json > /dev/null 2>&1
-sudo wget -O /var/opt/judge/pilots/scores/3.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/pilots/scores/3.json > /dev/null 2>&1
-sudo wget -O /var/opt/judge/pilots/scores/4.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/pilots/scores/4.json > /dev/null 2>&1
-sudo wget -O /var/opt/judge/pilots/scores/5.json https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data/pilots/scores/5.json > /dev/null 2>&1
+
+sudo wget -O /tmp/data.zip https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data.zip						    > /dev/null 2>&1
+sudo unzip -o /tmp/data.zip -d /var/opt/judge/
 
 sudo chmod 777 -R /var/opt/judge								> /dev/null 2>&1
-sudo chmod 777 /home/judge/judge_update.sh			> /dev/null 2>&1
+sudo chmod 777 /home/judge/judge_update.sh						> /dev/null 2>&1
 sudo /home/judge/judge_update.sh								> /dev/null 2>&1
+
+sudo systemctl restart kiosk.service
+
+sleep 60
+
+echo -e "${Red}Rebooting to complete setup..."
+
+sudo reboot

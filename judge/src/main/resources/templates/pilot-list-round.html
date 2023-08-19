@@ -48,6 +48,7 @@
         <h2 th:unless="${pilotScores[pilot.primary_id].isActive}" class="pilot_round"> All Rounds Completed!</h2>
         <a class="pilot_round" th:unless="${pilotScores[pilot.primary_id].isActive}"> <i
                 class="material-icons center black-text">done</i> </a>
+        <!--
         <a th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences == 0}"
            class="waves-effect waves-light btn orange darken-1 pulse"
            th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='KNOWN')}"><i
@@ -56,33 +57,66 @@
         <a th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence gt 1 }"
            class="waves-effect waves-light btn orange darken-1 pulse"
            th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType=${pilotScores[pilot.primary_id].activeRoundType})}"><i
-                class="material-icons right">flight_takeoff</i>Judge</a>
+                class="material-icons right">flight_takeoff</i>Judge</a> -->        
 
-        <a th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence == 1}"
+        <a th:if="${pilotScores[pilot.primary_id].isActive}"
            class="waves-effect waves-light btn modal-trigger orange darken-1 pulse" th:href="'#modal'+ ${pilot.primary_id}"><i
                 class="material-icons right">flight_takeoff</i>Judge</a>
         <!-- Modal Structure -->
         <div
-                th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence == 1 }"
-                th:id="'modal'+ ${pilot.primary_id}" class="modal">
-            <div class="modal-content">
-                <h5 class="black-text">SELECT ROUND TYPE</h5>
-                <br>
-                <div class="row">
-                    <div class="col s6 m3"> <a class="" th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='KNOWN')}"><i
-                            class="medium material-icons center">visibility</i></a>
-                        <p class="black-text">KNOWN</p>
-                    </div>
-                    <div class="col s6 m3"> <a class=""
-                                               th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='UNKNOWN')}"><i
-                            class="medium material-icons center">visibility_off</i></a>
-                        <p class="black-text">UNKNOWN</p>
-                    </div>
-                </div>
+        th:if="${pilotScores[pilot.primary_id].isActive}"
+        th:id="'modal'+ ${pilot.primary_id}" class="modal">
+        <div class="modal-content">
+          <h6 class="black-text">SELECT ROUND DIRECTION & TYPE</h6>
+          <form th:id="'judgeknown'+${pilot.primary_id}" action="/judge" method="get">
+            <input type="hidden" name="pilot_id" th:value="${pilot.primary_id}"/>
+            <input type="hidden" name="roundType" value="KNOWN"/>
+            <input type="hidden" th:id="'dirflip'+${pilot.primary_id}" name="dirflip" value="false" />
+          <div class="row">
+            <div class="col s3"><a class="">
+              <i class="small material-icons">east</i>
+              <i class="small material-icons">east</i></a>
             </div>
-            <!-- <div class="modal-footer">
-               <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
-             </div>-->
+            
+            <div class="col s6 switch">
+              <label class="black-text" style="font-size: 12pt" th:for="'cb_dirflip'+${pilot.primary_id}">
+                (B)
+                <input type="checkbox" th:id="'cb_dirflip'+${pilot.primary_id}" th:onchange="'javascript:$(\'#dirflip'+${pilot.primary_id}+'\').val(this.checked)'"/>
+                <span class="lever"></span>
+                (C)
+              </label>
+            </div>
+        
+            <div class="col s3"><a class="">
+              <i class="small material-icons">west</i>
+              <i class="small material-icons">west</i></a>
+            </div>
+        
+          </div>
+          
+          <div class="row">
+            <div class="col s4"> <a class="" th:href="'javascript:$(\'#judgeknown'+${pilot.primary_id}+'\').submit()'" >
+              <i class="medium material-icons center">visibility</i></a>
+              <p class="black-text">KNOWN</p>
+            </div>
+        
+            <div class="col s4"> <a class="" th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='UNKNOWN', dirflip=false)}">
+              <i class="medium material-icons center">visibility_off</i></a>
+              <p class="black-text">UNKNOWN</p>
+            </div>
+        
+            <!-- <div class="col s4"> <a class="" th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='FREESTYLE', dirflip=false)}"> -->
+              <div class="col s4"> <a class="" href="#"></a>
+              <i class="medium material-icons center">diversity_2</i></a>
+              <p class="black-text">FREESTYLE</p>
+            </div>
+          </div>
+        
+          </form>
+        </div>
+        <!-- <div class="modal-footer">
+          <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+        </div>-->
         </div>
     </div>
 </div>

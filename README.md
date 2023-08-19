@@ -1,5 +1,11 @@
 # IMAC-Judge-App
 
+# For AeroJudge setup instruction please take a look here
+## https://github.com/IMAC-ORG/imac-judge-app/tree/main/scripts
+
+
+# For developer environment please look below
+
 ## Requirements
 1. VSCode
 2. Docker Desktop
