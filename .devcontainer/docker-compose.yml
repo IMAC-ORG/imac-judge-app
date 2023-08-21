@@ -9,6 +9,7 @@ services:
       - ../judge:/workspace
       - ./judge:/var/opt/judge
     command: /bin/sh -c "while sleep 1000; do :; done"
+    network_mode: bridge
     restart: unless-stopped
     
   score_web:
