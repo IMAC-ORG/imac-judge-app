@@ -23,3 +23,5 @@
 hs_err_pid*
 /.idea
 *.zip
+.devcontainer/judge/judge.backup.zip
+.devcontainer/judge/pilots/judge.backup.zip
