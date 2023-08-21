@@ -26,6 +26,7 @@ import com.google.gson.Gson;
 import co.za.imac.judge.service.CompService;
 import co.za.imac.judge.service.PilotService;
 import co.za.imac.judge.service.SequenceService;
+import co.za.imac.judge.service.SettingService;
 
 @RestController
 public class APIController {
@@ -39,7 +40,8 @@ public class APIController {
     private PilotService pilotService;
     @Autowired
     private SequenceService sequenceService;
-
+  @Autowired
+    private SettingService settingService;
     @GetMapping("/api/comp")
     public CompDTO getComp() throws IOException, ParserConfigurationException, SAXException {
         return compService.getComp();
@@ -58,14 +60,16 @@ public class APIController {
         // fetch pilots
         pilotService.getPilotsFileFromScore(); // Reloading here means we can add pilots mid comp. But if their id/name
         compService.enrichCompWithCompInfoFromScore(comp); // Add the names and ID.
-
+       
+        //archive exising pilots
+         settingService.backupAllFiles();
         if (!editComp) {
             pilotService.setupPilotScores();
         }
 
         // fetch seqs
         sequenceService.getSequenceFileFromScore();
-
+  
         CompDTO newComp = compService.createCompFromRequest(comp);
         if (newComp == null) {
             result.put("result", "fail");

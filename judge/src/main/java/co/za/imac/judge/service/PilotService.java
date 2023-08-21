@@ -69,7 +69,7 @@ public class PilotService {
     public void getPilotsFileFromScore() throws MalformedURLException, IOException {
         SettingDTO settingDTO = settingService.getSettings();
         PILOT_DAT_URL = PILOT_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
-        FileUtils.copyURLToFile(new URL(PILOT_DAT_URL), new File(PILOT_DAT_PATH));
+        FileUtils.copyURLToFile(new URL(PILOT_DAT_URL), new File(PILOT_DAT_PATH),1000,1000);
     }
 
     public boolean isPilots(){
