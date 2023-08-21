@@ -74,13 +74,8 @@ public class RootController {
          * important).
          */
 
-        settingService.getSettings();
         logger.info("Is there a comp? : " + compService.isCurrentComp());
-
-        List<Pilot> pilots = null;
-        pilots = pilotService.getPilots();
-        sequenceService.getAllSequences(); // We're not doing anything with it just yet.
-
+        settingService.backupAllFiles();
         if (!compService.isCurrentComp()) {
             logger.debug("Redirect to newcomp page.");
             return "redirect:/newcomp";
