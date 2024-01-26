@@ -8,6 +8,7 @@ services:
       # Mount the root folder that contains .git
       - ../judge:/workspace
       - ./judge:/var/opt/judge
+      - ../figures:/var/opt/judge/figures
     command: /bin/sh -c "while sleep 1000; do :; done"
     restart: unless-stopped
     
