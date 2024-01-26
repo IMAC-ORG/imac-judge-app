@@ -2,7 +2,7 @@
 Description=IMAC Judge Webapp Java REST Service
 
 [Service]
-User=root
+User=judge
 # The configuration file application.properties should be here:
 
 #change this to your workspace

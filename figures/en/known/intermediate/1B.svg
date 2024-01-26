@@ -1,0 +1,27 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.2//EN" "http://www.w3.org/Graphics/SVG/1.2/DTD/svg12.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny" id="selectedFigureSvg" width="100px" height="100px" viewBox="-19.08 -124.46 265.73 138.06">
+	<g id="sequence">
+		<g id="figure-2">
+			<path d="M 0,0 m 3,-6 a7,7 0 1 1 -6,0" style="stroke: black; stroke-width: 3px; fill: none;"/>
+			<path d="M 0,0 m -4,0 a4,4 0 1 1 0,0.01" style="stroke: black; stroke-width: 1px; fill: black;"/>
+			<path d="M 4,0 l 52,0" style="stroke-dasharray: 5, 3; stroke: red; stroke-width: 3px; fill: none;" class="line" id="figure-2-entry"/>
+			<path d="M 56,0 l 73.54,-73.54" style="stroke-dasharray: 5, 3; stroke: red; stroke-width: 3px; fill: none;" class="line" id="figure-2-roll0-gap0"/>
+			<path d="M 129.54,-73.54 m -16.38,-5.73 l 8.45,-3.31 l -2.07,7.73 z" style="stroke: black; stroke-width: 1px; fill: black;"/>
+			<path d="M 129.54,-73.54 m -16.38,-5.73 a 20,20 0 0 1 21.56,14.7 " style="stroke: black; stroke-width: 3px; fill: none;"/>
+			<path d="M 129.54,-73.54 l 7.07,-7.07" style="stroke-dasharray: 5, 3; stroke: red; stroke-width: 3px; fill: none;" class="line"/>
+			<path d="M 136.61,-80.61 m -19.84,-7.11 l -7.07,7.07" style="stroke: black; stroke-width: 3px; fill: none;"/>
+			<path d="M 136.61,-80.61 m -16.38,-5.73 l 8.45,-3.31 l -2.07,7.73 z" style="stroke: black; stroke-width: 1px; fill: black;"/>
+			<path d="M 136.61,-80.61 m -16.38,-5.73 a 20,20 0 0 1 16.38,5.73 " style="stroke: black; stroke-width: 3px; fill: none;"/>
+			<path d="M 136.61,-80.61 l 9.19,-9.19" style="stroke: black; stroke-width: 3px; fill: none;" class="line" id="figure-2-roll0-gap1"/>
+			<path d="M 145.8,-89.8 a52,52 0 1 1 0,73.54" style="stroke-dasharray: 5, 3; stroke: red; stroke-width: 3px; fill: none;"/>
+			<path d="M 145.8,-16.26 l -73.54,-73.54" style="stroke-dasharray: 5, 3; stroke: red; stroke-width: 3px; fill: none;" class="line" id="figure-2-roll1-gap0"/>
+			<path d="M 72.26,-89.8 m -5.73,16.38 l -3.31,-8.45 l 7.73,2.07 z" style="stroke: black; stroke-width: 1px; fill: black;"/>
+			<path d="M 72.26,-89.8 m -5.73,16.38 a 20,20 0 0 1 5.73,-16.38 " style="stroke: black; stroke-width: 3px; fill: none;"/>
+			<text style="font-family: Arial, Sans; font-size: 20px; font-weight: bold; fill: red;" text-anchor="middle" x="46" y="-61.59">2x4</text>
+			<path d="M 72.26,-89.8 l -18.38,-18.38" style="stroke: black; stroke-width: 3px; fill: none;" class="line" id="figure-2-roll1-gap1"/>
+			<path d="M 53.88,-108.18 l -52,0" style="stroke: black; stroke-width: 3px; fill: none;" class="line" id="figure-2-exit"/>
+			<path d="M 1.88,-108.18 m 0,10 l 0,-20" style="stroke: black; stroke-width: 3px; fill: none;"/>
+		</g>
+	</g>
+</svg>
