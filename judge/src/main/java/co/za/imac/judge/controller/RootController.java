@@ -74,35 +74,40 @@ public class RootController {
          * important).
          */
 
-        logger.info("Is there a comp? : " + compService.isCurrentComp());
-        settingService.backupAllFiles();
+        
         if (!compService.isCurrentComp()) {
             logger.debug("Redirect to newcomp page.");
+            logger.info("There is no Comp!! redirecting");
             return "redirect:/newcomp";
         }
+        return "redirect:/pilot-list-global";
 
-        // Now if we have a comp, are we scoring a round?
-        logger.info("Are we scoring a round?? : " + roundService.isScoringRound());
-        if (!roundService.isScoringRound()) {
-            logger.debug("Redirect to new round page.");
-            return "redirect:/rounds";
-        }
+        // // Now if we have a comp, are we scoring a round?
+        // logger.info("Are we scoring a round?? : " + roundService.isScoringRound());
+        // if (!roundService.isScoringRound()) {
+        //     logger.debug("Redirect to new round page.");
+        //     return "redirect:/rounds";
+        // }
 
-        if ("global".equalsIgnoreCase(compService.getComp().getScore_mode()))
-            return "redirect:/pilot-list-global";
-        else
-            return "redirect:/rounds";
+        // if ("global".equalsIgnoreCase(compService.getComp().getScore_mode()))
+        //     return "redirect:/pilot-list-global";
+        // else
+        //     return "redirect:/rounds";
     }
 
     @GetMapping("/pilot-list-global")
-    public String pilotListGlobal(Model model)
+    public String pilotListGlobal(Model model,@RequestParam(name = "classFilter", required = false) String classFilter)
             throws IOException, ParserConfigurationException, SAXException, UnirestException {
 
         // Check first if we have a valid comp
-        logger.info("Is there a comp? : " + compService.isCurrentComp());
+        //logger.info("Is there a comp? : " + compService.isCurrentComp());
         List<Pilot> pilots = pilotService.getPilots();
+        if(classFilter != null && !classFilter.isEmpty()){
+            pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
+        }
         if (!compService.isCurrentComp()) {
             logger.debug("Redirect to newcomp page.");
+            logger.info("There is no Comp!! redirecting");
             return "redirect:/newcomp";
         }
 
@@ -119,7 +124,7 @@ public class RootController {
     }
 
     @GetMapping("/pilot-list-round")
-    public String pilotListRound(Model model)
+    public String pilotListRound(Model model,@RequestParam(name = "classFilter", required = false) String classFilter)
             throws IOException, ParserConfigurationException, SAXException, UnirestException {
         /******************
          * Create the carousel for the pilot selector.
@@ -130,6 +135,9 @@ public class RootController {
         // Check first if we have a valid comp
         logger.info("Is there a comp? : " + compService.isCurrentComp());
         List<Pilot> pilots = pilotService.getPilots();
+        if(classFilter != null && !classFilter.isEmpty()){
+            pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
+        }
         if (!compService.isCurrentComp()) {
             logger.debug("Redirect to newcomp page.");
             return "redirect:/newcomp";
@@ -171,7 +179,6 @@ public class RootController {
             @RequestParam(name = "dirflip", required = true, defaultValue = "false") Boolean dirflip, Model model)
             throws IOException, ParserConfigurationException, SAXException {
 
-        logger.info("Is there a comp? : " + compService.isCurrentComp());
         if (!compService.isCurrentComp()) {
             logger.debug("Redirect to newcomp page.");
             return "redirect:/newcomp";

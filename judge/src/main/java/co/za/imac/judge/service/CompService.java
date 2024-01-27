@@ -161,7 +161,7 @@ public class CompService {
             }
 
             logger.info("Loaded comp " + this.compDTO.getComp_name() + " (" + this.compDTO.getComp_id() + ") from file.");
-            enrichCompWithCompInfoFromScore(this.compDTO);
+            //enrichCompWithCompInfoFromScore(this.compDTO);
             if (saveFile)
                 this.saveCompToFile();
 
