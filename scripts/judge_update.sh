@@ -8,6 +8,9 @@ fi
 if [ "$(stat -c '%U' /var/opt/judge)" != "judge" ]; then
    echo Changing owner of judge folder...
    sudo chown -R judge.judge /var/opt/judge
+   echo Changing judge service to use judge owner...
+   sudo sed -i 's/User=root/User=judge/g' /lib/systemd/system/judge.service
+   sudo systemctl daemon-reload
 fi
 
 if [ ! -f ".judge_last_release" ]; then
