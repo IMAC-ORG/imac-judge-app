@@ -97,7 +97,7 @@ th:id="'modal'+ ${pilot.primary_id}" class="modal">
   <script src="materialize/js/materialize.js"></script>
   <script>
     // Or with jQuery
-    var windowHeight = window.innerHeight;
+    var windowHeight = window.innerHeight - 35; // reduce some for banner
     $('.carousel.carousel-slider').carousel({
       fullWidth: true,
       indicators: false
