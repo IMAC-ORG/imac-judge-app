@@ -52,6 +52,7 @@
 
 <body class="yellow">
   <div class="section no-pad-bot yellow" id="index-banner">
+    <div th:replace="~{banner::line_judge}"></div>
     <div class="container yellow black-text">
       <div class="row">
         <div class="col s12 center-align"><h2 id="comp_name" th:text="${compName}" class="heading">Competition Name</h2></div>
@@ -60,11 +61,24 @@
         <div class="col s12 center-align"><span>Comp Id:</span>&nbsp;<span id="comp_id" th:text="${compId}" class="light">Competition ID</span></div>
       </div>
       <div class="row">
-        <div class="col s12 left"><span class="header">Sequence count</span></div>
+        <div class="col s5 left"><span class="header">Sequence count</span></div>
+        <div class="col s7 left"><span class="header">Sequence type</span></div>
       </div>
       <div class="row">
-        <div class="col s6 left-align"><h5 class="comp_info">Known Seq / Round</h5></div>
-        <div class="col s6 right-align"><h5 class="comp_info">Unknown Seq / Round</h5></div>
+        <div class="col s5 left-align"><h5 class="comp_info">Known Seq / Round: <span id="seqvalue"></span></h5></div>
+        <div class="col s1">
+          <label class="black-text comp_info">
+            <input class="with-gap" name="sequenceType" type="radio" value="std" id="std_seqType" checked />
+            <span class="comp_info">Std</span>
+          </label>
+        </div>
+        <div class="col s1">
+          <label class="black-text comp_info">
+              <input class="with-gap" name="sequenceType" type="radio" value="alt" id="alt_seqType" />
+              <span class="comp_info">Alt</span>
+          </label></span>
+        </div>
+        <div class="col s5 right-align"><h5 class="comp_info">Unknown Seq / Round: <span id="unkseqvalue"></span></h5></div>
       </div>
       <div class="row">
         <div class="col s4 center"><div class="black" id="sequence-slider"></div></div>
@@ -127,7 +141,9 @@
   <script th:inline="javascript">
     /*<![CDATA[*/
     var sequenceslider = document.getElementById('sequence-slider');
+    var sequencesliderVal = document.getElementById('seqvalue');
     var unknownsequenceslider = document.getElementById('unknown-sequence-slider');
+    var unksequencesliderVal = document.getElementById('unkseqvalue');
     /*var valuesForRoundSlider = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50]; // 16 values */
     var valuesForSequenceSlider = [1, 2]; // 16 values
     var valuesForUnknownSequenceSlider = [0, 1, 2]; // 16 values
@@ -137,6 +153,7 @@
     const scoreMode = /*[[${scoreMode}]]*/ ;
     const maxSeqPerRound = /*[[${maxSeqPerRound}]]*/ ;
     const maxUnknownSeqPerRound = /*[[${maxUnknownSeqPerRound}]]*/ ;
+    const sequenceType = /*[[${sequenceType}]]*/ ;
 
     document.addEventListener('DOMContentLoaded', function () {
       var elems = document.querySelectorAll('.fixed-action-btn');
@@ -188,12 +205,19 @@
       format: unknownseqformat,
       //pips: { mode: 'steps', format: unknownseqformat },
     });
+    sequenceslider.noUiSlider.on('update', function (values, handle) {
+      sequencesliderVal.innerHTML = values[handle];
+    });
+    unknownsequenceslider.noUiSlider.on('update', function (values, handle) {
+      unksequencesliderVal.innerHTML = values[handle];
+    });
 
     if (isCurrentComp) {
       sequenceslider.noUiSlider.set(maxSeqPerRound);
       unknownsequenceslider.noUiSlider.set(maxUnknownSeqPerRound);
       $('#updateMode').attr('checked','checked')
       $("input[name=score_mode][value=" + scoreMode + "]").prop('checked', true);
+      $("input[name=sequenceType][value=" + sequenceType + "]").prop('checked', true);
     }
 
     $("#createComp").click(function () {
@@ -201,7 +225,7 @@
       var sequences = sequenceslider.noUiSlider.get();
       var unknownSequences = unknownsequenceslider.noUiSlider.get();
       var scoreMode = $('input[name="score_mode"]:checked').val();
-              //$("#score_mode").val();
+      var sequenceType = $('input[name="sequenceType"]:checked').val();
       $.ajax({
         type: "POST",
         url: "/api/comp?edit=" + editComp,
@@ -210,7 +234,8 @@
           {
             score_mode: scoreMode,
             sequences: sequences,
-            unknown_sequences: unknownSequences
+            unknown_sequences: unknownSequences,
+            sequenceType: sequenceType
           }
         ),
         contentType: "application/json; charset=utf-8",
