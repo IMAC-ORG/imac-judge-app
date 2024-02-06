@@ -41,4 +41,4 @@ jobs:
         CHANGELOG_FILE: none
         ALLOW_EMPTY_CHANGELOG: true
       with:
-        args: staging/*
+        args: staging/judge.jar
