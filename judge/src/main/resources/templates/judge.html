@@ -92,7 +92,7 @@
                 <div class="col s8">
                 <br>
                  <img id="my-svg" style="width:60vw; height:75vh;" class="figure-wrapper"
-                    th:src="@{/man/en/{roundType}/{class}/{index}{dirletter}.svg(class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index + 1}, roundType=${roundType.toLowerCase()}, dirletter=${dirletter})}">
+                 th:src="@{/man/en/{sequenceType}/{roundType}/{class}/{index}{dirletter}.svg(sequenceType=${sequenceType},class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index + 1}, roundType=${roundType.toLowerCase()}, dirletter=${dirletter})}">
                 </div>
             </div>
             <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
@@ -167,6 +167,10 @@
         const pilot_class =  /*[[${pilot_class}]]*/ ;
         const sequenceJson = JSON.parse( /*[[${sequencesjson}]]*/);
         var audio = new Audio();
+
+        //TODO: read language from settings
+        const sequencesBasePath = "/man/en";
+        const sequenceType = /*[[${sequenceType}]]*/ ;
 
         const welcome_text = 'Now judging ' + pilot_name + ' ' + pilot_class + ' round ' + round + ' sequence ' + sequence + ' ' + roundType;
         const synth = window.speechSynthesis;
@@ -251,7 +255,7 @@
         function shortdescription(caller_index) {
             audio.pause();
             audio.currentTime = 0;
-            var audio_url = '/man/en/' + roundType + '/' + pilot_class + '/fig' + ( score_index + caller_index + 1 ) + '.mp3';
+            var audio_url = sequencesBasePath+'/'+ sequenceType + '/' + roundType + '/' + pilot_class + '/fig' + ( score_index + caller_index + 1 ) + '.mp3';
             audio = new Audio(audio_url.toLowerCase());
             audio.volume = 0.5;
             audio.play();
@@ -266,14 +270,14 @@
         }  
         
         function setLongDescription(caller_index) {
-            var audiolongurl = '/man/en/' + roundType + '/' + pilot_class + '/call' + ( score_index + caller_index + 1 ) + '.mp3';
+            var audiolongurl = sequencesBasePath + '/'+ sequenceType + '/' + roundType + '/' + pilot_class + '/call' + ( score_index + caller_index + 1 ) + '.mp3';
             audiolongd = new Audio(audiolongurl.toLowerCase());
         }
 
         function NowJudgingMessage() {
             audio.pause();
             audio.currentTime = 0;
-            var audio_url = '/man/en/now_judging_' + pilot_class + '_' + roundType + '_sequence.mp3';
+            var audio_url = sequencesBasePath + '/now_judging_' + pilot_class + '_' + roundType + '_sequence.mp3';
             audio = new Audio(audio_url.toLowerCase());
             audio.volume = 0.5;
             audio.play();
@@ -288,7 +292,7 @@
                 //this is a number lets build url to wave file
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = '/man/en/score/' + text + '.mp3';
+                var audio_url = sequencesBasePath + '/score/' + text + '.mp3';
                 audio = new Audio(audio_url);
                 audio.volume = 0.5;
                 audio.play();
@@ -296,7 +300,7 @@
             } else if (text == 'BREAK') {
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = '/man/en/score/break.mp3';
+                var audio_url = sequencesBasePath + '/score/break.mp3';
                 audio = new Audio(audio_url);
                 audio.volume = 0.5;
                 audio.play();
@@ -304,7 +308,7 @@
             } else if (text == 'Not Observed') {
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = '/man/en/score/not_observed.mp3';
+                var audio_url = sequencesBasePath + '/score/not_observed.mp3';
                 audio = new Audio(audio_url);
                 audio.volume = 0.5;
                 audio.play();

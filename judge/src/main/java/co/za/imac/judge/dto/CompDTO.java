@@ -21,6 +21,7 @@ public class CompDTO {
     private int sequences;
     private int unknown_sequences = 0;
     private int judge_id = 1;
+    private String sequence_type = "std";
 
     public CompDTO() {
         this.comp_id = 0;
@@ -70,5 +71,11 @@ public class CompDTO {
     }
     public void setSequences(int sequences) {
         this.sequences = sequences;
+    }
+    public String getSequenceType() {
+        return sequence_type;
+    }
+    public void setSequenceType(String sequence_type) {
+        this.sequence_type = sequence_type;
     }
 }

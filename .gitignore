@@ -22,6 +22,10 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 /.idea
-*.zip
-.devcontainer/judge/judge.backup.zip
-.devcontainer/judge/pilots/judge.backup.zip
+
+### VS Code ###
+.vscode/
+
+### Judge Files not needing to be tracked ###
+dockerbuild/settings.json
+.devcontainer/judge/
