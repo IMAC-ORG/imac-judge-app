@@ -95,7 +95,9 @@
                  th:src="@{/man/en/{sequenceType}/{roundType}/{class}/{index}{dirletter}.svg(sequenceType=${sequenceType},class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index + 1}, roundType=${roundType.toLowerCase()}, dirletter=${dirletter})}">
                 </div>
             </div>
-            <h2 th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
+            <h2 th:if="${roundType == 'KNOWN' or pilot_class == 'BASIC'}" th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
+                    th:id="'description_'+ ${iterStat.index}">First Panel</h2>
+           <h2 th:if="${roundType == 'UNKNOWN' and pilot_class != 'BASIC'}" th:text="'Figure '+${iterStat.index + 1}" style="line-height: 1rem ; margin: 1rem ;"
                     th:id="'description_'+ ${iterStat.index}">First Panel</h2>
         </div>
     </div>
