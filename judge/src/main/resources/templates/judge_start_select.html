@@ -20,7 +20,7 @@
             }
             }
         </style>
-        <h6 class="black-text">SELECT ROUND DIRECTION & TYPE</h6>
+        <h6 class="black-text hide-on-small-only">SELECT ROUND DIRECTION & TYPE</h6>
         <form th:id="'judgeknown'+${pilot.primary_id}" action="/judge" method="get">
             <input type="hidden" name="pilot_id" th:value="${pilot.primary_id}"/>
             <input type="hidden" name="roundType" value="KNOWN"/>
