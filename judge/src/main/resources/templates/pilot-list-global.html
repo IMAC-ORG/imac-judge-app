@@ -30,17 +30,18 @@
   <!-- CSS  -->
   <link href="materialize/css/material_lcons.css" rel="stylesheet">
   <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+  <script src="jquery-3.6.4.min.js"></script>
 
 </head>
 
 <body style="height: 100vh !important;" class="yellow">
 
+ <!-- <div th:replace="~{banner::line_judge}"></div> -->
 
   <div class="carousel carousel-slider center">
-
-
     <div th:each="pilot,iterStat : ${pilots}" class="carousel-item yellow black-text"
       th:href="@{/judge(pilot_id=${pilot.primary_id})}">
+      <a th:replace="~{banner::line_judge}"></a>
       <h1 th:text="${pilot.name}" class="pilot_name">First Panel</h1>
       <h2 th:text="${pilot.getClassString()}" class="pilot_class">First Panel</h2>
       <h2 th:if="${pilotScores[pilot.primary_id].isActive}" class="pilot_round">Round: <span
@@ -71,62 +72,11 @@ th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 
 <div
 th:if="${pilotScores[pilot.primary_id].isActive}"
 th:id="'modal'+ ${pilot.primary_id}" class="modal">
-<div class="modal-content">
-  <h6 class="black-text">SELECT ROUND DIRECTION & TYPE</h6>
-  <form th:id="'judgeknown'+${pilot.primary_id}" action="/judge" method="get">
-    <input type="hidden" name="pilot_id" th:value="${pilot.primary_id}"/>
-    <input type="hidden" name="roundType" value="KNOWN"/>
-    <input type="hidden" th:id="'dirflip'+${pilot.primary_id}" name="dirflip" value="false" />
-  <div class="row">
-    <div class="col s3"><a class="">
-      <i class="small material-icons">east</i>
-      <i class="small material-icons">east</i></a>
-    </div>
-    
-    <div class="col s6 switch">
-      <label class="black-text" style="font-size: 12pt" th:for="'cb_dirflip'+${pilot.primary_id}">
-        (B)
-        <input type="checkbox" th:id="'cb_dirflip'+${pilot.primary_id}" th:onchange="'javascript:$(\'#dirflip'+${pilot.primary_id}+'\').val(this.checked)'"/>
-        <span class="lever"></span>
-        (C)
-      </label>
-    </div>
-
-    <div class="col s3"><a class="">
-      <i class="small material-icons">west</i>
-      <i class="small material-icons">west</i></a>
-    </div>
-
+  <div th:replace="~{judge_start_select::modal_select}"></div>
+  <!-- <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+  </div>-->
   </div>
-  
-  <div class="row">
-    <div class="col s4"> <a class="" th:href="'javascript:$(\'#judgeknown'+${pilot.primary_id}+'\').submit()'" >
-      <i class="medium material-icons center">visibility</i></a>
-      <p class="black-text">KNOWN</p>
-    </div>
-
-    <div class="col s4"> <a class="" th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='UNKNOWN', dirflip=false)}">
-      <i class="medium material-icons center">visibility_off</i></a>
-      <p class="black-text">UNKNOWN</p>
-    </div>
-
-    <!-- <div class="col s4"> <a class="" th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='FREESTYLE', dirflip=false)}"> -->
-      <div class="col s4"> <a class="" href="#">
-      <i class="medium material-icons center">diversity_2</i></a>
-      <p class="black-text">FREESTYLE</p>
-    </div>
-  </div>
-
-  </form>
-</div>
-<!-- <div class="modal-footer">
-  <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
-</div>-->
-
-
-
-
-</div>
     </div>
   </div>
 
@@ -146,11 +96,10 @@ th:id="'modal'+ ${pilot.primary_id}" class="modal">
 
 
   <!--  Scripts-->
-  <script src="jquery-3.6.4.min.js"></script>
   <script src="materialize/js/materialize.js"></script>
   <script>
     // Or with jQuery
-    var windowHeight = window.innerHeight;
+    var windowHeight = window.innerHeight - 35; // reduce some for banner
     $('.carousel.carousel-slider').carousel({
       fullWidth: true,
       indicators: false
