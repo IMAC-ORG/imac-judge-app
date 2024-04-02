@@ -36,12 +36,11 @@
 
 <body style="height: 100vh !important;" class="yellow">
 
- <!-- <div th:replace="~{banner::line_judge}"></div> -->
+ <div th:replace="~{banner::line_judge}"></div>
 
   <div class="carousel carousel-slider center">
     <div th:each="pilot,iterStat : ${pilots}" class="carousel-item yellow black-text"
       th:href="@{/judge(pilot_id=${pilot.primary_id})}">
-      <a th:replace="~{banner::line_judge}"></a>
       <h1 th:text="${pilot.name}" class="pilot_name">First Panel</h1>
       <h2 th:text="${pilot.getClassString()}" class="pilot_class">First Panel</h2>
       <h2 th:if="${pilotScores[pilot.primary_id].isActive}" class="pilot_round">Round: <span
@@ -86,7 +85,6 @@ th:id="'modal'+ ${pilot.primary_id}" class="modal">
       <i class="large material-icons">menu</i>
     </a>
     <ul>
-
       <li><a class="btn-floating btn-large purple" onclick="syncPilots();"><i class="material-icons">sync</i></a></li>
       <li><a class="btn-floating btn-large light-blue darken-1" onclick="syncScores();"><i class="material-icons">publish</i></a></li>
       <li><a class="btn-floating btn-large green" href="/newcomp"><i class="material-icons">edit</i></a></li>
