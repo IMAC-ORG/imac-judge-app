@@ -5,6 +5,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import java.io.IOException;
@@ -19,6 +24,7 @@ import co.za.imac.judge.utils.SettingUtils;
 public class SettingService {
 
     private static final Logger logger = LoggerFactory.getLogger(SettingService.class);
+    private final String PILOT_SCORE_PATH = SettingUtils.getApplicationConfigPath() + "/pilots/scores";
 
     private final String SETTINGS_FILE_NAME = SettingUtils.getApplicationConfigPath() + "/settings.json";
     private boolean firstRun = true;
@@ -87,11 +93,18 @@ public class SettingService {
 
     public void backupAllFiles() throws IOException{
         String sourceFile = SettingUtils.DEFAULT_APPLICATION_CONFIG_PATH + "/pilots";
-        FileOutputStream fos = new FileOutputStream(SettingUtils.DEFAULT_APPLICATION_CONFIG_PATH + "/" + "judge.backup.zip");
+        String date =  new SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().getTime());
+        FileOutputStream fos = new FileOutputStream(SettingUtils.DEFAULT_APPLICATION_CONFIG_PATH + "/" + "judge.backup."+ date + ".zip");
         ZipOutputStream zipOut = new ZipOutputStream(fos);
         File fileToZip = new File(sourceFile);
         SettingUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
         zipOut.close();
         fos.close();
+
+        //remove pilot data
+        Files.walk(Paths.get(PILOT_SCORE_PATH))
+                .filter(Files::isRegularFile)
+                .map(Path::toFile)
+                .forEach(File::delete);
     }
 }

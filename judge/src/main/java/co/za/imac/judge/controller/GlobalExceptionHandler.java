@@ -29,5 +29,4 @@ public class GlobalExceptionHandler {
 
         return "/needscore";
     }
-
 }
