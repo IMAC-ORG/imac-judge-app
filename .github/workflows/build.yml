@@ -29,15 +29,19 @@ jobs:
           mvn clean package
     - run: ls judge/target/
     - run: mkdir staging && cp judge/target/*.jar staging/judge.jar
+    - run: cp judge/target/*.zip staging/figures.zip
     - uses: actions/upload-artifact@v3
       with:
         name: Package
         path: staging
     - name: Release
-      uses: docker://antonyurchenko/git-release:v5
+      uses: docker://antonyurchenko/git-release:latest
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CHANGELOG_FILE: none
         ALLOW_EMPTY_CHANGELOG: true
+        RELEASE_NAME_PREFIX: "Release: "
       with:
-        args: staging/judge.jar
+        args: |
+          staging/judge.jar
+          staging/figures.zip

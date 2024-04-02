@@ -8,6 +8,7 @@ import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 
 import co.za.imac.judge.dto.RoundDTO;
+import co.za.imac.judge.dto.SettingDTO;
 import co.za.imac.judge.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import org.xml.sax.SAXException;
 import com.google.gson.Gson;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
+import co.za.imac.judge.dto.CompDTO;
 import co.za.imac.judge.dto.FigureDTO;
 import co.za.imac.judge.dto.Pilot;
 import co.za.imac.judge.dto.PilotScores;
@@ -111,6 +113,10 @@ public class RootController {
             return "redirect:/newcomp";
         }
 
+        // Get settings so we can show them
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+        
         model.addAttribute("pilots", pilots);
         HashMap<Integer, PilotScores> pilotScores = new HashMap<>();
 
@@ -170,13 +176,19 @@ public class RootController {
         }
         model.addAttribute("pilotScores", pilotScores);
         model.addAttribute("comp", compService.getComp());
+
+        // Get settings so we can show them
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+
         return "pilot-list-round";
     }
 
     @GetMapping("/judge")
     public String judge(@RequestParam(name = "pilot_id", required = true) int pilot_id,
             @RequestParam(name = "roundType", required = true) String roundType,
-            @RequestParam(name = "dirflip", required = true, defaultValue = "false") Boolean dirflip, Model model)
+            @RequestParam(name = "dirflip", required = true, defaultValue = "false") Boolean dirflip, 
+            @RequestParam(name = "sequenceType", required = true, defaultValue = "std") String sequenceType, Model model)
             throws IOException, ParserConfigurationException, SAXException {
 
         if (!compService.isCurrentComp()) {
@@ -198,6 +210,7 @@ public class RootController {
         model.addAttribute("pilot", pilot);
         model.addAttribute("pilotScores", pilotScores);
         model.addAttribute("roundType", roundType.toUpperCase());
+        model.addAttribute("sequenceType", sequenceType);
         model.addAttribute("pilot_class", pilot.getClassString());
         String sequencesJson = new Gson().toJson(sequences);
         model.addAttribute("sequencesjson", sequencesJson);
@@ -209,22 +222,29 @@ public class RootController {
 
     @GetMapping("/newcomp")
     public String newcomp(Model model) throws IOException {
+        // Get settings so we can show them
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
 
         boolean isComp = compService.isCurrentComp();
         logger.info("Is there a comp? : " + isComp);
         model.addAttribute("isCurrentComp", isComp);
         if (isComp) {
-            model.addAttribute("compName", compService.getComp().getComp_name());
-            model.addAttribute("compId", compService.getComp().getComp_id());
-            model.addAttribute("scoreMode", compService.getComp().getScore_mode());
-            model.addAttribute("maxSeqPerRound", compService.getComp().getSequences());
-            model.addAttribute("maxUnknownSeqPerRound", compService.getComp().getUnknown_sequences());
+            CompDTO curComp = compService.getComp();
+            model.addAttribute("compName", curComp.getComp_name());
+            model.addAttribute("compId", curComp.getComp_id());
+            model.addAttribute("scoreMode", curComp.getScore_mode());
+            model.addAttribute("maxSeqPerRound", curComp.getSequences());
+            model.addAttribute("maxUnknownSeqPerRound", curComp.getUnknown_sequences());
+            model.addAttribute("maxUnknownSeqPerRound", curComp.getUnknown_sequences());
+            model.addAttribute("sequenceType", curComp.getSequenceType());
         } else {
             model.addAttribute("compName", "Untitled Comp");
             model.addAttribute("compId", 0);
             model.addAttribute("scoreMode", "byRound");
             model.addAttribute("maxSeqPerRound", 2);
             model.addAttribute("maxUnknownSeqPerRound", 1);
+            model.addAttribute("sequenceType", "std");
         }
         return "newcomp";
     }
