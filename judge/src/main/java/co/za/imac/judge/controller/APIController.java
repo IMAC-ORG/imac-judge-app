@@ -53,16 +53,17 @@ public class APIController {
             throws IOException, ParserConfigurationException, SAXException, URISyntaxException {
 
         Map<String, Object> result = new HashMap<>();
-
+        
         logger.debug("Comp data received:");
         logger.debug(new Gson().toJson(comp));
+        //archive exising pilots
+        settingService.backupAllFiles();
 
         // fetch pilots
         pilotService.getPilotsFileFromScore(); // Reloading here means we can add pilots mid comp. But if their id/name
         compService.enrichCompWithCompInfoFromScore(comp); // Add the names and ID.
        
-        //archive exising pilots
-         settingService.backupAllFiles();
+       
         if (!editComp) {
             pilotService.setupPilotScores();
         }
