@@ -9,7 +9,6 @@ services:
       - ../judge:/workspace
       - ./judge:/var/opt/judge
       - ../figures:/var/opt/judge/figures
-      - C:\Users\tejpi\OneDrive\Documents\git\imac-judge-app\.devcontainer\judge-controller:/imac-judge-controller
     command: /bin/sh -c "while sleep 1000; do :; done"
     restart: unless-stopped
     
