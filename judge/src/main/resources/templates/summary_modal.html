@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+
+    <div th:fragment="summary_modal"  class="modal-content">
+        <style>
+            .comp_action {
+                font-size: 2rem;
+            }
+            .comp_action_text {
+                font-size: 2vw;
+            }
+            @media only screen and (min-width: 601px) {
+                .comp_action {
+                    font-size: 4rem;
+                }
+                .comp_action_text {
+                font-size: 3vw;
+            }
+            }
+        </style>
+        <div id="modal_summary" class="modal">
+        <div class="modal-content yellow">
+            <h6 class="black-text hide-on-small-only">Score Summary</h6>
+            <!-- <h7 class="black-text hide-on-med-and-up">Score Summary</h7> -->
+            <div class="row scoresummary" style="font-weight: bold;">
+                <div class="col s2 m3 right-align hide-on-small-only">Figure</div>
+                <div class="col s9 m7 hide-on-small-only">Desc</div>
+                <div class="col s1 m2 right-align hide-on-small-only">Score</div>
+            </div>
+            <div class="row scoresummary"><div class="col s2 m3 right-align">Fig 1</div><div class="col s9 m7" id="ss_0_desc">Desc</div><div class="col s1 m2 right-align" id="ss_0_text" >-</div></div>
+            <div class="row scoresummary"><div class="col s2 m3 right-align">Fig 2</div><div class="col s9 m7" id="ss_1_desc">Desc</div><div class="col s1 m2 right-align" id="ss_1_text">-</div></div>
+            <div class="row scoresummary"><div class="col s2 m3 right-align">Fig 3</div><div class="col s9 m7" id="ss_2_desc">Desc</div><div class="col s1 m2 right-align" id="ss_2_text">-</div></div>
+            <div class="row scoresummary"><div class="col s2 m3 right-align">Fig 4</div><div class="col s9 m7" id="ss_3_desc">Desc</div><div class="col s1 m2 right-align" id="ss_3_text">-</div></div>
+            <div class="row scoresummary"><div class="col s2 m3 right-align">Fig 5</div><div class="col s9 m7" id="ss_4_desc">Desc</div><div class="col s1 m2 right-align" id="ss_4_text">-</div></div>
+            <div class="row scoresummary"><div class="col s2 m3 right-align">Fig 6</div><div class="col s9 m7" id="ss_5_desc">Desc</div><div class="col s1 m2 right-align" id="ss_5_text">-</div></div>
+            <div class="row scoresummary"><div class="col s2 m3 right-align">Fig 7</div><div class="col s9 m7" id="ss_6_desc">Desc</div><div class="col s1 m2 right-align" id="ss_6_text">-</div></div>
+            <div class="row scoresummary"><div class="col s2 m3 right-align">Fig 8</div><div class="col s9 m7" id="ss_7_desc">Desc</div><div class="col s1 m2 right-align" id="ss_7_text">-</div></div>
+            <div class="row scoresummary"><div class="col s2 m3 right-align">Fig 9</div><div class="col s9 m7" id="ss_8_desc">Desc</div><div class="col s1 m2 right-align" id="ss_8_text">-</div></div>
+            <div class="row scoresummary"><div class="col s2 m3 right-align">Fig 10</div><div class="col s9 m7" id="ss_9_desc">Desc</div><div class="col s1 m2 right-align" id="ss_9_text">-</div></div>
+            <div class="row scoresummary hide-on-small-only"><div class="col s2 m3 right-align"></div><div class="col s9 m7" id="ss_10_desc">Sound</div><div class="col s1 m2 right-align" id="ss_10_text">-</div></div>
+            <div class="row scoresummary hide-on-small-only"><div class="col s2 m3 right-align"></div><div class="col s9 m7" id="ss_11_desc">Airspace</div><div class="col s1 m2 right-align" id="ss_11_text">-</div></div>
+            <div class="modal-footer yellow">
+                <div class="row">
+                    <div class="col s4 center-align">
+                        <button data-target="modal_summary" class="modal-action modal-close orange darken-1 btn-small">Review</button>
+                    </div>
+                    <div class="col s4 offset-s4 center-align">
+                        <button data-target="modal_summary" class="modal-action modal-close orange darken-1 btn-small" onclick="submitScores(true);">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+  </body>

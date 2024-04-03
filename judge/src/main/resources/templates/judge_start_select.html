@@ -3,7 +3,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
   <body>
 
-    <div th:fragment="modal_select"  class="modal-content">
+    <div th:fragment="modal_select"  class="modal-content" style="padding-top: 5px">
         <style>
             .comp_action {
                 font-size: 2rem;
@@ -67,7 +67,7 @@
             </div>
     
             <div class="row">
-                <div class="col s8 left-align">
+                <div class="col s12 center-align">
                     <label th:for="'std_seqType'+${pilot.primary_id}">
                         <input class="with-gap" th:name="'rb_sequenceType'+${pilot.primary_id}" type="radio" value="std" th:id="'std_seqType'+${pilot.primary_id}" th:checked="${comp.sequenceType}=='std'" />
                         <span class="black-text comp_action_text">STD</span>
