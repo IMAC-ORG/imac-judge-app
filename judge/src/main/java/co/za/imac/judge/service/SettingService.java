@@ -92,9 +92,9 @@ public class SettingService {
     }
 
     public void backupAllFiles() throws IOException{
-        String sourceFile = SettingUtils.DEFAULT_APPLICATION_CONFIG_PATH + "/pilots";
+        String sourceFile = SettingUtils.getApplicationConfigPath() + "/pilots";
         String date =  new SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().getTime());
-        FileOutputStream fos = new FileOutputStream(SettingUtils.DEFAULT_APPLICATION_CONFIG_PATH + "/" + "judge.backup."+ date + ".zip");
+        FileOutputStream fos = new FileOutputStream(SettingUtils.getApplicationConfigPath() + "/" + "judge.backup."+ date + ".zip");
         ZipOutputStream zipOut = new ZipOutputStream(fos);
         File fileToZip = new File(sourceFile);
         SettingUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
