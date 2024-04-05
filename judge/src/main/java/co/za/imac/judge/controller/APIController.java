@@ -56,15 +56,15 @@ public class APIController {
         
         logger.debug("Comp data received:");
         logger.debug(new Gson().toJson(comp));
-        //archive exising pilots
-        settingService.backupAllFiles();
-
+       
         // fetch pilots
         pilotService.getPilotsFileFromScore(); // Reloading here means we can add pilots mid comp. But if their id/name
         compService.enrichCompWithCompInfoFromScore(comp); // Add the names and ID.
        
        
         if (!editComp) {
+        //archive exising pilots and scores on new comp creation
+            settingService.backupAllFiles();
             pilotService.setupPilotScores();
         }
 

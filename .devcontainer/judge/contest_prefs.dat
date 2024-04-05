@@ -1,12 +1,12 @@
    <contest_prefs>
       <!-- ========================= -->
-      <!-- [program version = 4.52-Release] -->
-      <!-- [timestamp = 17-Jul-2023 11:56] -->
-      <!-- [file name = C:/Users/WARLOCK/Desktop/Score/data/dir/contest_prefs.dat] -->
+      <!-- [program version = 4.53-RELEASE] -->
+      <!-- [timestamp = 5-Apr-2024 07:10] -->
+      <!-- [file name = /score/data/dir/contest_prefs.dat] -->
       <!-- ========================= -->
-      <contest_name>xxxx</contest_name>
-      <region>Intl</region>
-      <primary_org_name>LSASA</primary_org_name>
+      <contest_name>NoName (see File/Preferences)</contest_name>
+      <region>SW</region>
+      <primary_org_name>AMA</primary_org_name>
       <secondary_org_name>IMAC</secondary_org_name>
       <secondary_id_req>true</secondary_id_req>
       <custom_class_name_0>Seniors</custom_class_name_0>
@@ -139,7 +139,7 @@
       <scaling_factor_unk>20</scaling_factor_unk>
       <scale_free_proportionally>false</scale_free_proportionally>
       <scaing_factor_free>10</scaing_factor_free>
-      <scale_final_scores>true</scale_final_scores>
+      <scale_final_scores>false</scale_final_scores>
       <must_match_0>false</must_match_0>
       <must_match_0510>false</must_match_0510>
       <show_elapsed_time>true</show_elapsed_time>
