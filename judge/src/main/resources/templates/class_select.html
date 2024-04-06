@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
+  <title>Class Select</title>
+  <style>
+
+  </style>
+  <!-- CSS  -->
+  <link href="materialize/css/material_lcons.css" rel="stylesheet">
+  <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+  <script src="jquery-3.6.4.min.js"></script>
+
+</head>
+
+<body style="height: 100vh !important;" class="yellow">
+    <div class="container yellow black-text">
+      <div class="row center-align" style="margin-bottom: 15px;">
+        <div class="col s12"><h4 class="heading">Class Select</h4></div>
+      </div>
+      <div class="row" style="margin-bottom: 15px;">
+        <a href="/pilot-list-global?classFilter=basic" class="col s5 btn orange darken-1 waves-effect waves-light">Basic</a>
+        <a href="/pilot-list-global?classFilter=sportsman"  class="col s5 offset-s2 btn orange darken-1 waves-effect waves-light">Sportsman</a>
+      </div>
+      <div class="row" style="margin-bottom: 15px;">
+        <a href="/pilot-list-global?classFilter=intermediate"  class="col s5 btn orange darken-1 waves-effect waves-light">Intermidiate</a>
+        <a href="/pilot-list-global?classFilter=advanced"  class="col s5 offset-s2 btn orange darken-1 waves-effect waves-light">Advanced</a>
+      </div>
+      <div class="row" style="margin-bottom: 15px;">
+        <a href="/pilot-list-global?classFilter=unlimited"  class="col s5 btn orange darken-1 waves-effect waves-light">Unlimited</a>
+        <a href="/pilot-list-global?classFilter=freestyle"  class="col s5 offset-s2 btn orange darken-1 disabled waves-effect waves-light">Freestyle</a>
+      </div>
+      <div class="row" style="margin-bottom: 15px;">
+        <a href="/"  class="col s6 offset-s3 btn orange darken-1 waves-effect waves-light">Global List</a>
+      </div>
+    </div>
+
+    <div class="fixed-action-btn">
+      <a class="btn-floating btn-large red">
+        <i class="large material-icons">menu</i>
+      </a>
+      <ul>
+        <li><a class="btn-floating btn-large purple" onclick="syncPilots();"><i class="material-icons">sync</i></a></li>
+        <li><a class="btn-floating btn-large light-blue darken-1" onclick="syncScores();"><i class="material-icons">publish</i></a></li>
+        <li><a class="btn-floating btn-large green" href="/newcomp"><i class="material-icons">edit</i></a></li>
+      </ul>
+    </div>
+
+  <!--  Scripts-->
+      <!--JavaScript at end of body for optimized loading-->
+      <script type="text/javascript" src="js/materialize.min.js"></script>
+</body>
+</html>
