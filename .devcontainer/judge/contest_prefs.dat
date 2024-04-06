@@ -1,14 +1,14 @@
    <contest_prefs>
       <!-- ========================= -->
       <!-- [program version = 4.53-RELEASE] -->
-      <!-- [timestamp = 5-Apr-2024 07:10] -->
-      <!-- [file name = /score/data/dir/contest_prefs.dat] -->
+      <!-- [timestamp = 5-Apr-2024 16:41] -->
+      <!-- [file name = /score/data/sr/contest_prefs.dat] -->
       <!-- ========================= -->
-      <contest_name>NoName (see File/Preferences)</contest_name>
+      <contest_name>src</contest_name>
       <region>SW</region>
       <primary_org_name>AMA</primary_org_name>
       <secondary_org_name>IMAC</secondary_org_name>
-      <secondary_id_req>true</secondary_id_req>
+      <secondary_id_req>false</secondary_id_req>
       <custom_class_name_0>Seniors</custom_class_name_0>
       <custom_class_name_1>MiniMac</custom_class_name_1>
       <multiple_divs_okay>true</multiple_divs_okay>
@@ -21,7 +21,7 @@
       <points_enabled>false</points_enabled>
       <points_scaled>false</points_scaled>
       <bonus_points_enabled>false</bonus_points_enabled>
-      <show_kfactored_percentages>true</show_kfactored_percentages>
+      <show_kfactored_percentages>false</show_kfactored_percentages>
       <base_points_collection>
          <base_points rank="1" value="250">
          </base_points>
@@ -147,7 +147,7 @@
       <create_nested_reports>true</create_nested_reports>
       <reverse_rounds>false</reverse_rounds>
       <show_primary_id>true</show_primary_id>
-      <show_secondary_id>true</show_secondary_id>
+      <show_secondary_id>false</show_secondary_id>
       <allow_filenaming_overrides>false</allow_filenaming_overrides>
       <reports_prefix>report_</reports_prefix>
    </contest_prefs>
