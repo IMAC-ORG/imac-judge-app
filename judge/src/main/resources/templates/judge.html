@@ -146,6 +146,8 @@
         const synth = window.speechSynthesis;
         const voices = synth.getVoices();
 
+        const classFilter = localStorage.getItem("classFilter");
+
         document.addEventListener('DOMContentLoaded', function () {
             var elems = document.querySelectorAll('.modal');
             for (var i in sequenceJson) {
@@ -451,13 +453,19 @@
         function nextEvent(responseData) {
             if (responseData.isActive) {
                 if (responseData.activeRound > round) {
+                    if (classFilter != "global") {
+                    window.location.replace("/pilot-list-global?classFilter=" + classFilter);
+                    }
+                    else {
                     window.location.replace("/pilot-list-global");
+                    }
                 }
                 if (responseData.activeSequence > sequence) {
                     location.reload();
                 }
             } else {
-                window.location.replace("/pilot-list-global");
+
+                window.location.replace("/pilot-list-global?classFilter=" + classFilter);
             }
         }
         $("#buttonsDiv").hide();
