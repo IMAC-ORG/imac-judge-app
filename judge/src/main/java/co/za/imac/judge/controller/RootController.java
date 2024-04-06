@@ -82,7 +82,7 @@ public class RootController {
             logger.info("There is no Comp!! redirecting");
             return "redirect:/newcomp";
         }
-        return "redirect:/pilot-list-global";
+        return "redirect:/class_select";
 
         // // Now if we have a comp, are we scoring a round?
         // logger.info("Are we scoring a round?? : " + roundService.isScoringRound());
@@ -95,6 +95,13 @@ public class RootController {
         //     return "redirect:/pilot-list-global";
         // else
         //     return "redirect:/rounds";
+    }
+
+    @GetMapping("/class_select")
+    public String ClassSelect(Model model)
+            throws IOException, ParserConfigurationException, SAXException, UnirestException {
+                return "class_select";
+
     }
 
     @GetMapping("/pilot-list-global")
