@@ -333,6 +333,7 @@
                 //submitScores();
             }
         }
+
         function submitScores(done = false) {
             console.log("Scores: " + JSON.stringify(scores));
             if (done !== true) {
@@ -367,6 +368,7 @@
                 }
             });
         }
+
         function addScore(increment) {
             if (increment == 0.5) {
                 //check if scoring is half
@@ -392,6 +394,7 @@
             textToSpeechCustomMessage(scoreFloat);
 
         }
+
         function removeScore(increment) {
             if (increment == 0.5) {
                 //check if scoring is half
@@ -412,6 +415,7 @@
             $(score_id).text(scoreFloat);
             textToSpeechCustomMessage(scoreFloat);
         }
+
         function setScore(score) {
             if (score == -1 || score == -2) {
                 //check if scoring is half
@@ -447,13 +451,13 @@
         function nextEvent(responseData) {
             if (responseData.isActive) {
                 if (responseData.activeRound > round) {
-                    window.location.replace("/");
+                    window.location.replace("/pilot-list-global");
                 }
                 if (responseData.activeSequence > sequence) {
                     location.reload();
                 }
             } else {
-                window.location.replace("/");
+                window.location.replace("/pilot-list-global");
             }
         }
         $("#buttonsDiv").hide();
