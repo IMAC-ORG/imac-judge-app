@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<body>
+
+  <div th:fragment="class_filter_modal"  class="modal-content">
+    <style>
+        @media only screen and (min-width: 601px) {
+            .comp_action {
+                font-size: 4rem;
+            }
+            .comp_action_text {
+            font-size: 3vw;
+        }
+        }
+    </style>
+    <div id="class_select_modal" class="modal">
+      <div class="modal-content yellow black-text">
+        <div class="row center-align" style="margin-bottom: 10px;">
+          <div class="col s12"><h4 class="heading">Class Select</h4></div>
+        </div>
+        <div class="row" style="margin-bottom: 10px;">
+          <a class="col s5 btn orange darken-1 waves-effect waves-light" id="basic">Basic</a>
+          <a class="col s5 offset-s2 btn orange darken-1 waves-effect waves-light" id="sportsman">Sportsman</a>
+        </div>
+        <div class="row" style="margin-bottom: 10px;">
+          <a class="col s5 btn orange darken-1 waves-effect waves-light" id="intermediate">Intermediate</a>
+          <a class="col s5 offset-s2 btn orange darken-1 waves-effect waves-light" id="advanced">Advanced</a>
+        </div>
+        <div class="row" style="margin-bottom: 10px;">
+          <a class="col s5 btn orange darken-1 waves-effect waves-light" id="unlimited">Unlimited</a>
+          <a class="col s5 offset-s2 btn orange darken-1 disabled waves-effect waves-light" id="freestyle">Freestyle</a>
+        </div>
+        <div class="row" style="margin-bottom: 10px;">
+          <a class="col s6 offset-s3 btn orange darken-1 waves-effect waves-light" id="global">Global List</a>
+        </div>
+    </div>
+  </div>
+
+  <!--  Scripts-->
+      <!--JavaScript at end of body for optimized loading-->
+      <script src="materialize/js/materialize.js"></script>
+      <script>
+        document.getElementById("basic").addEventListener("click", function() {
+          localStorage.setItem("classFilter", "basic");
+          window.location.href = "/pilot-list-global?classFilter=basic";
+        });
+
+        document.getElementById("sportsman").addEventListener("click", function() {
+          localStorage.setItem("classFilter", "sportsman");
+          window.location.href = "/pilot-list-global?classFilter=sportsman";
+        });
+
+        document.getElementById("intermediate").addEventListener("click", function() {
+          localStorage.setItem("classFilter", "intermediate");
+          window.location.href = "/pilot-list-global?classFilter=intermediate";
+        });
+
+        document.getElementById("advanced").addEventListener("click", function() {
+          localStorage.setItem("classFilter", "advanced");
+          window.location.href = "/pilot-list-global?classFilter=advanced";
+        });
+
+        document.getElementById("unlimited").addEventListener("click", function() {
+          localStorage.setItem("classFilter", "unlimited");
+          window.location.href = "/pilot-list-global?classFilter=unlimited";
+        });
+
+        document.getElementById("global").addEventListener("click", function() {
+          localStorage.setItem("classFilter", "global");
+          window.location.href = "/pilot-list-global ";
+        });
+
+      </script>
+</body>
+</html>
