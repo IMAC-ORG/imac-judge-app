@@ -51,7 +51,9 @@ public class JudgeApplication implements WebMvcConfigurer {
 	//sets the path /man to the location where we now store outside of the jar
 	@Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/man/**").addResourceLocations("file://" + SettingUtils.getApplicationConfigPath() + "/figures/")
+        //convert a Windows path to Unix style
+		String appConfigPath = SettingUtils.getApplicationConfigPath().replace('\\', '/');
+        registry.addResourceHandler("/man/**").addResourceLocations("file:///" + appConfigPath + "/figures/" )
                 .setCachePeriod(0);
 		
     }
