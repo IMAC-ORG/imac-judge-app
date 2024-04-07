@@ -107,13 +107,13 @@
 
 
     <div class="fixed-action-btn">
-        <a class="btn-floating btn-large red">
+        <a class="btn-floating red">
             <i class="large material-icons">menu</i>
         </a>
         <ul>
-            <li><a class="btn-floating btn-large green" onclick="showAllButtons();"><i
+            <li><a class="btn-floating green" onclick="showAllButtons();"><i
                         class="material-icons">view_module</i></a></li>
-            <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">home</i></a></li>
+            <li><a class="btn-floating green" href="/"><i class="material-icons">home</i></a></li>
         </ul>
     </div>
 
@@ -145,6 +145,8 @@
         const welcome_text = 'Now judging ' + pilot_name + ' ' + pilot_class + ' round ' + round + ' sequence ' + sequence + ' ' + roundType;
         const synth = window.speechSynthesis;
         const voices = synth.getVoices();
+
+        const classFilter = localStorage.getItem("classFilter");
 
         document.addEventListener('DOMContentLoaded', function () {
             var elems = document.querySelectorAll('.modal');
@@ -333,6 +335,7 @@
                 //submitScores();
             }
         }
+
         function submitScores(done = false) {
             console.log("Scores: " + JSON.stringify(scores));
             if (done !== true) {
@@ -367,6 +370,7 @@
                 }
             });
         }
+
         function addScore(increment) {
             if (increment == 0.5) {
                 //check if scoring is half
@@ -392,6 +396,7 @@
             textToSpeechCustomMessage(scoreFloat);
 
         }
+
         function removeScore(increment) {
             if (increment == 0.5) {
                 //check if scoring is half
@@ -412,6 +417,7 @@
             $(score_id).text(scoreFloat);
             textToSpeechCustomMessage(scoreFloat);
         }
+
         function setScore(score) {
             if (score == -1 || score == -2) {
                 //check if scoring is half
@@ -447,13 +453,19 @@
         function nextEvent(responseData) {
             if (responseData.isActive) {
                 if (responseData.activeRound > round) {
-                    window.location.replace("/");
+                    if (classFilter != "global") {
+                    window.location.replace("/pilot-list-global?classFilter=" + classFilter);
+                    }
+                    else {
+                    window.location.replace("/pilot-list-global");
+                    }
                 }
                 if (responseData.activeSequence > sequence) {
                     location.reload();
                 }
             } else {
-                window.location.replace("/");
+
+                window.location.replace("/pilot-list-global?classFilter=" + classFilter);
             }
         }
         $("#buttonsDiv").hide();

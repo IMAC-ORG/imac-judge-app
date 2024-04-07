@@ -22,6 +22,16 @@
       font-size: calc(4vw + 3vh) !important;
     }
 
+    .modal {
+            border-radius: 20px !important;
+            max-height: 98% !important;
+            top: 5% !important;
+        }
+
+    .modal-content {
+            padding: 10px !important;
+    }
+
     @font-face {
       font-family: digitalFont;
       src: url(font/digital-7.ttf);
@@ -63,31 +73,35 @@
       <a th:if="${pilotScores[pilot.primary_id].isActive}"
         class="waves-effect waves-light btn modal-trigger orange darken-1 pulse" th:href="'#modal'+ ${pilot.primary_id}"><i
           class="material-icons right">flight_takeoff</i>Judge</a>
-<!-- Modal Structure -->
-<!--
-<div
-th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence == 1 }"
--->
-<div
-th:if="${pilotScores[pilot.primary_id].isActive}"
-th:id="'modal'+ ${pilot.primary_id}" class="modal">
-  <div th:replace="~{judge_start_select::modal_select}"></div>
-  <!-- <div class="modal-footer">
-    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
-  </div>-->
-  </div>
+      <!-- Modal Structure -->
+      <!--
+      <div
+      th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence == 1 }"
+      -->
+      <div
+        th:if="${pilotScores[pilot.primary_id].isActive}"
+        th:id="'modal'+ ${pilot.primary_id}" class="modal">
+          <div th:replace="~{judge_start_select::modal_select}"></div>
+        <!-- <div class="modal-footer">
+          <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+        </div>-->
+      </div>
     </div>
   </div>
 
+  <div th:replace="~{class_filter_modal::class_filter_modal}"></div>
+
 
   <div class="fixed-action-btn">
-    <a class="btn-floating btn-large red">
+    <a class="btn-floating red">
       <i class="large material-icons">menu</i>
     </a>
     <ul>
-      <li><a class="btn-floating btn-large purple" onclick="syncPilots();"><i class="material-icons">sync</i></a></li>
-      <li><a class="btn-floating btn-large light-blue darken-1" onclick="syncScores();"><i class="material-icons">publish</i></a></li>
-      <li><a class="btn-floating btn-large green" href="/newcomp"><i class="material-icons">edit</i></a></li>
+      <li><a class="btn-floating purple" onclick="syncPilots();"><i class="material-icons">sync</i></a></li>
+      <li><a class="btn-floating light-blue darken-1" onclick="syncScores();"><i class="material-icons">publish</i></a></li>
+      <li><a class="btn-floating modal-trigger orange" href="#class_select_modal"><i class="material-icons">filter_alt</i></a></li>
+      <li><a class="btn-floating green" href="/newcomp"><i class="material-icons">edit</i></a></li>
+      <!--<li><a class="btn-floating btn-medium green" href="/"><i class="material-icons">home</i></a></li>-->
     </ul>
   </div>
 
