@@ -69,9 +69,11 @@
         class="waves-effect waves-light btn orange darken-1 pulse"
         th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType=${pilotScores[pilot.primary_id].activeRoundType})}"><i
           class="material-icons right">flight_takeoff</i>Judge</a> -->
-
+      <div class="row hide-on-small-only">
+        <div class="col s12"></div>
+      </div>
       <a th:if="${pilotScores[pilot.primary_id].isActive}"
-        class="waves-effect waves-light btn modal-trigger orange darken-1 pulse" th:href="'#modal'+ ${pilot.primary_id}"><i
+        class="waves-effect waves-light btn-large modal-trigger orange darken-1 pulse" th:href="'#modal'+ ${pilot.primary_id}"><i 
           class="material-icons right">flight_takeoff</i>Judge</a>
       <!-- Modal Structure -->
       <!--
@@ -93,14 +95,14 @@
 
 
   <div class="fixed-action-btn"  style="margin-right: 25px;">
-    <a class="btn-floating red">
+    <a class="btn-floating btn-large red">
       <i class="large material-icons">menu</i>
     </a>
     <ul>
-      <li><a class="btn-floating purple" onclick="syncPilots();"><i class="material-icons">sync</i></a></li>
-      <li><a class="btn-floating light-blue darken-1" onclick="syncScores();"><i class="material-icons">publish</i></a></li>
-      <li><a class="btn-floating modal-trigger orange" href="#class_select_modal"><i class="material-icons">filter_alt</i></a></li>
-      <li><a class="btn-floating green" href="/newcomp"><i class="material-icons">edit</i></a></li>
+      <li><a class="btn-floating btn-large purple" onclick="syncPilots();"><i class="material-icons">sync</i></a></li>
+      <li><a class="btn-floating btn-large light-blue darken-1" onclick="syncScores();"><i class="material-icons">publish</i></a></li>
+      <li><a class="btn-floating btn-large modal-trigger orange" href="#class_select_modal"><i class="material-icons">filter_alt</i></a></li>
+      <li><a class="btn-floating btn-large green hide-on-small-only" href="/newcomp"><i class="material-icons">edit</i></a></li>
       <!--<li><a class="btn-floating btn-medium green" href="/"><i class="material-icons">home</i></a></li>-->
     </ul>
   </div>
