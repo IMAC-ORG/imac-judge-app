@@ -19,8 +19,8 @@ jobs:
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-java@v3
+    - uses: actions/checkout@v4
+    - uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -30,7 +30,7 @@ jobs:
     - run: ls judge/target/
     - run: mkdir staging && cp judge/target/*.jar staging/judge.jar
     - run: cp judge/target/*.zip staging/figures.zip
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: Package
         path: staging
