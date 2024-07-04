@@ -11,6 +11,7 @@ services:
       - ../figures:/var/opt/judge/figures
     command: /bin/sh -c "while sleep 1000; do :; done"
     restart: unless-stopped
+    network_mode: bridge
     
   score_web:
     # Using a Dockerfile is optional, but included for completeness.
