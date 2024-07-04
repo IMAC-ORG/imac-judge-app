@@ -1,8 +1,8 @@
    <sequences>
       <!-- ========================= -->
       <!-- [program version = 4.53-RELEASE] -->
-      <!-- [timestamp = 5-Apr-2024 16:41] -->
-      <!-- [file name = /score/data/sr/sequences.dat] -->
+      <!-- [timestamp = 4-Jul-2024 09:35] -->
+      <!-- [file name = /score/data/kz/sequences.dat] -->
       <!-- [record count = 7] -->
       <!-- ========================= -->
       <sequence index="0">
@@ -271,8 +271,8 @@
                <scoring>HALF</scoring>
             </figure>
             <figure index="9">
-               <k_factor>15</k_factor>
-               <description>90 Degree Rolling Turn</description>
+               <k_factor>16</k_factor>
+               <description>Sharkstooth</description>
                <short_desc></short_desc>
                <spoken_desc></spoken_desc>
                <scoring>HALF</scoring>
@@ -312,7 +312,7 @@
             </figure>
             <figure index="1">
                <k_factor>31</k_factor>
-               <description>270 Degree Rolling Turn</description>
+               <description>Humpty Bump</description>
                <short_desc></short_desc>
                <spoken_desc></spoken_desc>
                <scoring>HALF</scoring>
@@ -414,8 +414,8 @@
                <scoring>HALF</scoring>
             </figure>
             <figure index="2">
-               <k_factor>46</k_factor>
-               <description>360 Degree Rolling Turn</description>
+               <k_factor>45</k_factor>
+               <description>P Loop</description>
                <short_desc></short_desc>
                <spoken_desc></spoken_desc>
                <scoring>HALF</scoring>
