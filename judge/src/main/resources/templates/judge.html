@@ -146,7 +146,11 @@
         const synth = window.speechSynthesis;
         const voices = synth.getVoices();
 
-        const classFilter = localStorage.getItem("classFilter");
+        let classFilter = localStorage.getItem("classFilter");
+            if (classFilter === null) {
+                classFilter = "global";
+                localStorage.setItem("classFilter", classFilter);
+            }
 
         document.addEventListener('DOMContentLoaded', function () {
             var elems = document.querySelectorAll('.modal');
