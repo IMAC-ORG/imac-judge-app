@@ -41,6 +41,13 @@
             font-family: digitalFont;
             src: url(font/digital-7.ttf);
         }
+
+        .pilotname {
+            font-size: 6vh;
+            font-weight: 500;
+            line-height: 10vh;
+            line-height: 3vh; 
+        }
     </style>
     <!-- CSS  -->
     <link href="materialize/css/material_lcons.css" rel="stylesheet">
@@ -72,33 +79,36 @@
 
         </div>
         <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item yellow black-text" href="#one!">
+            <div class="row" style="margin-bottom: 0px; height: 10px;">
+                <p><span class="pilotname" th:text="${pilot.name + ' ('+pilot_class.substring(0,3)+' '+roundType.substring(0,3)+')'}"></span></p>
+            </div>
             <div class="row">
-                <div class="col s4">
-                    <!-- <button data-target="modal_summary" class="btn modal-trigger">Modal</button> -->
-                    <p class="" style="line-height: 50%; font-weight: 500;"><span th:text="${pilot.name}"></span></p>
-                    <p class="" style="line-height: 50%; font-weight: 500;"><span th:text="${pilot_class}"></span></p>
-                    <p class="" style="line-height: 50%; font-weight: 500;">
-                        Round <span th:text="${pilotScores.activeRound}"></span>
-                        Seq <span th:text="${pilotScores.activeSequence}"></span>
-                        <span th:if="${roundType eq 'KNOWN'}">Dir <span th:text="${dirletter}"></span></span>
-                    </p>
-                    <p class="" style="line-height: 50%; font-weight: 500;">FIG <span th:text="${iterStat.index + 1}"></span>
-                        <span th:text="${roundType}"></span>
-                    </p>
+                <div class="col s12 valign-wrapper">
+                    <div class="col s4">
+                        <!-- <button data-target="modal_summary" class="btn modal-trigger">Modal</button> -->
+                        <div class="section" style="height: 80%">
+                            <h1 style="font-family: digitalFont; font-size: 40vh; line-height: 10vh;  "
+                                th:id="'score_'+ ${iterStat.index}">10.0</h1>
+                        </div>
+                    </div>
+                    <div class="col s8">
                     <br>
-                    <h1 style="font-family: digitalFont; font-size: 40vh; line-height: 10vh;  "
-                        th:id="'score_'+ ${iterStat.index}">10.0</h1>
-                </div>
-                <div class="col s8">
-                <br>
-                 <img id="my-svg" style="width:60vw; height:75vh;" class="figure-wrapper"
-                 th:src="@{/man/en/{sequenceType}/{roundType}/{class}/{index}{dirletter}.svg(sequenceType=${sequenceType},class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index + 1}, roundType=${roundType.toLowerCase()}, dirletter=${dirletter})}">
+                    <img id="my-svg" style="width:60vw; height:70vh;" class="figure-wrapper"
+                    th:src="@{/man/en/{sequenceType}/{roundType}/{class}/{index}{dirletter}.svg(sequenceType=${sequenceType},class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index + 1}, roundType=${roundType.toLowerCase()}, dirletter=${dirletter})}">
+                    </div>
                 </div>
             </div>
-            <h2 th:if="${roundType == 'KNOWN' or pilot_class == 'BASIC'}" th:text="${maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
+            <div class="row">
+                <div class="col s4 left" style="font-size: 4vh; font-weight: 500; margin-left: 10px;">
+                    <span th:text="'Round '+${pilotScores.activeRound + ' Seq ' + pilotScores.activeSequence}"></span>
+                    <span th:if="${roundType eq 'KNOWN'}" th:text="'Dir ' + ${dirletter}"></span>
+                </div>
+                
+                <h2 th:if="${roundType == 'KNOWN' or pilot_class == 'BASIC'}" th:text="'Figure '+${(iterStat.index + 1) + ' ' + maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
                     th:id="'description_'+ ${iterStat.index}">First Panel</h2>
-           <h2 th:if="${roundType == 'UNKNOWN' and pilot_class != 'BASIC'}" th:text="'Figure '+${iterStat.index + 1}" style="line-height: 1rem ; margin: 1rem ;"
-                    th:id="'description_'+ ${iterStat.index}">First Panel</h2>
+                <h2 th:if="${roundType == 'UNKNOWN' and pilot_class != 'BASIC'}" th:text="'Figure '+${iterStat.index + 1}" style="line-height: 1rem ; margin: 1rem ;"
+                            th:id="'description_'+ ${iterStat.index}">First Panel</h2>
+            </div>
         </div>
     </div>
 
@@ -257,6 +267,10 @@
             audio = new Audio(audio_url.toLowerCase());
             audio.volume = 0.5;
             audio.play();
+            audio.addEventListener("ended", (event) => {
+                shortdescription(0);
+            });
+
         }
 
         function isNumber(n) {
