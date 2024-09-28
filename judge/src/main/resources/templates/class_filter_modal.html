@@ -29,7 +29,8 @@
         </div>
         <div class="row" style="margin-bottom: 10px;">
           <a class="col s5 btn orange darken-1 waves-effect waves-light" id="unlimited">Unlimited</a>
-          <a class="col s5 offset-s2 btn orange darken-1 disabled waves-effect waves-light" id="freestyle">Freestyle</a>
+          <a class="col s5 offset-s2 btn orange darken-1 waves-effect waves-light" id="invitational">Invitational</a>
+          <!--<a class="col s5 offset-s2 btn orange darken-1 disabled waves-effect waves-light" id="freestyle">Freestyle</a>-->
         </div>
         <div class="row" style="margin-bottom: 10px;">
           <a class="col s6 offset-s3 btn orange darken-1 waves-effect waves-light" id="global">Global List</a>
@@ -64,6 +65,11 @@
         document.getElementById("unlimited").addEventListener("click", function() {
           localStorage.setItem("classFilter", "unlimited");
           window.location.href = "/pilot-list-global?classFilter=unlimited";
+        });
+
+        document.getElementById("invitational").addEventListener("click", function() {
+          localStorage.setItem("classFilter", "invitational");
+          window.location.href = "/pilot-list-global?classFilter=invitational";
         });
 
         document.getElementById("global").addEventListener("click", function() {
