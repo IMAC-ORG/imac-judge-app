@@ -70,7 +70,7 @@ if [ "$latest_tag" != "$last_release" ]; then
     fi
 
     if [ -f figures.zip ]; then
-        unzip -qu figures.zip -d /var/opt/judge
+        unzip -quo figures.zip -d /var/opt/judge
         rm figures.zip
         echo Installed/Upgraded judge figures to version $latest_tag
     fi
@@ -80,4 +80,27 @@ if [ "$latest_tag" != "$last_release" ]; then
     sudo systemctl start kiosk.service
 else
     echo "Latest version already installed"
+fi
+
+#now checking for volume service and install if not found
+if [ ! -d /var/opt/volume_service ]; then
+    if [ -f volume_service.zip ]; then
+      echo "Installing and starting volume service..."
+
+      echo Creating volume_service folder and extracting files...
+      sudo mkdir -p /var/opt/volume_service
+      sudo chown judge.judge /var/opt/volume_service
+      unzip -quoj volume_service.zip -d /var/opt/volume_service/
+      rm volume_service.zip
+
+      echo Starting volume service...
+      chmod +x /var/opt/volume_service/volume.service
+      sudo mv /var/opt/volume_service/volume.service /etc/systemd/system
+      sudo systemctl enable volume
+      sudo systemctl start volume
+
+    else
+      echo Latest release does not include the volume service
+    fi
+
 fi
