@@ -54,7 +54,8 @@
                     <p class="black-text comp_action_text">KNOWN</p></a>
                 </div>
             
-                <div class="col s4"> <a th:id="'act_unknown'+${pilot.primary_id}" class="" th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='UNKNOWN', dirflip=false)}">
+                <div class="col s4"> <a th:id="'act_unknown'+${pilot.primary_id}" class="" th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='UNKNOWN', dirflip='false')}"
+                                        th:onmouseover="'this.href = this.href.replace(/dirflip=[^&]*/, \'dirflip=\' + $(\'#dirflip' + ${pilot.primary_id} + '\').val())'">
                     <i class="comp_action material-icons center">visibility_off</i>
                     <p class="black-text comp_action_text">UNKNOWN</p></a>
                 </div>
