@@ -31,6 +31,7 @@ jobs:
     - run: mkdir staging && cp judge/target/*.jar staging/judge.jar
     - run: cp judge/target/*.zip staging/figures.zip
     - run: zip -r volume_service.zip volume_service/* && cp volume_service.zip staging/
+    - run: ls staging/
     - uses: actions/upload-artifact@v4
       with:
         name: Package
@@ -46,3 +47,4 @@ jobs:
         args: |
           staging/judge.jar
           staging/figures.zip
+          staging/volume_service.zip
