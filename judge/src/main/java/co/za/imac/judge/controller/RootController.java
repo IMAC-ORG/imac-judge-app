@@ -2,8 +2,12 @@ package co.za.imac.judge.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -103,14 +107,17 @@ public class RootController {
 
         // Check first if we have a valid comp
         //logger.info("Is there a comp? : " + compService.isCurrentComp());
-        List<Pilot> pilots = pilotService.getPilots();
-        if(classFilter != null && !classFilter.isEmpty()){
-            pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
-        }
         if (!compService.isCurrentComp()) {
             logger.debug("Redirect to newcomp page.");
             logger.info("There is no Comp!! redirecting");
             return "redirect:/newcomp";
+        }
+
+        List<Pilot> pilots = pilotService.getPilots();
+
+
+        if(classFilter != null && !classFilter.isEmpty()){
+            pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
         }
 
         // Get settings so we can show them
@@ -120,10 +127,24 @@ public class RootController {
         model.addAttribute("pilots", pilots);
         HashMap<Integer, PilotScores> pilotScores = new HashMap<>();
 
+        //get distinct list of all pilot classes for filtering (Set doesn't allow duplicates)
+        Set<String> pilot_classes = new LinkedHashSet<>();
         for (Pilot pilot : pilots) {
             pilotScores.put(pilot.getPrimary_id(), pilotService.getPilotScores(pilot));
+            //pilot_classes.add(pilot.getClassString());
         }
         model.addAttribute("pilotScores", pilotScores);
+
+        //now get ordered list of classes
+        List<String> orderedClasses = Arrays.asList("BASIC", "SPORTSMAN", "INTERMEDIATE", "ADVANCED", "UNLIMITED", "INVITATIONAL");
+        //build ordered list of classes from those contained in the pilots list
+        for (String className : orderedClasses) {
+            if (pilots.stream().anyMatch(pilot -> className.equalsIgnoreCase(pilot.getClassString()))) {
+                pilot_classes.add(className);
+            }
+        }
+        model.addAttribute("pilotClasses", pilot_classes);
+
         model.addAttribute("comp", compService.getComp());
         model.addAttribute("dirflip", false);
         return "pilot-list-global";
@@ -141,6 +162,7 @@ public class RootController {
         // Check first if we have a valid comp
         logger.info("Is there a comp? : " + compService.isCurrentComp());
         List<Pilot> pilots = pilotService.getPilots();
+
         if(classFilter != null && !classFilter.isEmpty()){
             pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
         }
@@ -159,6 +181,9 @@ public class RootController {
         }
 
         List<Pilot> filteredPilots = new ArrayList<>();
+        //get distinct list of all pilot classes for filtering
+        Set<String> pilot_classes = new HashSet<>();
+
         for (Pilot p : pilots) {
             // If pilot is registered for FreeStyle then add him.
             if ("FREESTYLE".equalsIgnoreCase(roundToScore.getType()) && Boolean.TRUE.equals(p.getFreestyle())) {
@@ -167,9 +192,13 @@ public class RootController {
             if (p.getClassString() != null && p.getClassString().equalsIgnoreCase(roundToScore.getComp_class())) {
                 filteredPilots.add(p);
             }
+
+            pilot_classes.add(p.getClassString());
         }
 
         model.addAttribute("pilots", filteredPilots);
+        model.addAttribute("pilotClasses", pilot_classes);
+
         HashMap<Integer, PilotScores> pilotScores = new HashMap<>();
         for (Pilot pilot : filteredPilots) {
             pilotScores.put(pilot.getPrimary_id(), pilotService.getPilotScores(pilot));
