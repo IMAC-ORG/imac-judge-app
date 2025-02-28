@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>co.za.imac</groupId>
 	<artifactId>judge</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.2-Release</version>
 	<name>judge</name>
 	<description>imac judge</description>
 	<properties>
