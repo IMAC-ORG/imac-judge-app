@@ -27,6 +27,7 @@ public class GlobalRestExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public APIErrorMessage restScoreUnavailable(HttpServletRequest request,
             HttpServletResponse response, Exception ex) {
+        LOGGER.error("Exception occurred: " + ex.getMessage(), ex);
         LOGGER.info("PATH>>>>: " + request.getContextPath());
         // do something with request or response
 
