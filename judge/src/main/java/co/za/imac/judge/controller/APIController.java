@@ -40,8 +40,9 @@ public class APIController {
     private PilotService pilotService;
     @Autowired
     private SequenceService sequenceService;
-  @Autowired
+    @Autowired
     private SettingService settingService;
+
     @GetMapping("/api/comp")
     public CompDTO getComp() throws IOException, ParserConfigurationException, SAXException {
         return compService.getComp();
@@ -199,5 +200,24 @@ public class APIController {
             throws ParserConfigurationException, SAXException, IOException {
         System.out.println(new Gson().toJson(pilotScoreDTO));
         return pilotService.submitScore(pilotScoreDTO);
+    }
+
+    @GetMapping("/api/settings")
+    public SettingDTO getSettings() throws IOException, ParserConfigurationException, SAXException {
+        return settingService.getSettings();
+    }
+    
+    @PostMapping("/api/settings")
+    public ResponseEntity<String> updateSettings(@RequestBody SettingDTO setting)
+            throws IOException, ParserConfigurationException, SAXException {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            settingService.updateSettings(setting);
+            result.put("result", "ok");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+        } catch (ConnectException e) {
+            logger.error("Could not update settings. " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not update settings.");
+        }
     }
 }

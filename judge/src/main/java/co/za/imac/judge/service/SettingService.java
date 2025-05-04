@@ -49,9 +49,14 @@ public class SettingService {
         newFile.createNewFile();
         String compdtoJson = new Gson().toJson(settingDTO);
         byte[] strToBytes = compdtoJson.getBytes();
-        FileOutputStream outputStream = new FileOutputStream(SETTINGS_FILE_NAME);
+
+        //need to use temporary file since target file is owned by root (in boot folder)
+        FileOutputStream outputStream = new FileOutputStream(SETTINGS_FILE_NAME.replace(".json", "_tmp.json"));
         outputStream.write(strToBytes);
         outputStream.close();
+
+        //now replace the original file with the temporary file
+        moveTemporarySettingsFile();
 
         // get settings file
         return settingDTO;
@@ -106,5 +111,32 @@ public class SettingService {
                 .filter(Files::isRegularFile)
                 .map(Path::toFile)
                 .forEach(File::delete);
+    }
+
+    public void moveTemporarySettingsFile() throws IOException {
+        String commandString = String.format("sudo cp %s %s", SETTINGS_FILE_NAME.replace(".json", "_tmp.json"), SETTINGS_FILE_NAME);
+
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.command("bash", "-c", commandString);
+    
+        try {
+            Process process = processBuilder.start();
+            int exitCode = process.waitFor();
+    
+            if (exitCode == 0) {
+                logger.info("Temporary settings file successfully moved to settings.json");
+            } else {
+                logger.error("Failed to move temporary settings file. Exit code: " + exitCode);
+                try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                    String errorLine;
+                    while ((errorLine = errorReader.readLine()) != null) {
+                        logger.error(errorLine);
+                    }
+                }
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Restore the interrupted status
+            logger.error("Process was interrupted while moving the temporary settings file", e);
+        }
     }
 }
