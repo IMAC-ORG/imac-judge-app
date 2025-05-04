@@ -115,6 +115,17 @@ public class RootController {
 
         List<Pilot> pilots = pilotService.getPilots();
 
+        //now get ordered list of classes for the filter dialog
+        Set<String> pilot_classes = new LinkedHashSet<>();
+        List<String> orderedClasses = Arrays.asList("BASIC", "SPORTSMAN", "INTERMEDIATE", "ADVANCED", "UNLIMITED", "INVITATIONAL");
+        //build ordered list of classes from those contained in the pilots list
+        for (String className : orderedClasses) {
+            if (pilots.stream().anyMatch(pilot -> className.equalsIgnoreCase(pilot.getClassString()))) {
+                pilot_classes.add(className);
+            }
+        }
+        model.addAttribute("pilotClasses", pilot_classes);
+        
 
         if(classFilter != null && !classFilter.isEmpty()){
             pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
@@ -127,23 +138,10 @@ public class RootController {
         model.addAttribute("pilots", pilots);
         HashMap<Integer, PilotScores> pilotScores = new HashMap<>();
 
-        //get distinct list of all pilot classes for filtering (Set doesn't allow duplicates)
-        Set<String> pilot_classes = new LinkedHashSet<>();
         for (Pilot pilot : pilots) {
             pilotScores.put(pilot.getPrimary_id(), pilotService.getPilotScores(pilot));
-            //pilot_classes.add(pilot.getClassString());
         }
         model.addAttribute("pilotScores", pilotScores);
-
-        //now get ordered list of classes
-        List<String> orderedClasses = Arrays.asList("BASIC", "SPORTSMAN", "INTERMEDIATE", "ADVANCED", "UNLIMITED", "INVITATIONAL");
-        //build ordered list of classes from those contained in the pilots list
-        for (String className : orderedClasses) {
-            if (pilots.stream().anyMatch(pilot -> className.equalsIgnoreCase(pilot.getClassString()))) {
-                pilot_classes.add(className);
-            }
-        }
-        model.addAttribute("pilotClasses", pilot_classes);
 
         model.addAttribute("comp", compService.getComp());
         model.addAttribute("dirflip", false);
@@ -180,9 +178,18 @@ public class RootController {
             return "redirect:/rounds";
         }
 
+        //now get ordered list of classes for the filter dialog
+        Set<String> pilot_classes = new LinkedHashSet<>();
+        List<String> orderedClasses = Arrays.asList("BASIC", "SPORTSMAN", "INTERMEDIATE", "ADVANCED", "UNLIMITED", "INVITATIONAL");
+        //build ordered list of classes from those contained in the pilots list
+        for (String className : orderedClasses) {
+            if (pilots.stream().anyMatch(pilot -> className.equalsIgnoreCase(pilot.getClassString()))) {
+                pilot_classes.add(className);
+            }
+        }
+        model.addAttribute("pilotClasses", pilot_classes);
+        
         List<Pilot> filteredPilots = new ArrayList<>();
-        //get distinct list of all pilot classes for filtering
-        Set<String> pilot_classes = new HashSet<>();
 
         for (Pilot p : pilots) {
             // If pilot is registered for FreeStyle then add him.
@@ -192,12 +199,9 @@ public class RootController {
             if (p.getClassString() != null && p.getClassString().equalsIgnoreCase(roundToScore.getComp_class())) {
                 filteredPilots.add(p);
             }
-
-            pilot_classes.add(p.getClassString());
         }
 
         model.addAttribute("pilots", filteredPilots);
-        model.addAttribute("pilotClasses", pilot_classes);
 
         HashMap<Integer, PilotScores> pilotScores = new HashMap<>();
         for (Pilot pilot : filteredPilots) {

@@ -285,7 +285,7 @@ public class PilotService {
         return pilotScore;
     }
 
-    public void syncPilotsToScoreWebService() throws Exception {
+    public void syncPilotsToScoreWebService() throws IOException, ParserConfigurationException, SAXException, UnirestException {
         SettingDTO settingDTO = settingService.getSettings();
         List<FlightUploadDTO> flight = new ArrayList<>();
         int index = 0;
@@ -351,7 +351,7 @@ public class PilotService {
                 .field("filename", flights_dat_file_name)
                 .asString();
         if(response.getStatus() != 200){
-            throw new Exception("Unable to sync to Score");
+            throw new IOException("Unable to sync to Score");
         }
         System.out.println(response.getStatus());
         System.out.println(xml);
