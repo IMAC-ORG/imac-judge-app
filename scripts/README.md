@@ -1,4 +1,4 @@
-# SA rPI Bootstrap Script Install
+# Aerojudge Bootstrap Script Install
 
 1. Using the Raspberry Pi Imager available from the Raspberry site write the Raspberry Pi OS (32-bit) Desktop version to the SD card. Configure the relevant WiFi details, enable SSH and setup the user name judge (required) and password
 	- username : judge
@@ -27,11 +27,11 @@ chmod +x judge_setup.sh
 ```
 <br>
 
-6. Once the script is complete and the system is rebooted it will take about 2min for AeroJudge to start, then you should be able to browse to **http://rPI-IP:8080** form you PC. Or if your screen is connected you should see AeroJudge loaded.
+6. Once the script is complete and the system is rebooted it will take about 2min for AeroJudge to start, then you should be able to browse to **http://rPI-IP:8080** from your PC or if your screen is connected, you should see AeroJudge loaded.
 <br>
 <br>
 
-# SA-rPI-Score Setup From Pre Build SD.
+# Aerojudge Setup From Pre Built SD
 
 1. Using the Raspberry Pi Imager write the Raspberry Pi OS (32-bit) to the SD card.
    <br>
@@ -60,7 +60,7 @@ chmod +x judge_setup.sh
 	<br>	
 
 
-# SA-rPI-Score Setup From Scratch.
+# Aerojudge Setup From Scratch
 
 The purpose of this document is to set out the process to the build a Raspberry PI judging unit from ground up. This document assumes that you are familiar with basic linux commands and SSH access into a linux terminal.
 
@@ -70,7 +70,8 @@ The purpose of this document is to set out the process to the build a Raspberry 
    <br>
 2. Once the image has complete, remove and re-insert the SD into your PC, this should remount the SD card with an additional drive attached to your PC labled bootfs
    <br>
-3. If you did not configure the WiFi in the previous step on the bootfs volume create a file called **wpa_supplicant.conf** with the following information replace **\<Country Code>**, **\<SSID>**, and **\<PASSWORD>** with your own country code **(US)**, WiFi SSID and password.
+3. If you did not configure the WiFi in the previous step on the bootfs volume create a file called **wpa_supplicant.conf** with the following information replace **\<Country Code>**, **\<SSID>**, and **\<PASSWORD>** with your own country code **US**, WiFi SSID **ScoreBox**, and password. 
+_Note: The < > brackets are not part of the file - they only indicate these are placeholders._
 	```
 	ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 	update_config=1
@@ -100,9 +101,9 @@ The purpose of this document is to set out the process to the build a Raspberry 
 	- line_number = This is the flight line if you are running multiple flight lines (Leave it as 1 for now)
 	- language = This will be used to determine which audio files to use. currently we are only supporting English so leave this unchanged
 	<br>
-5. Once complete insert the SD in to the rPI and boot. THe inital boot will take some time as the system will expand the SD card's file system and configure the user and wifi details. 
+5. Once complete insert the SD in to the rPI and boot. The inital boot will take some time as the system will expand the SD card's file system and configure the user and wifi details. 
    <br>
-6. Using a tool like Fing or looking on your Router AP determine the IP address of the PI and SSH into the rPI to configure the system swapfile for improved performance, We are going to update the swap to 512MB
+6. Using a tool like Ping, or looking on your Router AP, determine the IP address of the PI and SSH into the rPI to configure the system swapfile for improved performance (if using an older Pi), We are going to update the swap to 512MB
     ```
 	sudo dphys-swapfile swapoff
 	sudo vi /etc/dphys-swapfile
@@ -212,26 +213,27 @@ The purpose of this document is to set out the process to the build a Raspberry 
 	<br>
 17. Install the Judging software. The prerequisite to this, you would have needed to download and copied all the files from the scripts folder in the repo to /home/judge on the pi
     ```
-	sudo mkdir /var/opt/judge
-	sudo mkdir /var/opt/judge/bin
 	
-	sudo mv judge.sh /var/opt/judge/bin
-	sudo chmod +x /var/opt/judge/bin/judge.sh
+	sudo mkdir /var/opt/judge
+	sudo chown judge:judge /var/opt/judge
+	mkdir /var/opt/judge/bin
+	
+	mv judge.sh /var/opt/judge/bin
+	chmod +x /var/opt/judge/bin/judge.sh
 	
 	sudo mv judge.service /lib/systemd/system/
 	sudo systemctl enable judge.service
 
-	sudo mv kiosk.sh /var/opt/judge/bin
-	sudo chmod +x /var/opt/judge/bin/kiosk.sh
+	mv kiosk.sh /var/opt/judge/bin
+	chmod +x /var/opt/judge/bin/kiosk.sh
 	
 	sudo mv kiosk.service /lib/systemd/system/
 	sudo systemctl enable kiosk.service
 
 	sudo ln -s /boot/settings.json /var/opt/judge/settings.json
-    	sudo chmod 777 -R /var/opt/judge
 
-    	chmod +x judge_update.sh
-    	sudo ./judge_update.sh
+   	chmod +x judge_update.sh
+   	./judge_update.sh
         
 	```
 

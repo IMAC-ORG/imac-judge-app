@@ -105,8 +105,11 @@ if [ ! -d /var/opt/volume_service ]; then
 
 fi
 
-#check for xset added to .bashrc that disables key repeat
+#check for xset added to .bashrc that disables key repeat (after reboot)
 if ! grep -q "xset r off" /home/judge/.bashrc; then
     echo "export DISPLAY=:0" >> /home/judge/.bashrc
     echo "xset r off" >> /home/judge/.bashrc
+    #now implement the change
+    export DISPLAY=:0
+    xset r off
 fi

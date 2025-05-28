@@ -9,13 +9,19 @@ NC="\033[0m" 			  # No Color
 echo -e "${Green}Setting up your AeroJudge Scoring Device"
 echo -e "${Red}Please note this script should only be run once !!!"
 
-# Setup Swap to 512MB
-echo -e "${Yellow}Setting swapfile to 512MB..."
-sudo dphys-swapfile swapoff 					> /dev/null 2>&1
-sudo sed -i 's/100/512/g' /etc/dphys-swapfile 	> /dev/null 2>&1
-sudo dphys-swapfile setup 						> /dev/null 2>&1
-sudo dphys-swapfile swapon 						> /dev/null 2>&1
+echo -e "${Yellow}Use swap file (older Pi) (y/n) ?"
+read response
 
+case $response in
+	y|Y)
+		# Setup Swap to 512MB
+		echo -e "${Yellow}Setting swapfile to 512MB..."
+		sudo dphys-swapfile swapoff 					> /dev/null 2>&1
+		sudo sed -i 's/100/512/g' /etc/dphys-swapfile 	> /dev/null 2>&1
+		sudo dphys-swapfile setup 						> /dev/null 2>&1
+		sudo dphys-swapfile swapon 						> /dev/null 2>&1
+		;;
+esac
 
 # Updating the OS
 echo -e "${Yellow}Updating the OS..."
@@ -39,7 +45,7 @@ sudo apt autoremove -y 																		> /dev/null 2>&1
 # Configure vim mouse preferances
 echo -e "${Yellow}Configure vim..."
 echo "set mouse-=a" | sudo tee -a /root/.vimrc 					> /dev/null 2>&1
-echo "set mouse-=a" | sudo tee -a /home/judge/.vimrc 			> /dev/null 2>&1
+echo "set mouse-=a" | tee -a /home/judge/.vimrc 			> /dev/null 2>&1
 
 # Disable IPV6
 echo -e "${Yellow}Disabling IPV6..."
@@ -179,44 +185,38 @@ echo '	"score_http_port":'$scoreport','	| sudo tee -a /boot/settings.json	> /dev
 echo '	"language":"en"'					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 echo '}'									| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 
+echo -e "${Yellow}Configuring various settings..."
+echo "export DISPLAY=:0" >> /home/judge/.bashrc
+echo "xset r off # disable key repeat" >> /home/judge/.bashrc
+echo "xset s off # disable screen saver " >> /home/judge/.bashrc
+echo "xset -dpms # disable DPMS (Energy Star) features" >> /home/judge/.bashrc
+echo "xset s noblank # disable screen blanking " >> /home/judge/.bashrc
 
 echo -e "${Yellow}Setting up the AeroJudge App..."
 sudo mkdir /var/opt/judge 																													> /dev/null 2>&1
-sudo mkdir /var/opt/judge/bin 																												> /dev/null 2>&1
+sudo chown judge:judge /var/opt/judge 																										> /dev/null 2>&1
+mkdir /var/opt/judge/bin 																													> /dev/null 2>&1
 
 sudo wget -O /lib/systemd/system/judge.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.service 		> /dev/null 2>&1
-sudo wget -O /var/opt/judge/bin/judge.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.sh					> /dev/null 2>&1
-sudo wget -O /home/judge/judge_update.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_update.sh				> /dev/null 2>&1
+wget -O /var/opt/judge/bin/judge.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.sh							> /dev/null 2>&1
+wget -O /home/judge/judge_update.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_update.sh					> /dev/null 2>&1
+chmod +x /home/judge/judge_update.sh																										> /dev/null 2>&1	
 sudo wget -O /lib/systemd/system/kiosk.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.service			> /dev/null 2>&1
-sudo wget -O /var/opt/judge/bin/kiosk.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.sh					> /dev/null 2>&1
-sudo wget -O /home/judge/imac.png https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/imac.png							> /dev/null 2>&1
-sudo chmod +x /var/opt/judge/bin/judge.sh					> /dev/null 2>&1	
+wget -O /var/opt/judge/bin/kiosk.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.sh							> /dev/null 2>&1
+
+wget -O /home/judge/ajdesktop.png https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/ajdesktop.png						> /dev/null 2>&1
+pcmanfm --set-wallpaper /home/judge/ajdesktop.png --wallpaper-mode=stretch																	> /dev/null 2>&1
+
+chmod +x /var/opt/judge/bin/judge.sh					> /dev/null 2>&1	
 sudo systemctl enable judge.service				    		> /dev/null 2>&1
 sudo chmod +x /var/opt/judge/bin/kiosk.sh					> /dev/null 2>&1
 sudo systemctl enable kiosk.service				    		> /dev/null 2>&1
 sudo ln -s /boot/settings.json /var/opt/judge/settings.json	> /dev/null 2>&1
 
+echo -e "${Yellow}Creating Default Pilots for Testing..."
+wget -O /tmp/data.zip https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data.zip						    > /dev/null 2>&1
+unzip -o /tmp/data.zip -d /var/opt/judge/
 
-sudo chmod +x /var/opt/judge/bin/judge.sh						> /dev/null 2>&1	
-sudo systemctl enable judge.service								> /dev/null 2>&1
-sudo chmod +x /var/opt/judge/bin/kiosk.sh						> /dev/null 2>&1
-sudo systemctl enable kiosk.service								> /dev/null 2>&1
-sudo ln -s /boot/settings.json /var/opt/judge/settings.json		> /dev/null 2>&1
+/home/judge/judge_update.sh
 
-
-echo -e "${Yellow}Creating Dummy Pilots"
-
-sudo wget -O /tmp/data.zip https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data.zip						    > /dev/null 2>&1
-sudo unzip -o /tmp/data.zip -d /var/opt/judge/
-
-sudo chmod 777 -R /var/opt/judge								> /dev/null 2>&1
-sudo chmod 777 /home/judge/judge_update.sh						> /dev/null 2>&1
-sudo /home/judge/judge_update.sh								> /dev/null 2>&1
-
-sudo systemctl restart kiosk.service
-
-sleep 60
-
-echo -e "${Red}Rebooting to complete setup..."
-
-sudo reboot
+echo -e "${Yellow}AeroJudge App installation complete!"
