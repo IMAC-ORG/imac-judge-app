@@ -148,7 +148,7 @@ case $response in
 		echo ""																					| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 		echo "#Shutdown and Power Off button commands (SN DPG-061 and above)" 					| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 		echo "dtoverlay=gpio-shutdown,gpio_pin=25,active_low=1,gpio_pull=up,debounce=3000"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
-		echo "dtoverlay=gpio-poweroff,gpio_pin=24"												| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-poweroff,gpiopin=24,active_delay_ms=5000,inactive_delay_ms=4000"	| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
 		;;
 	c|C) 
 		echo "Enter the prefered gpio mappings"
