@@ -91,14 +91,20 @@ echo "Break 			= 2"
 echo ""
 
 function gpiokeys {
-echo -e "${Yellow}Use deafult mappings (y/n)"
+echo -e "${Yellow}GPIO Mappings"
+echo -e "${Yellow}1 = Original Mappings"
+echo -e "${Yellow}2 = AeroJudge Red board (No v#) Mappings"
+echo -e "${Yellow}3 = AeroJudge Rev 2.5 (Blue board) Mappings"
+echo -e "${Yellow}C = Custom Mappings (with custom keys)"
+
+echo -e "${Yellow}Enter version of mappings to use (1,2,3, or C)"
 read response
 
 case $response in
-	y|Y)
+	1)
 		echo "Setting up default gpio to key mappings"
 		echo ""																		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
-		echo "#gpip key mappings" 													| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo "#gpio key mappings" 													| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 		echo "dtoverlay=gpio-key,gpio=22,active_low=1,gpio_pull=up,keycode=7"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # encoder down/next
 		echo "dtoverlay=gpio-key,gpio=6,active_low=1,gpio_pull=up,keycode=9"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # +0.5
 		echo "dtoverlay=gpio-key,gpio=13,active_low=1,gpio_pull=up,keycode=10"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # +1
@@ -110,7 +116,41 @@ case $response in
 		echo "dtoverlay=gpio-key,gpio=3,active_low=1,gpio_pull=up,keycode=6"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # zero
 		echo "dtoverlay=gpio-key,gpio=2,active_low=1,gpio_pull=up,keycode=8"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # break
 		;;
-	n|N) 
+	2)
+		echo "Setting up AeroJudge red board (No v#) gpio to key mappings"
+		echo ""																					| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo "#gpio key mappings" 																| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo "dtoverlay=gpio-key,gpio=22,active_low=1,gpio_pull=up,keycode=2  # Not Observed"	| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=13,active_low=1,gpio_pull=up,keycode=3  # -0.5"			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=6,active_low=1,gpio_pull=up,keycode=4   # -1"				| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=26,active_low=1,gpio_pull=up,keycode=5  # encoder up/previous"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=5,active_low=1,gpio_pull=up,keycode=6   # zero"			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=19,active_low=1,gpio_pull=up,keycode=7  # encoder down/next"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=27,active_low=1,gpio_pull=up,keycode=8  # break"			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=2,active_low=1,gpio_pull=up,keycode=9   # +0.5"			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=3,active_low=1,gpio_pull=up,keycode=10  # +1"				| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=4,active_low=1,gpio_pull=up,keycode=11  #speak"			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		;;
+	3)
+		echo "Setting up AeroJudge Rev 2.5 (Blue board) gpio to key mappings"
+		echo ""																					| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo "#gpio key mappings" 																| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo "dtoverlay=gpio-key,gpio=15,active_low=1,gpio_pull=up,keycode=5  # encoder up/previous"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=14,active_low=1,gpio_pull=up,keycode=10  # +1"			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=22,active_low=1,gpio_pull=up,keycode=9   # +0.5"			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=27,active_low=1,gpio_pull=up,keycode=11  # caller"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=4,active_low=1,gpio_pull=up,keycode=2  # Not Observed"	| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=20,active_low=1,gpio_pull=up,keycode=7  # encoder down/next"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=21,active_low=1,gpio_pull=up,keycode=4   # -1"			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=5,active_low=1,gpio_pull=up,keycode=3   # -0.5"			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=6,active_low=1,gpio_pull=up,keycode=6  # 0"				| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-key,gpio=13,active_low=1,gpio_pull=up,keycode=8  # break"			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo ""																					| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo "#Shutdown and Power Off button commands (SN DPG-061 and above)" 					| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo "dtoverlay=gpio-shutdown,gpio_pin=25,active_low=1,gpio_pull=up,debounce=3000"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		echo "dtoverlay=gpio-poweroff,gpio_pin=24"												| sudo tee -a /boot/config.txt 		> /dev/null 2>&1 
+		;;
+	c|C) 
 		echo "Enter the prefered gpio mappings"
 		echo -e "${Blue}Previous :${NC}" 
 		read previous
@@ -147,7 +187,7 @@ case $response in
 		echo "Break 			:"$break
 		echo ""
 		echo ""																			| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
-		echo "#gpip key mappings" 														| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
+		echo "#gpio key mappings" 														| sudo tee -a /boot/config.txt 		> /dev/null 2>&1
 		echo "dtoverlay=gpio-key,gpio=$previous,active_low=1,gpio_pull=up,keycode=7"	| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # encoder down/next
 		echo "dtoverlay=gpio-key,gpio=$plus5,active_low=1,gpio_pull=up,keycode=9"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # +0.5
 		echo "dtoverlay=gpio-key,gpio=$plus1,active_low=1,gpio_pull=up,keycode=10"		| sudo tee -a /boot/config.txt 		> /dev/null 2>&1  # +1
