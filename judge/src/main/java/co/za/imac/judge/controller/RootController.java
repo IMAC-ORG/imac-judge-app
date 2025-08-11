@@ -127,7 +127,7 @@ public class RootController {
         model.addAttribute("pilotClasses", pilot_classes);
         
 
-        if(classFilter != null && !classFilter.isEmpty()){
+        if(classFilter != null && !classFilter.isEmpty() && classFilter != "global"){
             pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
         }
 
@@ -161,7 +161,7 @@ public class RootController {
         logger.info("Is there a comp? : " + compService.isCurrentComp());
         List<Pilot> pilots = pilotService.getPilots();
 
-        if(classFilter != null && !classFilter.isEmpty()){
+        if(classFilter != null && !classFilter.isEmpty() && classFilter != "global"){
             pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
         }
         if (!compService.isCurrentComp()) {
