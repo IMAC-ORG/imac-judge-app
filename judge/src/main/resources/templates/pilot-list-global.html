@@ -63,16 +63,7 @@
       <h2 th:unless="${pilotScores[pilot.primary_id].isActive}" class="pilot_round"> All Rounds Completed!</h2>
       <a class="pilot_round" th:unless="${pilotScores[pilot.primary_id].isActive}"> <i
           class="material-icons center black-text">done</i> </a>
-      <!--
-      <a th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences == 0}"
-        class="waves-effect waves-light btn orange darken-1 pulse"
-        th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='KNOWN')}"><i
-          class="material-icons right">flight_takeoff</i>Judge</a>
 
-      <a th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence gt 1 }"
-        class="waves-effect waves-light btn orange darken-1 pulse"
-        th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType=${pilotScores[pilot.primary_id].activeRoundType})}"><i
-          class="material-icons right">flight_takeoff</i>Judge</a> -->
       <div class="row hide-on-small-only">
         <div class="col s12"></div>
       </div>
@@ -80,23 +71,17 @@
         class="waves-effect waves-light btn-large modal-trigger orange darken-1 pulse" th:href="'#modal'+ ${pilot.primary_id}"><i 
           class="material-icons right">flight_takeoff</i>Judge</a>
       <!-- Modal Structure -->
-      <!--
-      <div
-      th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence == 1 }"
-      -->
       <div
         th:if="${pilotScores[pilot.primary_id].isActive}"
         th:id="'modal'+ ${pilot.primary_id}" class="modal">
           <div th:replace="~{judge_start_select::modal_select}"></div>
-        <!-- <div class="modal-footer">
-          <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
-        </div>-->
       </div>
     </div>
+    <div th:if="${#lists.isEmpty(pilots)}" class="center-align" style="margin-top: 10vh;">
+      <h4>No pilots found for the selected filter.</h4>
+      <h4>Please adjust your filter or sync pilots.</h4>
+    </div>
   </div>
-
-  <div th:replace="~{class_filter_modal::class_filter_modal}"></div>
-
 
   <div class="fixed-action-btn"  style="margin-right: 25px;">
     <a class="btn-floating btn-large red">
@@ -107,22 +92,15 @@
       <li><a class="btn-floating btn-large light-blue darken-1" onclick="syncScores();"><i class="material-icons">publish</i></a></li>
       <li><a class="btn-floating btn-large modal-trigger orange" href="#class_select_modal"><i class="material-icons">filter_alt</i></a></li>
       <li><a class="btn-floating btn-large green hide-on-small-only" href="/newcomp"><i class="material-icons">edit</i></a></li>
-      <!--<li><a class="btn-floating btn-medium green" href="/"><i class="material-icons">home</i></a></li>-->
     </ul>
   </div>
 
-
+  <div th:replace="~{class_filter_modal::class_filter_modal}"></div>
 
   <!--  Scripts-->
   <script src="materialize/js/materialize.js"></script>
   <script>
-    // Or with jQuery
     var windowHeight = window.innerHeight - 35; // reduce some for banner
-    $('.carousel.carousel-slider').carousel({
-      fullWidth: true,
-      indicators: false
-    }).height(windowHeight);
-
     document.addEventListener('DOMContentLoaded', function () {
       var elems = document.querySelectorAll('.modal');
       var instances = M.Modal.init(elems);
@@ -134,6 +112,12 @@
       });
     });
 
+    $('.carousel.carousel-slider').carousel({
+      fullWidth: true,
+      indicators: false
+    }).height(windowHeight);
+
+    
     function carouselNext() {
       $('.carousel').carousel('next');
     }
@@ -178,14 +162,6 @@
             if (e.which == 52) {
                 $('.carousel').carousel('prev');
             }
-            // numpad 8
-            //if (e.which == 56) {
-            //    syncPilots();
-            //}
-            //numpad 9
-            //if (e.which == 57) {
-            //    syncScores();
-            //}
         });
   </script>
 
