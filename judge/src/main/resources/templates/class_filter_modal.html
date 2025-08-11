@@ -30,7 +30,7 @@
         </div>
 
         <div class="row" style="margin-bottom: 10px;">
-          <a class="col s6 offset-s3 btn orange darken-1 waves-effect waves-light" id="global" href="/pilot-list-global">Global List</a>
+          <a class="col s6 offset-s3 btn orange darken-1 waves-effect waves-light" id="global" href="/pilot-list-global" onclick="resetfilter()">Global List</a>
         </div>
     </div>
   </div>
@@ -47,15 +47,26 @@
         }
 
         // Retrieve classFilter from URL
-        const classFilter = getQueryParam("classFilter");
+        let classFilter = getQueryParam("classFilter");
+        if (!classFilter) { //check localStorage
+          classFilter = localStorage.getItem("classFilter")
+          if (classFilter) {
+            //apply filter
+            window.location.replace("/pilot-list-global?classFilter=" + classFilter);
+          }
+        }
 
         // Store classFilter in localStorage for judge page to use
         if (classFilter) {
           localStorage.setItem("classFilter", classFilter);
         } else {
-          localStorage.setItem("classFilter", "global");
+          resetfilter();
         }
     });
+
+    function resetfilter() {
+      localStorage.removeItem("classFilter");
+    }
 
   </script>
 </body>
