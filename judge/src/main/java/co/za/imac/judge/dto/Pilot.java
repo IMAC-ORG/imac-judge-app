@@ -21,7 +21,7 @@ public class Pilot {
 
     private Boolean spread_spectrum;
 
-    private int secondary_id;
+    private String secondary_id;
 
     private String airplane;
 
@@ -32,7 +32,7 @@ public class Pilot {
     private int primary_id;
 
     public Pilot(Boolean freestyle, String comments, String addr2, String addr1, String _class, String index,
-            Boolean active, int comp_id, int frequency, Boolean spread_spectrum, int secondary_id, String airplane,
+            Boolean active, int comp_id, int frequency, Boolean spread_spectrum, String secondary_id, String airplane,
             String name, Boolean missing_pilot_panel, int primary_id) {
         this.freestyle = freestyle;
         this.comments = comments;
@@ -131,11 +131,11 @@ public class Pilot {
         this.spread_spectrum = spread_spectrum;
     }
 
-    public int getSecondary_id() {
+    public String getSecondary_id() {
         return secondary_id;
     }
 
-    public void setSecondary_id(int secondary_id) {
+    public void setSecondary_id(String secondary_id) {
         this.secondary_id = secondary_id;
     }
 
