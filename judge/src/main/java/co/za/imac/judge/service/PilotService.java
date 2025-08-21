@@ -16,20 +16,17 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import co.za.imac.judge.controller.RootController;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ResourceUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.gson.Gson;
 import com.mashape.unirest.http.HttpResponse;
@@ -48,8 +45,6 @@ import co.za.imac.judge.dto.PilotScores;
 import co.za.imac.judge.dto.SettingDTO;
 import co.za.imac.judge.utils.SettingUtils;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 @Service
@@ -103,8 +98,8 @@ public class PilotService {
             Node node = newList.item(temp);
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) node;
-                String index = element.getAttribute("index");
-                int primary_id = Integer.parseInt(element.getElementsByTagName("primary_id").item(0).getTextContent());
+                int index = Integer.parseInt(element.getAttribute("index"));
+                String primary_id = element.getElementsByTagName("primary_id").item(0).getTextContent();
                 String secondary_id = "";
                 int comp_id = 0;
                 if (element.getElementsByTagName("secondary_id").item(0).hasChildNodes() == true && 
@@ -113,7 +108,11 @@ public class PilotService {
                 }
                 if (element.getElementsByTagName("comp_id").item(0).hasChildNodes() == true && 
                     element.getElementsByTagName("comp_id").item(0).getTextContent().length() > 0) {
-                    comp_id = Integer.parseInt(element.getElementsByTagName("comp_id").item(0).getTextContent());
+                    try {
+                        comp_id = Integer.parseInt(element.getElementsByTagName("comp_id").item(0).getTextContent());
+                    } catch (NumberFormatException e) {
+                        comp_id = index; // fallback to index if comp_id is not a number
+                    }
                 }
                 String name = element.getElementsByTagName("name").item(0).getTextContent();
                 String addr1 = element.getElementsByTagName("addr1").item(0).getTextContent();
@@ -130,7 +129,7 @@ public class PilotService {
                 int frequency = Integer.parseInt(element.getElementsByTagName("frequency").item(0).getTextContent());
 
                 NodeList classesList = doc.getElementsByTagName("classes");
-                Element class_element = (Element) classesList.item(Integer.parseInt(index));
+                Element class_element = (Element) classesList.item(index);
                 String _class = class_element.getElementsByTagName("class").item(0).getTextContent();
                 Pilot pilot = new Pilot(freestyle, comments, addr2, addr1, _class, index, active, comp_id, frequency,
                         spread_spectrum, secondary_id, airplane, name, missing_pilot_panel, primary_id);
@@ -141,9 +140,9 @@ public class PilotService {
         return pilots;
     }
 
-    public Pilot getPilot(int pilot_id) throws ParserConfigurationException, SAXException, IOException {
+    public Pilot getPilot(String pilot_id) throws ParserConfigurationException, SAXException, IOException {
         List<Pilot> pilots = getPilots();
-        return pilots.stream().filter(pilot -> pilot.getPrimary_id() == pilot_id).findFirst().orElse(null);
+        return pilots.stream().filter(pilot -> pilot.getPrimary_id().equals(pilot_id)).findFirst().orElse(null);
     }
 
     public void setupPilotScores() throws ParserConfigurationException, SAXException, IOException {
