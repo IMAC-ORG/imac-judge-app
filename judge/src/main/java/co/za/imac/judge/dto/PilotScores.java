@@ -7,7 +7,7 @@ public class PilotScores {
     private String name;
 
 
-    private int primary_id;
+    private String primary_id;
 
     private String _class;
 
@@ -26,7 +26,7 @@ public class PilotScores {
         this.activeRoundType = activeRoundType;
     }
 
-    public PilotScores(String name, int primary_id, String _class,int judge_id) {
+    public PilotScores(String name, String primary_id, String _class,int judge_id) {
         this.name = name;
         this.primary_id = primary_id;
         this._class = _class;
@@ -41,11 +41,11 @@ public class PilotScores {
         this.name = name;
     }
 
-    public int getPrimary_id() {
+    public String getPrimary_id() {
         return primary_id;
     }
 
-    public void setPrimary_id(int primary_id) {
+    public void setPrimary_id(String primary_id) {
         this.primary_id = primary_id;
     }
 

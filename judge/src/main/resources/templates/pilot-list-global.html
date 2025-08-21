@@ -68,12 +68,12 @@
         <div class="col s12"></div>
       </div>
       <a th:if="${pilotScores[pilot.primary_id].isActive}"
-        class="waves-effect waves-light btn-large modal-trigger orange darken-1 pulse" th:href="'#modal'+ ${pilot.primary_id}"><i 
+        class="waves-effect waves-light btn-large modal-trigger orange darken-1 pulse" th:href="'#modal'+ ${pilot.index}"><i 
           class="material-icons right">flight_takeoff</i>Judge</a>
       <!-- Modal Structure -->
       <div
         th:if="${pilotScores[pilot.primary_id].isActive}"
-        th:id="'modal'+ ${pilot.primary_id}" class="modal">
+        th:id="'modal'+ ${pilot.index}" class="modal">
           <div th:replace="~{judge_start_select::modal_select}"></div>
       </div>
     </div>

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -136,7 +135,7 @@ public class RootController {
         model.addAttribute("settings", settings);
         
         model.addAttribute("pilots", pilots);
-        HashMap<Integer, PilotScores> pilotScores = new HashMap<>();
+        HashMap<String, PilotScores> pilotScores = new HashMap<>();
 
         for (Pilot pilot : pilots) {
             pilotScores.put(pilot.getPrimary_id(), pilotService.getPilotScores(pilot));
@@ -203,7 +202,7 @@ public class RootController {
 
         model.addAttribute("pilots", filteredPilots);
 
-        HashMap<Integer, PilotScores> pilotScores = new HashMap<>();
+        HashMap<String, PilotScores> pilotScores = new HashMap<>();
         for (Pilot pilot : filteredPilots) {
             pilotScores.put(pilot.getPrimary_id(), pilotService.getPilotScores(pilot));
         }
@@ -218,7 +217,7 @@ public class RootController {
     }
 
     @GetMapping("/judge")
-    public String judge(@RequestParam(name = "pilot_id", required = true) int pilot_id,
+    public String judge(@RequestParam(name = "pilot_id", required = true) String pilot_id,
             @RequestParam(name = "roundType", required = true) String roundType,
             @RequestParam(name = "dirflip", required = true, defaultValue = "false") Boolean dirflip, 
             @RequestParam(name = "sequenceType", required = true, defaultValue = "std") String sequenceType, Model model)
