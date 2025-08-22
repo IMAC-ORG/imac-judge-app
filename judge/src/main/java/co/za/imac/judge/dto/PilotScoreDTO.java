@@ -1,11 +1,12 @@
 package co.za.imac.judge.dto;
 
 public class PilotScoreDTO {
-    private int primary_id;
+    private String primary_id;
     private int round;
     private int sequence;
     private String type;
     private float[] scores;
+
     public int getRound() {
         return round;
     }
@@ -30,10 +31,10 @@ public class PilotScoreDTO {
     public void setScores(float[] scores) {
         this.scores = scores;
     }
-    public int getPrimary_id() {
+    public String getPrimary_id() {
         return primary_id;
     }
-    public void setPrimary_id(int primary_id) {
+    public void setPrimary_id(String primary_id) {
         this.primary_id = primary_id;
     }
 

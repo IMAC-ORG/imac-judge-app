@@ -53,29 +53,20 @@
         <h2 th:unless="${pilotScores[pilot.primary_id].isActive}" class="pilot_round"> All Rounds Completed!</h2>
         <a class="pilot_round" th:unless="${pilotScores[pilot.primary_id].isActive}"> <i
                 class="material-icons center black-text">done</i> </a>
-        <!--
-        <a th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences == 0}"
-           class="waves-effect waves-light btn orange darken-1 pulse"
-           th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='KNOWN')}"><i
-                class="material-icons right">flight_takeoff</i>Judge</a>
-
-        <a th:if="${pilotScores[pilot.primary_id].isActive and comp.unknown_sequences gt 0 and pilotScores[pilot.primary_id].activeSequence gt 1 }"
-           class="waves-effect waves-light btn orange darken-1 pulse"
-           th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType=${pilotScores[pilot.primary_id].activeRoundType})}"><i
-                class="material-icons right">flight_takeoff</i>Judge</a> -->        
 
         <a th:if="${pilotScores[pilot.primary_id].isActive}"
-           class="waves-effect waves-light btn modal-trigger orange darken-1 pulse" th:href="'#modal'+ ${pilot.primary_id}"><i
+           class="waves-effect waves-light btn modal-trigger orange darken-1 pulse" th:href="'#modal'+ ${pilot.index}"><i
                 class="material-icons right">flight_takeoff</i>Judge</a>
         <!-- Modal Structure -->
         <div
         th:if="${pilotScores[pilot.primary_id].isActive}"
-        th:id="'modal'+ ${pilot.primary_id}" class="modal">
+        th:id="'modal'+ ${pilot.index}" class="modal">
         <div th:replace="~{judge_start_select::modal_select}"></div>
-        <!-- <div class="modal-footer">
-          <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
-        </div>-->
+
         </div>
+    </div>
+    <div th:if="${#lists.isEmpty(pilots)}" class="center-align" style="margin-top: 10vh;">
+      <h4>No pilots found. Please sync pilots.</h4>
     </div>
 </div>
 
@@ -98,11 +89,6 @@
 <script>
     // Or with jQuery
     var windowHeight = window.innerHeight - 35; // reduce some for banner
-    $('.carousel.carousel-slider').carousel({
-        fullWidth: true,
-        indicators: false
-    }).height(windowHeight);
-
     document.addEventListener('DOMContentLoaded', function () {
         var elems = document.querySelectorAll('.modal');
         var instances = M.Modal.init(elems);
@@ -114,6 +100,11 @@
         });
     });
 
+    $('.carousel.carousel-slider').carousel({
+        fullWidth: true,
+        indicators: false
+    }).height(windowHeight);
+    
     function carouselNext() {
         $('.carousel').carousel('next');
     }

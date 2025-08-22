@@ -1,11 +1,10 @@
 package co.za.imac.judge.dto;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 
 public class FlightUploadDTO {
-    public int pilot_primary_id;
+    public String pilot_primary_id;
 	public String type;
 	public int round;
 	public int sequence;
@@ -15,7 +14,7 @@ public class FlightUploadDTO {
     @JacksonXmlProperty(isAttribute = true, localName = "index")
 	public int index = 0;
     
-    public FlightUploadDTO(int pilot_primary_id, String type, int round, int sequence, int judge,
+    public FlightUploadDTO(String pilot_primary_id, String type, int round, int sequence, int judge,
             boolean missing_pilot_panel, FiguresUploadDTO figures, int index, int line_number) {
         this.pilot_primary_id = pilot_primary_id;
         this.type = type;
@@ -39,10 +38,10 @@ public class FlightUploadDTO {
         this.figures = figures;
         this.index = index;
     }
-    public int getPilot_primary_id() {
+    public String getPilot_primary_id() {
         return pilot_primary_id;
     }
-    public void setPilot_primary_id(int pilot_primary_id) {
+    public void setPilot_primary_id(String pilot_primary_id) {
         this.pilot_primary_id = pilot_primary_id;
     }
     public String getType() {
