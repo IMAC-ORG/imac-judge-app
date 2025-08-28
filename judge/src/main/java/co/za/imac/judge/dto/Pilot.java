@@ -11,7 +11,7 @@ public class Pilot {
 
     private Classes classes;
 
-    private String index;
+    private int index;
 
     private Boolean active;
 
@@ -21,7 +21,7 @@ public class Pilot {
 
     private Boolean spread_spectrum;
 
-    private int secondary_id;
+    private String secondary_id;
 
     private String airplane;
 
@@ -29,11 +29,11 @@ public class Pilot {
 
     private Boolean missing_pilot_panel;
 
-    private int primary_id;
+    private String primary_id;
 
-    public Pilot(Boolean freestyle, String comments, String addr2, String addr1, String _class, String index,
-            Boolean active, int comp_id, int frequency, Boolean spread_spectrum, int secondary_id, String airplane,
-            String name, Boolean missing_pilot_panel, int primary_id) {
+    public Pilot(Boolean freestyle, String comments, String addr2, String addr1, String _class, int index,
+            Boolean active, int comp_id, int frequency, Boolean spread_spectrum, String secondary_id, String airplane,
+            String name, Boolean missing_pilot_panel, String primary_id) {
         this.freestyle = freestyle;
         this.comments = comments;
         this.addr2 = addr2;
@@ -91,11 +91,11 @@ public class Pilot {
         this.classes = classes;
     }
 
-    public String getIndex() {
+    public int getIndex() {
         return index;
     }
 
-    public void setIndex(String index) {
+    public void setIndex(int index) {
         this.index = index;
     }
 
@@ -131,11 +131,11 @@ public class Pilot {
         this.spread_spectrum = spread_spectrum;
     }
 
-    public int getSecondary_id() {
+    public String getSecondary_id() {
         return secondary_id;
     }
 
-    public void setSecondary_id(int secondary_id) {
+    public void setSecondary_id(String secondary_id) {
         this.secondary_id = secondary_id;
     }
 
@@ -163,11 +163,11 @@ public class Pilot {
         this.missing_pilot_panel = missing_pilot_panel;
     }
 
-    public int getPrimary_id() {
+    public String getPrimary_id() {
         return primary_id;
     }
 
-    public void setPrimary_id(int primary_id) {
+    public void setPrimary_id(String primary_id) {
         this.primary_id = primary_id;
     }
 public String getClassString(){
