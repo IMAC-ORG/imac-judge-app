@@ -71,12 +71,6 @@
             <a class="btn waves-effect white grey-text darken-text-2" onclick="longDescription();" id="btnspeak">speak</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="$('.carousel').carousel('prev');audiolongd.pause();audiolongd.currentTime = 0;shortdescription(-1);setLongDescription(-1);" id="btnnext">prev</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();audiolongd.pause();audiolongd.currentTime = 0;shortdescription(1);setLongDescription(1);" id="btnnext">next</a>
-<!-- 
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="shortdescription(0);" id="btnspeak">speak</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="$('.carousel').carousel('prev');shortdescription(-1);" id="btnnext">prev</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();shortdescription(1);" id="btnnext">next</a>
--->
-
         </div>
         <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item yellow black-text" href="#one!">
             <div class="row" style="margin-bottom: 0px; height: 10px;">
@@ -93,7 +87,7 @@
                     </div>
                     <div class="col s8">
                     <br>
-                    <img id="my-svg" style="width:60vw; height:70vh;" class="figure-wrapper"
+                    <img id="my-svg" style="width:60vw; height:70vh;" class="figure-wrapper" alt="Figure Image"
                     th:src="@{/man/en/{sequenceType}/{roundType}/{class}/{index}{dirletter}.svg(sequenceType=${sequenceType},class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index + 1}, roundType=${roundType.toLowerCase()}, dirletter=${dirletter})}">
                     </div>
                 </div>
@@ -101,15 +95,9 @@
             <div class="row">
                 <div class="col s4 left" style="font-size: 4vh; font-weight: 500; margin-left: 10px;">
                     <span th:text="'Round '+${pilotScores.activeRound + ' Seq ' + pilotScores.activeSequence}"></span>
-                    <span th:if="${roundType eq 'KNOWN'}" th:text="'Dir ' + ${dirletter}"></span>
+                    <span th:if="${roundType eq 'KNOWN' or dirletter eq 'C'}" th:text="'Dir ' + ${dirletter}"></span>
                 </div>
                 
-<!--
-                <h2 th:if="${roundType == 'KNOWN' or pilot_class == 'BASIC'}" th:text="'Figure '+${(iterStat.index + 1) + ' ' + maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
-                    th:id="'description_'+ ${iterStat.index}">First Panel</h2>
-                <h2 th:if="${roundType == 'UNKNOWN' and pilot_class != 'BASIC'}" th:text="'Figure '+${iterStat.index + 1}" style="line-height: 1rem ; margin: 1rem ;"
-                    th:id="'description_'+ ${iterStat.index}">First Panel</h2>
--->
                 <h2 th:text="'Figure '+${(iterStat.index + 1) + ' ' + maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
                     th:id="'description_'+ ${iterStat.index}"></h2>
             </div>
@@ -125,9 +113,10 @@
             <i class="large material-icons">menu</i>
         </a>
         <ul>
-            <li><a class="btn-floating btn-large green" onclick="showAllButtons();"><i
-                        class="material-icons">view_module</i></a></li>
-            <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">home</i></a></li>
+            <li><a class="btn-floating btn-large green" onclick="showAllButtons();">
+                <i class="material-icons">view_module</i></a></li>
+            <li><a class="btn-floating btn-large green" href="/">
+                <i class="material-icons">home</i></a></li>
         </ul>
     </div>
 
@@ -161,10 +150,6 @@
         const voices = synth.getVoices();
 
         let classFilter = localStorage.getItem("classFilter");
-            if (classFilter === null) {
-                classFilter = "global";
-                localStorage.setItem("classFilter", classFilter);
-            }
 
         document.addEventListener('DOMContentLoaded', function () {
             var elems = document.querySelectorAll('.modal');
@@ -475,18 +460,16 @@
         function nextEvent(responseData) {
             if (responseData.isActive) {
                 if (responseData.activeRound > round) {
-                    if (classFilter != "global") {
-                    window.location.replace("/pilot-list-global?classFilter=" + classFilter);
-                    }
-                    else {
-                    window.location.replace("/pilot-list-global");
+                    if (classFilter && classFilter != "global") {
+                        window.location.replace("/pilot-list-global?classFilter=" + classFilter);
+                    } else {
+                        window.location.replace("/pilot-list-global");
                     }
                 }
                 if (responseData.activeSequence > sequence) {
                     location.reload();
                 }
             } else {
-
                 window.location.replace("/pilot-list-global?classFilter=" + classFilter);
             }
         }

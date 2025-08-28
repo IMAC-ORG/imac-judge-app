@@ -10,22 +10,27 @@
             }
             .comp_action_text {
                 font-size: 2vw;
+                margin-top: 5px;
+                margin-bottom: 5px;
             }
             @media only screen and (min-width: 601px) {
                 .comp_action {
                     font-size: 4rem;
                 }
                 .comp_action_text {
-                font-size: 3vw;
-            }
+                    font-size: 3vw;
+                    margin-top: 5px;
+                    margin-bottom: 5px;
+                }
             }
         </style>
+        <h5 th:text="${pilot.name}">Judging Pilot</h5>
         <h6 class="black-text">SELECT ROUND DIRECTION & TYPE</h6>
-        <form th:id="'judgeknown'+${pilot.primary_id}" action="/judge" method="get">
+        <form th:id="'judgeknown'+${pilot.index}" action="/judge" method="get">
             <input type="hidden" name="pilot_id" th:value="${pilot.primary_id}"/>
-            <input type="hidden" name="roundType" value="KNOWN"/>
-            <input type="hidden" th:id="'dirflip'+${pilot.primary_id}" name="dirflip" value="false" />
-            <input type="hidden" th:id="'sequenceType'+${pilot.primary_id}" name="sequenceType" th:value="${comp.sequenceType}" />
+            <input type="hidden" th:id="'roundType'+${pilot.index}" name="roundType" value="KNOWN"/>
+            <input type="hidden" th:id="'dirflip'+${pilot.index}" name="dirflip" value="false" />
+            <input type="hidden" th:id="'sequenceType'+${pilot.index}" name="sequenceType" th:value="${comp.sequenceType}" />
             <div class="row">
                 <div class="col s3"><a class="">
                     <i class="small material-icons">east</i>
@@ -33,9 +38,10 @@
                 </div>
                 
                 <div class="col s6 switch">
-                    <label class="black-text" style="font-size: 12pt" th:for="'cb_dirflip'+${pilot.primary_id}">
+                    <label class="black-text" style="font-size: 12pt" th:for="'cb_dirflip'+${pilot.index}">
                     (B)
-                    <input type="checkbox" th:id="'cb_dirflip'+${pilot.primary_id}" th:onchange="'javascript:$(\'#dirflip'+${pilot.primary_id}+'\').val(this.checked)'"/>
+                    <input type="checkbox" th:id="'cb_dirflip'+${pilot.index}" 
+                           th:onchange="'javascript:$(\'#dirflip'+${pilot.index}+'\').val(this.checked)'"/>
                     <span class="lever"></span>
                     (C)
                     </label>
@@ -47,38 +53,42 @@
                 </div>
         
             </div>
-            
-            <div class="row">
-                <div class="col s4"> <a th:id="'act_known'+${pilot.primary_id}" class="" th:href="'javascript:$(\'#judgeknown'+${pilot.primary_id}+'\').submit()'" >
-                    <i class="comp_action material-icons center">visibility</i>
-                    <p class="black-text comp_action_text">KNOWN</p></a>
-                </div>
-            
-                <div class="col s4"> <a th:id="'act_unknown'+${pilot.primary_id}" class="" th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='UNKNOWN', dirflip='false')}"
-                                        th:onmouseover="'this.href = this.href.replace(/dirflip=[^&]*/, \'dirflip=\' + $(\'#dirflip' + ${pilot.primary_id} + '\').val())'">
-                    <i class="comp_action material-icons center">visibility_off</i>
-                    <p class="black-text comp_action_text">UNKNOWN</p></a>
-                </div>
-            
-                <!-- <div class="col s4"> <a class="" th:href="@{/judge(pilot_id=${pilot.primary_id}, roundType='FREESTYLE', dirflip=false)}"> -->
-                <div class="col s4"> <a class="" href="#"></a>
-                    <i class="comp_action material-icons center">diversity_2</i></a>
-                    <p class="black-text comp_action_text">FREESTYLE</p>
-                </div>
-            </div>
-    
+
             <div class="row">
                 <div class="col s12 center-align">
-                    <label th:for="'std_seqType'+${pilot.primary_id}">
-                        <input class="with-gap" th:name="'rb_sequenceType'+${pilot.primary_id}" type="radio" value="std" th:id="'std_seqType'+${pilot.primary_id}" th:checked="${comp.sequenceType}=='std'" />
+                    <label th:for="'std_seqType'+${pilot.index}">
+                        <input class="with-gap" type="radio" value="std" th:id="'std_seqType'+${pilot.index}" th:checked="${comp.sequenceType}=='std'" th:onchange="'javascript:$(\'#sequenceType'+${pilot.index}+'\').val(\'std\')'" />
                         <span class="black-text comp_action_text">STD</span>
                     </label>
-                    <label style="font-size: 12pt" th:for="'alt_seqType'+${pilot.primary_id}">
-                        <input class="with-gap" th:name="'rb_sequenceType'+${pilot.primary_id}" type="radio" value="alt" th:id="'alt_seqType'+${pilot.primary_id}" th:checked="${comp.sequenceType}=='alt'" />
+                    <label th:for="'alt_seqType'+${pilot.index}">
+                        <input class="with-gap" type="radio" value="alt" th:id="'alt_seqType'+${pilot.index}" th:checked="${comp.sequenceType}=='alt'" th:onchange="'javascript:$(\'#sequenceType'+${pilot.index}+'\').val(\'alt\')'" />
                         <span class="black-text comp_action_text">ALT</span>
                     </label>
                 </div>
             </div>
+
+            <h6 class="black-text">Touch on KNOWN or UNKNOWN to start judging</h6>
+            
+            <div class="row">
+                <div class="col s6">
+                    <div class="center-align">
+                        <a th:id="'act_known'+${pilot.index}" th:href="'javascript:$(\'#judgeknown'+${pilot.index}+'\').submit()'" >
+                            <i class="comp_action material-icons center">visibility</i>
+                            <p class="black-text comp_action_text">KNOWN</p>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col s6">
+                    <div class="center-align">
+                    <a th:id="'act_unknown'+${pilot.index}" href="#" th:onclick="'javascript:$(\'#roundType'+${pilot.index}+'\').val(\'UNKNOWN\'); $(\'#judgeknown'+${pilot.index}+'\').submit();'">
+                        <i class="comp_action material-icons center">visibility_off</i>
+                        <p class="black-text comp_action_text">UNKNOWN</p>
+                    </a>
+                    </div>
+                </div>
+            </div>
+    
             <script lang="javascript" th:inline="javascript">
                 $(document).ready(function() {
                     $('#std_seqType[[${pilot.primary_id}]]').change(function () {
