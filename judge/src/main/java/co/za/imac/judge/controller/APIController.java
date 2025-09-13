@@ -24,6 +24,7 @@ import org.xml.sax.SAXException;
 import com.google.gson.Gson;
 
 import co.za.imac.judge.service.CompService;
+import co.za.imac.judge.service.InfoCollectorService;
 import co.za.imac.judge.service.PilotService;
 import co.za.imac.judge.service.SequenceService;
 import co.za.imac.judge.service.SettingService;
@@ -42,6 +43,8 @@ public class APIController {
     private SequenceService sequenceService;
     @Autowired
     private SettingService settingService;
+    @Autowired
+    private InfoCollectorService infoCollectorService;
 
     @GetMapping("/api/comp")
     public CompDTO getComp() throws IOException, ParserConfigurationException, SAXException {
@@ -219,5 +222,18 @@ public class APIController {
             logger.error("Could not update settings. " + e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not update settings.");
         }
+    }
+
+    @GetMapping("/api/version")
+    public Map<String, String> getVersion() {
+        Map<String, String> result = new HashMap<>();
+        result.put("appVersion", co.za.imac.judge.JudgeApplication.getAppVersion());
+        return result;
+    }
+
+    @GetMapping("/api/getinfo")
+    public InfoJson getLatestInfo() {
+        InfoJson info = infoCollectorService.collectInfo();
+        return info;
     }
 }
