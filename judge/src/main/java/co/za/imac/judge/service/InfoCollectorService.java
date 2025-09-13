@@ -1,0 +1,145 @@
+package co.za.imac.judge.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import co.za.imac.judge.dto.InfoJson;
+import co.za.imac.judge.dto.InfoLine;
+import co.za.imac.judge.dto.SettingDTO;
+
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Service
+public class InfoCollectorService {
+    private static final Logger logger = LoggerFactory.getLogger(InfoCollectorService.class);
+
+    @Autowired
+    private SettingService settingService;
+
+    public InfoJson collectInfo() {
+        InfoJson info = new InfoJson();
+        info.setAppName("AeroJudge App");
+        info.setAppVersion(co.za.imac.judge.JudgeApplication.getAppVersion());
+
+        List<InfoLine> lines = new ArrayList<>();
+        lines.add(getDeviceIP());
+        lines.add(getWiFiStatus());
+        //lines.add(getBatteryStatus()); //TODO: Implement battery status
+        lines.add(getScoreStatus());
+        info.setInfo_lines(lines);
+
+        return info;
+    }
+
+
+    private InfoLine getDeviceIP() {
+        String ip = "N/A";
+
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface iface = interfaces.nextElement();
+                if (iface.isLoopback() || !iface.isUp()) continue;
+                Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    if (!addr.isLoopbackAddress() && addr instanceof java.net.Inet4Address) {
+                        ip = addr.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            ip = "unknown";
+        }
+
+        return new InfoLine("IP Address:", ip);
+    }
+
+    private InfoLine getWiFiStatus () {
+        try {
+            String line;
+            String essid = null;
+            String qualityPct = null;
+
+            String osName = System.getProperty("os.name").toLowerCase();
+            if (osName.contains("win")) {
+                return new InfoLine("WiFi:", "unknown", "0%");
+            } //else assume linux/Pi
+
+            Process process = Runtime.getRuntime().exec("iwconfig");
+            java.io.BufferedReader reader = new java.io.BufferedReader(
+                new java.io.InputStreamReader(process.getInputStream()));
+
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("ESSID:")) {
+                    int idx = line.indexOf("ESSID:");
+                    essid = line.substring(idx + 6).replace("\"", "").trim();
+                }
+                if (line.contains("Quality=")) {
+                    // Example: Quality=70/70
+                    int qIdx = line.indexOf("Quality=");
+                    String qualityPart = line.substring(qIdx + 8).split(" ")[0];
+                    String[] parts = qualityPart.split("/");
+                    if (parts.length == 2) {
+                        try {
+                            int val = Integer.parseInt(parts[0].trim());
+                            int max = Integer.parseInt(parts[1].trim());
+                            int pct = (int) ((val * 100.0) / max);
+                            qualityPct = String.valueOf(pct) + "%";
+                        } catch (NumberFormatException e) {
+                            qualityPct = null;
+                        }
+                    }
+                }
+            }
+            reader.close();
+            return new InfoLine("WiFi:", essid, qualityPct);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new InfoLine("WiFi:", "unknown", "0%");
+        }
+    }
+
+    private InfoLine getBatteryStatus() {
+        return new InfoLine("Battery Status:", null, "100%");
+    }
+
+    private InfoLine getScoreStatus () {
+        // Check if score service is reachable
+        try {
+            HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build(); //short timeout for this
+            SettingDTO settingDTO = settingService.getSettings();
+
+            // Call a service within score to check if its available - this would best be a health check endpoint but score doesn't have one yet.
+            String statusUrl = "http://" + settingDTO.getScore_host() + ":" + String.valueOf(settingDTO.getScore_http_port()) + "/scorepad/contest_info.dat";
+            logger.debug("Checking score status at: " + statusUrl);
+            HttpRequest statusRequest = HttpRequest.newBuilder()
+                .timeout(Duration.ofSeconds(5)) //short timeout for this
+                .uri(URI.create(statusUrl)).build();
+            HttpResponse<String> healthResponse = client.send(statusRequest, HttpResponse.BodyHandlers.ofString());
+            logger.debug("Score status response code: " + healthResponse.statusCode());
+            if (healthResponse.statusCode() == 200) {
+                return new InfoLine("Score Status:", null, "Connected", "check_circle");
+            } else {
+                return new InfoLine("Score Status:", null, "Score Error", "error");
+            }
+        } catch (Exception e) {
+            logger.error("Error checking score status: " + e.getMessage());
+            return new InfoLine("Score Status:", null, "Unavailable", "error");
+        }
+	}
+
+}

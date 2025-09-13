@@ -48,14 +48,35 @@ public class JudgeApplication implements WebMvcConfigurer {
 		}
 	}
 
-	//sets the path /man to the location where we now store outside of the jar
 	@Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         //convert a Windows path to Unix style
 		String appConfigPath = SettingUtils.getApplicationConfigPath().replace('\\', '/');
-        registry.addResourceHandler("/man/**").addResourceLocations("file:///" + appConfigPath + "/figures/" )
+
+		//maps /man/** to the figures directory outside of the jar
+        registry.addResourceHandler("/man/**")
+				.addResourceLocations("file:///" + appConfigPath + "/figures/" )
                 .setCachePeriod(0);
-		
     }
+
+	public static String getAppVersion() {
+		Package pkg = JudgeApplication.class.getPackage();
+		String version = (pkg != null && pkg.getImplementationVersion() != null)
+			? pkg.getImplementationVersion()
+			: null;
+		if (version != null) {
+			return version;
+		}
+		// Fallback: read from .judge_last_release
+		try {
+			java.nio.file.Path path = java.nio.file.Paths.get("/home/judge/.judge_last_release");
+			if (java.nio.file.Files.exists(path)) {
+				return java.nio.file.Files.readString(path).replace("v", "").trim();
+			}
+		} catch (Exception e) {
+			// Ignore, fallback below
+		}
+		return "unknown";
+	}
 	
 }
