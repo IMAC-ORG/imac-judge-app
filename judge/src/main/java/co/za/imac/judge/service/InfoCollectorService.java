@@ -3,9 +3,14 @@ package co.za.imac.judge.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.pi4j.Pi4J;
+import com.pi4j.context.Context;
+
 import co.za.imac.judge.dto.InfoJson;
 import co.za.imac.judge.dto.InfoLine;
 import co.za.imac.judge.dto.SettingDTO;
+import co.za.imac.judge.utils.INA226PowerUtils;
+import co.za.imac.judge.utils.LiPoBatteryEstimator;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -36,7 +41,7 @@ public class InfoCollectorService {
         List<InfoLine> lines = new ArrayList<>();
         lines.add(getDeviceIP());
         lines.add(getWiFiStatus());
-        //lines.add(getBatteryStatus()); //TODO: Implement battery status
+        lines.add(getBatteryStatus());
         lines.add(getScoreStatus());
         info.setInfo_lines(lines);
 
@@ -114,7 +119,23 @@ public class InfoCollectorService {
     }
 
     private InfoLine getBatteryStatus() {
-        return new InfoLine("Battery Status:", null, "100%");
+        try {
+            Context pi4j = Pi4J.newAutoContext();
+            INA226PowerUtils sensor = new INA226PowerUtils(pi4j);
+            LiPoBatteryEstimator est = new LiPoBatteryEstimator();
+
+            double packV = sensor.getBusVoltage();
+            int percent = est.estimatePercentage(packV);
+            int cells = est.getNumCells();
+
+            return new InfoLine("Battery Status:", String.format("%.2fv", packV), percent + "% (" + cells + "S)");
+
+        } catch (Exception e) {
+            logger.error("Error reading battery status: " + e.getMessage());
+            return new InfoLine("Battery Status:", "Error", "0%");
+        }
+
+        
     }
 
     private InfoLine getScoreStatus () {

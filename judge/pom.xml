@@ -58,6 +58,21 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
+
+		<!-- Pi4J Core used for the Powerboard-->
+		<dependency>
+			<groupId>com.pi4j</groupId>
+			<artifactId>pi4j-core</artifactId>
+			<version>2.5.1</version>
+		</dependency>
+
+		<!-- Pi4J Linux-FS I2C provider (needed for I2C on Raspberry Pi) -->
+		<dependency>
+			<groupId>com.pi4j</groupId>
+			<artifactId>pi4j-plugin-linuxfs</artifactId>
+			<version>2.5.1</version>
+		</dependency>
+	
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
