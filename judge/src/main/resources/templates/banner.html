@@ -106,7 +106,8 @@
       <a class="btn-flat btn-small icon-btn" onclick="toggleStatus();"><i class="material-icons" style="font-size: 1.7rem" >info_outline</i></a>
 
       <div id="statusInfo" class="status-info right grey lighten-3 hidden" onclick="toggleStatus();">
-        <span id="appName"></span> v<span id="appVersion"></span><br/>
+        <span id="stsmsg">Please wait...</span>
+        <span id="appName"></span> <span id="appVersion"></span><br/>
         <div id="dynamicLines"></div>
         <svg id="wifiIcon" class="wifi-icon" style="display:none;" viewBox="0 0 64 64">
           <!-- Bars (all grey when disconnected) -->
@@ -226,8 +227,9 @@
             const response = await $.ajax({
               url: "/api/getinfo",
               success: function (data) {
+              document.getElementById('stsmsg').classList.add('hidden'); //hide this once we have data
               document.getElementById('appName').textContent = data.appName || 'AeroJudge App';
-              document.getElementById('appVersion').textContent = data.appVersion || '?';
+              document.getElementById('appVersion').textContent = 'v' + (data.appVersion || '?');
 
               const lines = data.info_lines || [];
               const container = document.getElementById('dynamicLines');
