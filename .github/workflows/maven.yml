@@ -11,17 +11,40 @@ name: Create Tag
 on:
   push:
     branches: [ "main" ]
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
 jobs:
   build:
-    permissions: write-all
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
+    - name: Get Latest Tag
+      id: latest-tag
+      run: |
+        git fetch --tags
+        latest_tag=$(git tag --sort=-v:refname | head -n 1)
+        if [ -z "$latest_tag" ]; then
+          latest_tag="v1.0.0"
+        fi
+        echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+
+    - name: Increment Tag
+      id: increment-tag
+      run: |
+        latest_tag=${{ env.latest_tag }}
+        prefix=${latest_tag%.*}
+        last_number=${latest_tag##*.}
+        new_number=$((last_number + 1))
+        new_tag="$prefix.$new_number"
+        echo "new_tag=$new_tag" >> $GITHUB_ENV
+        echo "Incremented tag: $new_tag"
+
     - name: Create Tag
-      uses: negz/create-tag@v1
-      with:
-        version: v1.0.${{github.run_number}}
-        message: "Testing automation"
-        token: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git tag -a ${{ env.new_tag }} -m "Latest released version"
+        git push origin ${{ env.new_tag }}
