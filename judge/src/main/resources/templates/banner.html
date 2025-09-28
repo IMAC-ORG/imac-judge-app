@@ -34,6 +34,12 @@
           -webkit-tap-highlight-color: transparent; /* kills tap highlight on touch */
         }
 
+        .stscounter {
+          font-size: 0.8rem;
+          margin-left: 5px;
+          float: left;
+        }
+
         .info-icon {
           width: 20px;
           height: 20px;
@@ -107,6 +113,7 @@
 
       <div id="statusInfo" class="status-info right grey lighten-3 hidden" onclick="toggleStatus();">
         <span id="stsmsg">Please wait...</span>
+        <span id="stsctr" class="stscounter hidden">10</span>
         <span id="appName"></span> <span id="appVersion"></span><br/>
         <div id="dynamicLines"></div>
         <svg id="wifiIcon" class="wifi-icon" style="display:none;" viewBox="0 0 64 64">
@@ -143,15 +150,32 @@
       <script>
         let statusInfoInterval = null;
 
-        function startStatusInfoUpdates() {
-          // Start the interval every 10 seconds and store its ID
-          statusInfoInterval = setInterval(updateStatusInfo, 10000);
-        }
-
         function stopStatusInfoUpdates() {
           if (statusInfoInterval) {
             clearInterval(statusInfoInterval);
             statusInfoInterval = null;
+
+            const counter = document.getElementById("stsctr");
+            counter.textContent = "10"; // reset to 10 seconds
+            counter.classList.add("hidden");
+          }
+        }
+
+        function updateStatusCountdown() {
+          const counter = document.getElementById("stsctr");
+
+          if (counter.classList.contains("hidden")) {
+            counter.classList.remove("hidden");
+            counter.textContent = "10"; // reset to 10 seconds
+          } else {
+            let count = parseInt(counter.textContent);
+            if (count > 0) {
+              count -= 1;
+              counter.textContent = count.toString();
+            } else {
+              counter.classList.add("hidden");
+              updateStatusInfo();
+            }
           }
         }
 
@@ -163,8 +187,7 @@
           if (statusInfo.classList.contains("hidden")) {
             stopStatusInfoUpdates();
           } else {
-            updateStatusInfo();
-            startStatusInfoUpdates();
+            updateStatusInfo(); //poll the status info and start timer
           }
         }
 
@@ -224,6 +247,11 @@
 
         async function updateStatusInfo() {
           try {
+            if (statusInfoInterval) {
+              clearInterval(statusInfoInterval);
+              statusInfoInterval = null;
+            }
+
             const response = await $.ajax({
               url: "/api/getinfo",
               success: function (data) {
@@ -285,7 +313,13 @@
 
           } catch (errMsg) {
               M.toast({ html: 'Unable to get info', classes: 'toastMessage', displayLength: 4000 })
+          } finally {
+            // start countdown if not already running
+            if (!statusInfoInterval) {
+              statusInfoInterval = setInterval(updateStatusCountdown, 1000);
+            }
           }
+
         }
       </script>
     </div>

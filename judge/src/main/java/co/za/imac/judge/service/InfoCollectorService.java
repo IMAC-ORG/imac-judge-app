@@ -77,7 +77,7 @@ public class InfoCollectorService {
         try {
             String line;
             String essid = null;
-            String qualityPct = null;
+            String qualityPct = "";
 
             String osName = System.getProperty("os.name").toLowerCase();
             if (osName.contains("win")) {
@@ -105,7 +105,7 @@ public class InfoCollectorService {
                             int pct = (int) ((val * 100.0) / max);
                             qualityPct = String.valueOf(pct) + "%";
                         } catch (NumberFormatException e) {
-                            qualityPct = null;
+                            qualityPct = "0%";
                         }
                     }
                 }
@@ -141,14 +141,14 @@ public class InfoCollectorService {
     private InfoLine getScoreStatus () {
         // Check if score service is reachable
         try {
-            HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build(); //short timeout for this
             SettingDTO settingDTO = settingService.getSettings();
+            HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(settingDTO.getScore_poll_timeout())).build();
 
             // Call a service within score to check if its available - this would best be a health check endpoint but score doesn't have one yet.
             String statusUrl = "http://" + settingDTO.getScore_host() + ":" + String.valueOf(settingDTO.getScore_http_port()) + "/scorepad/contest_info.dat";
             logger.debug("Checking score status at: " + statusUrl);
             HttpRequest statusRequest = HttpRequest.newBuilder()
-                .timeout(Duration.ofSeconds(5)) //short timeout for this
+                .timeout(Duration.ofSeconds(settingDTO.getScore_poll_timeout()))
                 .uri(URI.create(statusUrl)).build();
             HttpResponse<String> healthResponse = client.send(statusRequest, HttpResponse.BodyHandlers.ofString());
             logger.debug("Score status response code: " + healthResponse.statusCode());
