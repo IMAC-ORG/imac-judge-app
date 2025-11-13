@@ -28,4 +28,4 @@ hs_err_pid*
 
 ### Judge Files not needing to be tracked ###
 dockerbuild/settings.json
-.devcontainer/judge/
+.devcontainer/judge/*.code-workspace 
