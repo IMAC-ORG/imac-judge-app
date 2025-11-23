@@ -79,11 +79,23 @@
     <ul>
         <li><a class="btn-floating btn-large purple" onclick="syncPilots();"><i class="material-icons">sync</i></a></li>
         <li><a class="btn-floating btn-large light-blue darken-1" onclick="syncScores();"><i class="material-icons">publish</i></a></li>
-        <li><a class="btn-floating btn-large green" href="/newcomp"><i class="material-icons">edit</i></a></li>
+        <li><a class="btn-floating btn-large green modal-trigger" href="#admin_warning_modal"><i class="material-icons">edit</i></a></li>
     </ul>
 </div>
 
-
+<!-- Admin Warning Modal -->
+<div id="admin_warning_modal" class="modal">
+  <div class="modal-content center-align">
+    <h4><i class="material-icons medium orange-text">warning</i></h4>
+    <h5>Admin Access</h5>
+    <p style="font-size: 1.2rem;">This is an admin page that should only be used by the <strong>Contest Director</strong> or <strong>Scorekeeper</strong>.</p>
+    <p style="font-size: 1rem; color: #666;">Changes made here may affect the competition setup.</p>
+  </div>
+  <div class="modal-footer" style="text-align: center;">
+    <a href="/newcomp" class="waves-effect waves-green btn green" style="margin-right: 10px;">Continue</a>
+    <a href="#!" class="modal-close waves-effect waves-red btn red">Exit</a>
+  </div>
+</div>
 
 <!--  Scripts-->
 <script src="materialize/js/materialize.js"></script>

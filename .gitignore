@@ -29,4 +29,7 @@ hs_err_pid*
 
 ### Judge Files not needing to be tracked ###
 dockerbuild/settings.json
-.devcontainer/judge/ 
+.devcontainer/judge/
+
+### Local docs and notes (not for GitHub) ###
+dpg_docs/
