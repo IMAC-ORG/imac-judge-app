@@ -89,25 +89,7 @@
                 </div>
             </div>
     
-            <script lang="javascript" th:inline="javascript">
-                $(document).ready(function() {
-                    $('#std_seqType[[${pilot.primary_id}]]').change(function () {
-                        $('#sequenceType[[${pilot.primary_id}]]').val("std");
-                    });
 
-                    $('#alt_seqType[[${pilot.primary_id}]]').change(function () {
-                        $('#sequenceType[[${pilot.primary_id}]]').val("alt");
-                    });
-
-                    $('#act_known[[${pilot.primary_id}]]').click(function () {
-                        //disable the radio buttons used for selection so they don't appear as parameters to the judge page
-                        $('input[name=rb_sequenceType[[${pilot.primary_id}]]]').each(function () {
-                            $(this).prop('disabled', true);
-                        });
-                    });
-
-                });
-            </script>
         </form>
     </div>
 

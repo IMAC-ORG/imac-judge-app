@@ -27,6 +27,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 import co.za.imac.judge.dto.CompDTO;
 import co.za.imac.judge.dto.FigureDTO;
+import co.za.imac.judge.dto.ScheduleDTO;
 import co.za.imac.judge.dto.Pilot;
 import co.za.imac.judge.dto.PilotScores;
 
@@ -46,6 +47,8 @@ public class RootController {
     private ScheduleService scheduleService;
     @Autowired
     private SettingService settingService;
+    @Autowired
+    private SequenceFolderResolver sequenceFolderResolver;
 
     @GetMapping("/")
     public String home(Model model)
@@ -219,30 +222,55 @@ public class RootController {
     @GetMapping("/judge")
     public String judge(@RequestParam(name = "pilot_id", required = true) String pilot_id,
             @RequestParam(name = "roundType", required = true) String roundType,
-            @RequestParam(name = "dirflip", required = true, defaultValue = "false") Boolean dirflip, 
-            @RequestParam(name = "sequenceType", required = true, defaultValue = "std") String sequenceType, Model model)
+            @RequestParam(name = "dirflip", required = false, defaultValue = "false") Boolean dirflip, 
+            @RequestParam(name = "sequenceType", required = false) String sequenceType, Model model)
             throws IOException, ParserConfigurationException, SAXException {
 
         if (!compService.isCurrentComp()) {
             logger.debug("Redirect to newcomp page.");
             return "redirect:/newcomp";
         }
+        
+        // Get sequenceType from CompDTO if not provided (legacy fallback for blank short_desc)
+        if (sequenceType == null || sequenceType.isEmpty()) {
+            sequenceType = compService.getComp().getSequenceType();
+            if (sequenceType == null) sequenceType = "std";
+        }
+        
         Pilot pilot = pilotService.getPilot(pilot_id);
         logger.debug("Pilot data:");
         logger.debug(new Gson().toJson(pilot));
         PilotScores pilotScores = pilotService.getPilotScores(pilot);
 
-        List<FigureDTO> sequences = sequenceService.getAllSequenceForClass(pilot.getClassString().toUpperCase(),
-                roundType.toUpperCase());
-        if (sequences == null || sequences.size() == 0 || sequences.isEmpty()) {
+        // Resolve the folder path for figures using the new folder structure
+        String sequenceFolderPath = sequenceFolderResolver.resolve(
+                pilot.getClassString(),
+                roundType,
+                pilotScores.getActiveRound(),
+                sequenceType
+        );
+
+        // Get round-aware schedule with figures
+        ScheduleDTO schedule = scheduleService.getScheduleForRound(
+                pilot.getClassString(),
+                roundType,
+                pilotScores.getActiveRound()
+        );
+        if (schedule == null || schedule.getFigures() == null || schedule.getFigures().isEmpty()) {
             return "noseq";
         }
+        
+        // Convert figures map to list (sorted by figure number)
+        List<FigureDTO> sequences = new ArrayList<>(schedule.getFigures().values());
+        sequences.sort((a, b) -> Integer.compare(a.getFigNum(), b.getFigNum()));
+        
         model.addAttribute("maneuvers", sequences);
         model.addAttribute("numOfManeuvers", sequences.size());
         model.addAttribute("pilot", pilot);
         model.addAttribute("pilotScores", pilotScores);
         model.addAttribute("roundType", roundType.toUpperCase());
         model.addAttribute("sequenceType", sequenceType);
+        model.addAttribute("sequenceFolderPath", sequenceFolderPath);
         model.addAttribute("pilot_class", pilot.getClassString());
         String sequencesJson = new Gson().toJson(sequences);
         model.addAttribute("sequencesjson", sequencesJson);

@@ -88,7 +88,8 @@
                     <div class="col s8">
                     <br>
                     <img id="my-svg" style="width:60vw; height:70vh;" class="figure-wrapper" alt="Figure Image"
-                    th:src="@{/man/en/{sequenceType}/{roundType}/{class}/{index}{dirletter}.svg(sequenceType=${sequenceType},class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index + 1}, roundType=${roundType.toLowerCase()}, dirletter=${dirletter})}">
+                    th:src="@{/man/en/{sequenceFolderPath}/{index}{dirletter}.svg(sequenceFolderPath=${sequenceFolderPath}, index=${iterStat.index + 1}, dirletter=${dirletter})}"
+                    onerror="this.onerror=null; this.src='/man/en/default/FAIL/fig_missing.svg';">
                     </div>
                 </div>
             </div>
@@ -143,7 +144,9 @@
 
         //TODO: read language from settings
         const sequencesBasePath = "/man/en";
-        const sequenceType = /*[[${sequenceType}]]*/ ;
+        const sequenceFolderPath = /*[[${sequenceFolderPath}]]*/ ;
+        const audioBasePath = sequencesBasePath + "/audio";  // Score audio, Now Judging audio
+        const sequenceType = /*[[${sequenceType}]]*/ ;  // Kept for backward compatibility
 
         const welcome_text = 'Now judging ' + pilot_name + ' ' + pilot_class + ' round ' + round + ' sequence ' + sequence + ' ' + roundType;
         const synth = window.speechSynthesis;
@@ -230,9 +233,12 @@
         function shortdescription(caller_index) {
             audio.pause();
             audio.currentTime = 0;
-            var audio_url = sequencesBasePath+'/'+ sequenceType + '/' + roundType + '/' + pilot_class + '/fig' + ( score_index + caller_index + 1 ) + '.mp3';
+            var audio_url = sequencesBasePath + '/' + sequenceFolderPath + '/fig' + ( score_index + caller_index + 1 ) + '.mp3';
             audio = new Audio(audio_url.toLowerCase());
             audio.volume = 0.5;
+            audio.onerror = function() {
+                console.warn('Figure audio not found: ' + audio_url);
+            };
             audio.play();
         }
 
@@ -245,16 +251,24 @@
         }  
         
         function setLongDescription(caller_index) {
-            var audiolongurl = sequencesBasePath + '/'+ sequenceType + '/' + roundType + '/' + pilot_class + '/call' + ( score_index + caller_index + 1 ) + '.mp3';
+            var audiolongurl = sequencesBasePath + '/' + sequenceFolderPath + '/call' + ( score_index + caller_index + 1 ) + '.mp3';
             audiolongd = new Audio(audiolongurl.toLowerCase());
+            audiolongd.onerror = function() {
+                console.warn('Call audio not found: ' + audiolongurl);
+            };
         }
 
         function NowJudgingMessage() {
             audio.pause();
             audio.currentTime = 0;
-            var audio_url = sequencesBasePath + '/now_judging_' + pilot_class + '_' + roundType + '_sequence.mp3';
+            var audio_url = audioBasePath + '/now_judging_' + pilot_class + '_' + roundType + '_sequence.mp3';
             audio = new Audio(audio_url.toLowerCase());
             audio.volume = 0.5;
+            audio.onerror = function() {
+                console.warn('Now Judging audio not found: ' + audio_url);
+                // Still call shortdescription even if Now Judging audio fails
+                shortdescription(0);
+            };
             audio.play();
             audio.addEventListener("ended", (event) => {
                 shortdescription(0);
@@ -271,7 +285,7 @@
                 //this is a number lets build url to wave file
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = sequencesBasePath + '/score/' + text + '.mp3';
+                var audio_url = audioBasePath + '/score/' + text + '.mp3';
                 audio = new Audio(audio_url);
                 audio.volume = 0.5;
                 audio.play();
@@ -279,7 +293,7 @@
             } else if (text == 'BREAK') {
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = sequencesBasePath + '/score/break.mp3';
+                var audio_url = audioBasePath + '/score/break.mp3';
                 audio = new Audio(audio_url);
                 audio.volume = 0.5;
                 audio.play();
@@ -287,7 +301,7 @@
             } else if (text == 'Not Observed') {
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = sequencesBasePath + '/score/not_observed.mp3';
+                var audio_url = audioBasePath + '/score/not_observed.mp3';
                 audio = new Audio(audio_url);
                 audio.volume = 0.5;
                 audio.play();

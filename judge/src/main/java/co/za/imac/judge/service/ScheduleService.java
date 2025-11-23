@@ -200,6 +200,76 @@ public class ScheduleService {
         return true;
     }
 
+
+    /**
+     * Get schedule matching class, type, and round number.
+     * Returns the most specific match (highest min_round that satisfies condition).
+     * Falls back to highest max_round if no exact match.
+     * 
+     * @param pilotClass e.g., "SPORTSMAN"
+     * @param roundType e.g., "KNOWN", "UNKNOWN", "FREESTYLE"
+     * @param roundNumber the current round number
+     * @return matching ScheduleDTO or null if none found
+     */
+    public ScheduleDTO getScheduleForRound(String pilotClass, String roundType, int roundNumber) {
+        if (schedules == null) {
+            this.populateSequences();
+        }
+        if (schedules == null || schedules.isEmpty()) {
+            return null;
+        }
+
+        ScheduleDTO bestMatch = null;
+        int bestMinRound = -1;
+
+        // First pass: Find exact match (round in range)
+        for (ScheduleDTO sched : schedules.values()) {
+            boolean classMatches = "FREESTYLE".equalsIgnoreCase(roundType) 
+                || (sched.getComp_class() != null && sched.getComp_class().equalsIgnoreCase(pilotClass));
+            boolean typeMatches = sched.getType() != null && sched.getType().equalsIgnoreCase(roundType);
+            
+            if (classMatches && typeMatches &&
+                sched.getMin_round() != null && sched.getMax_round() != null &&
+                sched.getMin_round() <= roundNumber &&
+                sched.getMax_round() >= roundNumber) {
+
+                // Prefer schedule with highest min_round (most specific)
+                if (sched.getMin_round() > bestMinRound) {
+                    bestMinRound = sched.getMin_round();
+                    bestMatch = sched;
+                }
+            }
+        }
+
+        // Second pass: No exact match - find nearest (highest max_round)
+        if (bestMatch == null) {
+            int highestMaxRound = -1;
+            for (ScheduleDTO sched : schedules.values()) {
+                boolean classMatches = "FREESTYLE".equalsIgnoreCase(roundType) 
+                    || (sched.getComp_class() != null && sched.getComp_class().equalsIgnoreCase(pilotClass));
+                boolean typeMatches = sched.getType() != null && sched.getType().equalsIgnoreCase(roundType);
+
+                if (classMatches && typeMatches && sched.getMax_round() != null) {
+                    if (sched.getMax_round() > highestMaxRound) {
+                        highestMaxRound = sched.getMax_round();
+                        bestMatch = sched;
+                    }
+                }
+            }
+            if (bestMatch != null) {
+                logger.debug("No exact match for round {} - using schedule with max_round={}",
+                        roundNumber, highestMaxRound);
+            }
+        }
+
+        return bestMatch;
+    }
+
+    /**
+     * @deprecated Use getScheduleForRound() for round-aware lookups.
+     * This method ignores round numbers and returns the first match.
+     */
+    @Deprecated
     public  Map<String,List<FigureDTO>> getAllSequences_old()
             throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
 

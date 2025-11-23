@@ -257,7 +257,7 @@
           if (data.result === "ok") {
             $('#comp_name').text(compData.comp_name);
             $('#comp_id').text(compData.comp_id);
-            M.toast({ html: data.message, completeCallback: function(){window.location = '/rounds'}});
+            M.toast({ html: data.message, completeCallback: function(){window.location = '/validate-sequences'}});
 
           } else {
             // We got back a data.result that is not OK but we still gave a good HTTP response (1xx, 2xx, 3xx)
