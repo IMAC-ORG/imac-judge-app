@@ -23,92 +23,101 @@
                     margin-bottom: 5px;
                 }
             }
-            /* Battery indicator styles */
+            /* Battery warning indicator styles - only shown for warnings */
             .battery-status {
-                display: flex;
+                display: none; /* Hidden by default */
                 align-items: center;
                 justify-content: center;
-                padding: 8px 16px;
+                padding: 10px 20px;
                 border-radius: 8px;
                 margin-bottom: 10px;
-                font-weight: 500;
+                font-weight: 700;
+                border: 2px solid;
             }
             .battery-status i {
-                margin-right: 8px;
-                font-size: 1.8rem;
+                margin-right: 10px;
+                font-size: 2.2rem;
             }
             .battery-status .bat-text {
-                font-size: 1.1rem;
-            }
-            .battery-high {
-                background-color: #e8f5e9;
-                color: #2e7d32;
+                font-size: 1.3rem;
+                font-weight: 700;
             }
             .battery-mid {
-                background-color: #fff8e1;
-                color: #f57c00;
+                background-color: #fff3e0;
+                color: #e65100;
+                border-color: #ff9800;
             }
             .battery-low {
                 background-color: #ffebee;
-                color: #c62828;
-            }
-            .battery-unknown {
-                background-color: #f5f5f5;
-                color: #757575;
+                color: #b71c1c;
+                border-color: #f44336;
             }
         </style>
 
-        <!-- Battery Status Indicator -->
-        <div th:id="'battery-status-'+${pilot.index}" class="battery-status battery-unknown">
-            <i class="material-icons">battery_unknown</i>
-            <span class="bat-text">Checking battery...</span>
-        </div>
+        <!-- Battery Warning Indicator (only visible when battery is low) -->
+        <div th:id="'battery-status-'+${pilot.index}" class="battery-status"></div>
         <script th:inline="javascript">
             (function() {
                 var pilotIdx = /*[[${pilot.index}]]*/ '0';
+                var modalId = 'modal' + pilotIdx;
                 var statusDiv = document.getElementById('battery-status-' + pilotIdx);
 
-                $.ajax({
-                    url: "/api/getinfo",
-                    timeout: 3000,
-                    success: function(data) {
-                        if (data && data.info_lines) {
-                            var batteryLine = data.info_lines.find(function(line) {
-                                return line.label === "Battery Status:";
-                            });
-                            if (batteryLine && batteryLine.value) {
-                                var match = batteryLine.value.match(/(\d+)%/);
-                                if (match) {
-                                    var percent = parseInt(match[1]);
-                                    var icon, text, cssClass;
+                function checkBattery() {
+                    $.ajax({
+                        url: "/api/getinfo",
+                        timeout: 3000,
+                        cache: false, // Always fetch fresh data
+                        success: function(data) {
+                            if (data && data.info_lines) {
+                                var batteryLine = data.info_lines.find(function(line) {
+                                    return line.label === "Battery Status:";
+                                });
+                                if (batteryLine && batteryLine.value) {
+                                    var match = batteryLine.value.match(/(\d+)%/);
+                                    if (match) {
+                                        var percent = parseInt(match[1]);
+                                        var icon, text, cssClass;
 
-                                    if (percent < 20) {
-                                        icon = 'battery_alert';
-                                        text = 'LOW BATTERY: ' + percent + '% - Charge soon!';
-                                        cssClass = 'battery-low';
-                                    } else if (percent < 40) {
-                                        icon = 'battery_3_bar';
-                                        text = 'Battery: ' + percent + '%';
-                                        cssClass = 'battery-mid';
-                                    } else {
-                                        icon = 'battery_full';
-                                        text = 'Battery: ' + percent + '%';
-                                        cssClass = 'battery-high';
+                                        if (percent < 20) {
+                                            icon = 'battery_alert';
+                                            text = 'LOW BATTERY: ' + percent + '% - Charge soon!';
+                                            cssClass = 'battery-low';
+                                        } else if (percent < 40) {
+                                            icon = 'battery_3_bar';
+                                            text = 'Warning: Battery at ' + percent + '%';
+                                            cssClass = 'battery-mid';
+                                        } else {
+                                            // Battery OK - hide indicator
+                                            statusDiv.style.display = 'none';
+                                            return;
+                                        }
+
+                                        statusDiv.className = 'battery-status ' + cssClass;
+                                        statusDiv.innerHTML = '<i class="material-icons">' + icon + '</i><span class="bat-text">' + text + '</span>';
+                                        statusDiv.style.display = 'flex';
+                                        return;
                                     }
-
-                                    statusDiv.className = 'battery-status ' + cssClass;
-                                    statusDiv.innerHTML = '<i class="material-icons">' + icon + '</i><span class="bat-text">' + text + '</span>';
-                                    return;
                                 }
                             }
+                            // No battery info or error - hide
+                            statusDiv.style.display = 'none';
+                        },
+                        error: function() {
+                            statusDiv.style.display = 'none';
                         }
-                        // No battery info available
-                        statusDiv.innerHTML = '<i class="material-icons">battery_unknown</i><span class="bat-text">Battery: N/A</span>';
-                    },
-                    error: function() {
-                        statusDiv.innerHTML = '<i class="material-icons">battery_unknown</i><span class="bat-text">Battery: N/A</span>';
-                    }
-                });
+                    });
+                }
+
+                // Watch for modal open (Materialize adds 'open' class)
+                var modal = document.getElementById(modalId);
+                if (modal) {
+                    var observer = new MutationObserver(function(mutations) {
+                        if (modal.classList.contains('open')) {
+                            checkBattery();
+                        }
+                    });
+                    observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+                }
             })();
         </script>
 
