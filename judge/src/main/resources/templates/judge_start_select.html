@@ -23,7 +23,95 @@
                     margin-bottom: 5px;
                 }
             }
+            /* Battery indicator styles */
+            .battery-status {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 8px 16px;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                font-weight: 500;
+            }
+            .battery-status i {
+                margin-right: 8px;
+                font-size: 1.8rem;
+            }
+            .battery-status .bat-text {
+                font-size: 1.1rem;
+            }
+            .battery-high {
+                background-color: #e8f5e9;
+                color: #2e7d32;
+            }
+            .battery-mid {
+                background-color: #fff8e1;
+                color: #f57c00;
+            }
+            .battery-low {
+                background-color: #ffebee;
+                color: #c62828;
+            }
+            .battery-unknown {
+                background-color: #f5f5f5;
+                color: #757575;
+            }
         </style>
+
+        <!-- Battery Status Indicator -->
+        <div th:id="'battery-status-'+${pilot.index}" class="battery-status battery-unknown">
+            <i class="material-icons">battery_unknown</i>
+            <span class="bat-text">Checking battery...</span>
+        </div>
+        <script th:inline="javascript">
+            (function() {
+                var pilotIdx = /*[[${pilot.index}]]*/ '0';
+                var statusDiv = document.getElementById('battery-status-' + pilotIdx);
+
+                $.ajax({
+                    url: "/api/getinfo",
+                    timeout: 3000,
+                    success: function(data) {
+                        if (data && data.info_lines) {
+                            var batteryLine = data.info_lines.find(function(line) {
+                                return line.label === "Battery Status:";
+                            });
+                            if (batteryLine && batteryLine.value) {
+                                var match = batteryLine.value.match(/(\d+)%/);
+                                if (match) {
+                                    var percent = parseInt(match[1]);
+                                    var icon, text, cssClass;
+
+                                    if (percent < 20) {
+                                        icon = 'battery_alert';
+                                        text = 'LOW BATTERY: ' + percent + '% - Charge soon!';
+                                        cssClass = 'battery-low';
+                                    } else if (percent < 40) {
+                                        icon = 'battery_3_bar';
+                                        text = 'Battery: ' + percent + '%';
+                                        cssClass = 'battery-mid';
+                                    } else {
+                                        icon = 'battery_full';
+                                        text = 'Battery: ' + percent + '%';
+                                        cssClass = 'battery-high';
+                                    }
+
+                                    statusDiv.className = 'battery-status ' + cssClass;
+                                    statusDiv.innerHTML = '<i class="material-icons">' + icon + '</i><span class="bat-text">' + text + '</span>';
+                                    return;
+                                }
+                            }
+                        }
+                        // No battery info available
+                        statusDiv.innerHTML = '<i class="material-icons">battery_unknown</i><span class="bat-text">Battery: N/A</span>';
+                    },
+                    error: function() {
+                        statusDiv.innerHTML = '<i class="material-icons">battery_unknown</i><span class="bat-text">Battery: N/A</span>';
+                    }
+                });
+            })();
+        </script>
+
         <h5 th:text="${pilot.name}">Judging Pilot</h5>
         <h6 class="black-text">SELECT ROUND DIRECTION & TYPE</h6>
         <form th:id="'judgeknown'+${pilot.index}" action="/judge" method="get">

@@ -243,6 +243,12 @@
         }
 
         function longDescription() {
+            // Stop short description if playing, so caller audio takes priority
+            if (audio && !audio.paused) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+
             if (audiolongd.paused) {
                 audiolongd.play();
             } else {

@@ -41,20 +41,6 @@
       src: url(font/digital-7.ttf);
     }
 
-    /* Battery warning icon */
-    #battery-warning {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      font-size: 64px;
-      z-index: 9999;
-      display: none;
-      opacity: 1;
-      transition: opacity 1s ease-out;
-    }
-    #battery-warning.fade-out {
-      opacity: 0;
-    }
   </style>
   <!-- CSS  -->
   <link href="materialize/css/material_lcons.css" rel="stylesheet">
@@ -64,10 +50,6 @@
 </head>
 
 <body style="height: 100vh !important;" class="yellow">
-
- <!-- Battery warning icon (hidden by default) -->
- <i id="battery-warning" class="material-icons">battery_alert</i>
-
  <div th:replace="~{banner::line_judge}"></div>
  <div th:replace="~{banner::status}"></div>
 
@@ -184,47 +166,6 @@
           M.toast({ html: 'Scores Sync Error - Is Score Available?', classes: 'toastMessage', displayLength: 4000 })
       }
     }
-
-    // Battery check on Judge button click
-    function checkBattery() {
-      $.ajax({
-        url: "/api/getinfo",
-        timeout: 3000,
-        success: function(data) {
-          if (data && data.info_lines) {
-            var batteryLine = data.info_lines.find(line => line.label === "Battery Status:");
-            if (batteryLine && batteryLine.value) {
-              var match = batteryLine.value.match(/(\d+)%/);
-              if (match) {
-                var percent = parseInt(match[1]);
-                if (percent < 20) {
-                  showBatteryWarning('red');
-                } else if (percent < 30) {
-                  showBatteryWarning('orange');
-                }
-              }
-            }
-          }
-        },
-        error: function() {
-          // Silently fail - don't block judging
-        }
-      });
-    }
-
-    function showBatteryWarning(color) {
-      var icon = $('#battery-warning');
-      icon.removeClass('fade-out').css('color', color).show();
-      setTimeout(function() {
-        icon.addClass('fade-out');
-        setTimeout(function() { icon.hide(); }, 1000);
-      }, 2500);
-    }
-
-    // Attach battery check to Judge buttons
-    $(document).on('click', '.modal-trigger.orange.pulse', function() {
-      checkBattery();
-    });
 
       //add button listeners
       $(document).on("keypress", function (e) {
