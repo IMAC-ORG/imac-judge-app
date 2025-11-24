@@ -243,17 +243,20 @@ public class RootController {
         PilotScores pilotScores = pilotService.getPilotScores(pilot);
 
         // DEBUG: Log the round number being used
+        // Use per-type round number (KNOWN, UNKNOWN, FREESTYLE each have independent counters)
+        int activeRoundForType = pilotScores.getActiveRound(roundType);
         logger.info("=== JUDGE PAGE DEBUG ===");
         logger.info("Pilot: {} ({})", pilot.getName(), pilot.getClassString());
         logger.info("Round Type: {}", roundType);
-        logger.info("Active Round from pilotScores: {}", pilotScores.getActiveRound());
+        logger.info("Active Round for {}: {}", roundType, activeRoundForType);
         logger.info("Active Sequence: {}", pilotScores.getActiveSequence());
+        logger.info("All rounds by type: {}", pilotScores.getActiveRoundByType());
 
         // Resolve the folder path for figures using the new folder structure
         String sequenceFolderPath = sequenceFolderResolver.resolve(
                 pilot.getClassString(),
                 roundType,
-                pilotScores.getActiveRound(),
+                activeRoundForType,
                 sequenceType
         );
         logger.info("Resolved folder path: {}", sequenceFolderPath);
@@ -262,7 +265,7 @@ public class RootController {
         ScheduleDTO schedule = scheduleService.getScheduleForRound(
                 pilot.getClassString(),
                 roundType,
-                pilotScores.getActiveRound()
+                activeRoundForType
         );
         if (schedule == null || schedule.getFigures() == null || schedule.getFigures().isEmpty()) {
             return "noseq";
@@ -276,6 +279,7 @@ public class RootController {
         model.addAttribute("numOfManeuvers", sequences.size());
         model.addAttribute("pilot", pilot);
         model.addAttribute("pilotScores", pilotScores);
+        model.addAttribute("activeRound", activeRoundForType);
         model.addAttribute("roundType", roundType.toUpperCase());
         model.addAttribute("sequenceType", sequenceType);
         model.addAttribute("sequenceFolderPath", sequenceFolderPath);

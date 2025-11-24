@@ -1,7 +1,9 @@
 package co.za.imac.judge.dto;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PilotScores {
     private String name;
@@ -12,9 +14,16 @@ public class PilotScores {
     private String _class;
 
     private Boolean isActive = true;
-    private int activeRound = 1;
+
+    // Per-type round tracking (2026 format)
+    private Map<String, Integer> activeRoundByType = new HashMap<>(Map.of(
+        "KNOWN", 1,
+        "UNKNOWN", 1,
+        "FREESTYLE", 1
+    ));
+
     private int activeSequence = 1;
-    private String activeRoundType;
+    private String activeRoundType = "KNOWN";
     private int judge_id;
     private List<PScore> scores = new ArrayList<>();
 
@@ -65,12 +74,67 @@ public class PilotScores {
         this.isActive = isActive;
     }
 
-    public int getActiveRound() {
-        return activeRound;
+    /**
+     * Get active round for a specific type.
+     * @param roundType KNOWN, UNKNOWN, or FREESTYLE
+     * @return Round number (defaults to 1 if type not found)
+     */
+    public int getActiveRound(String roundType) {
+        if (roundType == null) {
+            roundType = "KNOWN";
+        }
+        return activeRoundByType.getOrDefault(roundType.toUpperCase(), 1);
     }
 
-    public void setActiveRound(int activeRound) {
-        this.activeRound = activeRound;
+    /**
+     * Get active round for current activeRoundType.
+     */
+    public int getActiveRound() {
+        return getActiveRound(activeRoundType);
+    }
+
+    /**
+     * Set active round for a specific type.
+     * @param roundType KNOWN, UNKNOWN, or FREESTYLE
+     * @param round Round number
+     */
+    public void setActiveRound(String roundType, int round) {
+        if (roundType == null) {
+            roundType = "KNOWN";
+        }
+        activeRoundByType.put(roundType.toUpperCase(), round);
+    }
+
+    /**
+     * Set active round for current activeRoundType.
+     */
+    public void setActiveRound(int round) {
+        setActiveRound(activeRoundType, round);
+    }
+
+    /**
+     * Increment active round for a specific type.
+     * @param roundType KNOWN, UNKNOWN, or FREESTYLE
+     */
+    public void incrementActiveRound(String roundType) {
+        int current = getActiveRound(roundType);
+        setActiveRound(roundType, current + 1);
+    }
+
+    /**
+     * Get the full activeRoundByType map (for JSON serialization).
+     */
+    public Map<String, Integer> getActiveRoundByType() {
+        return activeRoundByType;
+    }
+
+    /**
+     * Set the full activeRoundByType map (for JSON deserialization).
+     */
+    public void setActiveRoundByType(Map<String, Integer> activeRoundByType) {
+        if (activeRoundByType != null) {
+            this.activeRoundByType = activeRoundByType;
+        }
     }
 
     public int getActiveSequence() {

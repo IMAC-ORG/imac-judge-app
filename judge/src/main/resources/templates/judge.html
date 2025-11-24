@@ -95,7 +95,7 @@
             </div>
             <div class="row">
                 <div class="col s4 left" style="font-size: 4vh; font-weight: 500; margin-left: 10px;">
-                    <span th:text="'Round '+${pilotScores.activeRound + ' Seq ' + pilotScores.activeSequence}"></span>
+                    <span th:text="'Round '+${activeRound + ' Seq ' + pilotScores.activeSequence}"></span>
                     <span th:if="${roundType eq 'KNOWN' or dirletter eq 'C'}" th:text="'Dir ' + ${dirletter}"></span>
                 </div>
                 
@@ -133,7 +133,7 @@
         var windowHeight = window.innerHeight;
         const scores = [];
         const numOfManeuvers = /*[[${numOfManeuvers}]]*/ ;
-        const round =  /*[[${pilotScores.activeRound}]]*/ ;
+        const round =  /*[[${activeRound}]]*/ ;
         const sequence =  /*[[${pilotScores.activeSequence}]]*/ ;
         const primary_id =  /*[[${pilot.primary_id}]]*/ ;
         const pilot_name =  /*[[${pilot.name}]]*/ ;
@@ -479,7 +479,8 @@
 
         function nextEvent(responseData) {
             if (responseData.isActive) {
-                if (responseData.activeRound > round) {
+                // Use per-type round tracking - check if round advanced for current type
+                if (responseData.activeRoundByType[roundType] > round) {
                     if (classFilter && classFilter != "global") {
                         window.location.replace("/pilot-list-global?classFilter=" + classFilter);
                     } else {

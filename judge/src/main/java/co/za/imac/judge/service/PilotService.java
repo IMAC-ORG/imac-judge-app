@@ -260,8 +260,9 @@ public class PilotService {
         }
         if (pilotScore.getActiveSequence() == compSequences) {
 
-            // Just reset the seq back to 1 and increment the round counter.
-            pilotScore.setActiveRound((pilotScore.getActiveRound() + 1));
+            // Just reset the seq back to 1 and increment the round counter for THIS TYPE.
+            // Each type (KNOWN, UNKNOWN, FREESTYLE) has its own independent round counter.
+            pilotScore.incrementActiveRound(roundType);
             pilotScore.setActiveSequence(1);
             return pilotScore;
 
