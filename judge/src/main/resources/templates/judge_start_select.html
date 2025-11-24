@@ -151,10 +151,10 @@
         
             </div>
 
-            <h6 class="black-text">Touch on KNOWN or UNKNOWN to start judging</h6>
+            <h6 class="black-text">Touch to start judging</h6>
             
             <div class="row">
-                <div class="col s6">
+                <div class="col s4">
                     <div class="center-align">
                         <a th:id="'act_known'+${pilot.index}" th:href="'javascript:$(\'#judgeknown'+${pilot.index}+'\').submit()'" >
                             <i class="comp_action material-icons center">visibility</i>
@@ -162,13 +162,22 @@
                         </a>
                     </div>
                 </div>
-                
-                <div class="col s6">
+
+                <div class="col s4">
                     <div class="center-align">
-                    <a th:id="'act_unknown'+${pilot.index}" href="#" th:onclick="'javascript:$(\'#roundType'+${pilot.index}+'\').val(\'UNKNOWN\'); $(\'#judgeknown'+${pilot.index}+'\').submit();'">
-                        <i class="comp_action material-icons center">visibility_off</i>
-                        <p class="black-text comp_action_text">UNKNOWN</p>
-                    </a>
+                        <a th:id="'act_unknown'+${pilot.index}" href="#" th:onclick="'javascript:$(\'#roundType'+${pilot.index}+'\').val(\'UNKNOWN\'); $(\'#judgeknown'+${pilot.index}+'\').submit();'">
+                            <i class="comp_action material-icons center">visibility_off</i>
+                            <p class="black-text comp_action_text">UNKNOWN</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col s4">
+                    <div class="center-align">
+                        <a th:id="'act_freestyle'+${pilot.index}" href="#" th:onclick="'javascript:$(\'#roundType'+${pilot.index}+'\').val(\'FREESTYLE\'); $(\'#judgeknown'+${pilot.index}+'\').submit();'">
+                            <i class="comp_action material-icons center">diversity_2</i>
+                            <p class="black-text comp_action_text">FREESTYLE</p>
+                        </a>
                     </div>
                 </div>
             </div>

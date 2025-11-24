@@ -227,7 +227,11 @@ public class PilotService {
 
     public boolean isNewScore(PilotScores pilotScores, PScore score) {
         for (PScore savedScore : pilotScores.getScores()) {
-            if (savedScore.getRound() == score.getRound() && savedScore.getSequence() == score.getSequence()) {
+            // Must match round, sequence, AND type (so KNOWN R1 and FREESTYLE R1 are different)
+            if (savedScore.getRound() == score.getRound()
+                    && savedScore.getSequence() == score.getSequence()
+                    && savedScore.getType() != null
+                    && savedScore.getType().equalsIgnoreCase(score.getType())) {
                 return false;
             }
         }
@@ -244,6 +248,9 @@ public class PilotService {
         }
         if(roundType.equalsIgnoreCase("UNKNOWN")){
             compSequences = compDTO.getUnknown_sequences();
+        }
+        if(roundType.equalsIgnoreCase("FREESTYLE")){
+            compSequences = 1;  // Freestyle always has 1 sequence per round
         }
         // check if theres a next sequence
         if (pilotScore.getActiveSequence() < compSequences) {

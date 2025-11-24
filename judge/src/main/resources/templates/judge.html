@@ -234,8 +234,8 @@
             audio.pause();
             audio.currentTime = 0;
             var audio_url = sequencesBasePath + '/' + sequenceFolderPath + '/fig' + ( score_index + caller_index + 1 ) + '.mp3';
-            audio = new Audio(audio_url.toLowerCase());
-            audio.volume = 0.5;
+            audio = new Audio(audio_url);
+            audio.volume = 1.0;
             audio.onerror = function() {
                 console.warn('Figure audio not found: ' + audio_url);
             };
@@ -258,7 +258,7 @@
         
         function setLongDescription(caller_index) {
             var audiolongurl = sequencesBasePath + '/' + sequenceFolderPath + '/call' + ( score_index + caller_index + 1 ) + '.mp3';
-            audiolongd = new Audio(audiolongurl.toLowerCase());
+            audiolongd = new Audio(audiolongurl);
             audiolongd.onerror = function() {
                 console.warn('Call audio not found: ' + audiolongurl);
             };
@@ -269,7 +269,7 @@
             audio.currentTime = 0;
             var audio_url = audioBasePath + '/now_judging_' + pilot_class + '_' + roundType + '_sequence.mp3';
             audio = new Audio(audio_url.toLowerCase());
-            audio.volume = 0.5;
+            audio.volume = 1.0;
             audio.onerror = function() {
                 console.warn('Now Judging audio not found: ' + audio_url);
                 // Still call shortdescription even if Now Judging audio fails
@@ -293,7 +293,7 @@
                 audio.currentTime = 0;
                 var audio_url = audioBasePath + '/score/' + text + '.mp3';
                 audio = new Audio(audio_url);
-                audio.volume = 0.5;
+                audio.volume = 1.0;
                 audio.play();
 
             } else if (text == 'BREAK') {
@@ -301,7 +301,7 @@
                 audio.currentTime = 0;
                 var audio_url = audioBasePath + '/score/break.mp3';
                 audio = new Audio(audio_url);
-                audio.volume = 0.5;
+                audio.volume = 1.0;
                 audio.play();
 
             } else if (text == 'Not Observed') {
@@ -309,7 +309,7 @@
                 audio.currentTime = 0;
                 var audio_url = audioBasePath + '/score/not_observed.mp3';
                 audio = new Audio(audio_url);
-                audio.volume = 0.5;
+                audio.volume = 1.0;
                 audio.play();
 
             } else {
