@@ -73,6 +73,18 @@
     .action-buttons {
       margin-top: 30px;
       margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+    }
+
+    .action-buttons form {
+      width: 30%;
+      min-width: 200px;
+    }
+
+    .action-buttons .btn-large {
+      width: 100%;
     }
 
     .help-text {
@@ -144,42 +156,37 @@
       <div class="row">
         <div class="col s12">
           <div class="help-text">
-            <strong>How to fix:</strong>
             <ul>
-              <li>Errors indicate missing sequence folders or invalid configurations in Score</li>
-              <li>Fix the issues in Score software and re-sync the device</li>
-              <li>Warnings indicate non-critical issues that will use fallback behavior</li>
-              <li>"Continue Anyway" will use the FAIL folder for broken entries (generic figures)</li>
+              <li>ERRORS indicate missing AeroJudge sequence folders or invalid configurations in Score</li>
+              <li>WARNINGS indicate non-critical issues that will use fallback behavior</li>
+              <li></li>
+              <li>"Continue Anyway" will use the GENERIC FIGURES AND AUDIO</li>
             </ul>
           </div>
         </div>
       </div>
 
       <!-- Action Buttons -->
-      <div class="row center action-buttons">
-        <div class="col s6">
-          <form action="/validate-sequences/resync" method="post">
-            <button type="submit" class="waves-effect waves-light btn-large blue darken-1">
-              <i class="material-icons left">sync</i>
-              Re-Sync Now
-            </button>
-          </form>
-        </div>
-        <div class="col s6">
-          <form action="/validate-sequences/continue" method="post">
-            <button type="submit" class="waves-effect waves-light btn-large orange darken-2">
-              <i class="material-icons left">arrow_forward</i>
-              Continue Anyway
-            </button>
-          </form>
-        </div>
+      <div class="action-buttons">
+        <form action="/validate-sequences/resync" method="post">
+          <button type="submit" class="waves-effect waves-light btn-large blue darken-1">
+            <i class="material-icons left">sync</i>
+            Re-Sync Now
+          </button>
+        </form>
+        <form action="/validate-sequences/continue" method="post">
+          <button type="submit" class="waves-effect waves-light btn-large orange darken-2">
+            <i class="material-icons left">arrow_forward</i>
+            Continue Anyway
+          </button>
+        </form>
       </div>
 
       <div th:if="${hasErrors}" class="row">
         <div class="col s12 center-align">
           <p class="red-text text-darken-2">
             <i class="material-icons tiny">info</i>
-            "Continue Anyway" will use FAIL folder for broken entries - figures will show as generic placeholders
+            "Continue Anyway" will use the GENERIC FIGURES AND AUDIO
           </p>
         </div>
       </div>

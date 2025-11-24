@@ -26,6 +26,7 @@ import com.google.gson.Gson;
 import co.za.imac.judge.service.CompService;
 import co.za.imac.judge.service.InfoCollectorService;
 import co.za.imac.judge.service.PilotService;
+import co.za.imac.judge.service.ScheduleService;
 import co.za.imac.judge.service.SequenceService;
 import co.za.imac.judge.service.SettingService;
 
@@ -45,6 +46,8 @@ public class APIController {
     private SettingService settingService;
     @Autowired
     private InfoCollectorService infoCollectorService;
+    @Autowired
+    private ScheduleService scheduleService;
 
     @GetMapping("/api/comp")
     public CompDTO getComp() throws IOException, ParserConfigurationException, SAXException {
@@ -183,6 +186,8 @@ public class APIController {
         // fetch pilots
         pilotService.getPilotsFileFromScore();
         sequenceService.getSequenceFileFromScore();
+        // Force reload ScheduleService cache with new sequence data
+        scheduleService.populateSequences();
         // pilotService.setupPilotScores();
         Map<String, Object> result = new HashMap<>();
         result.put("sync", "ok");

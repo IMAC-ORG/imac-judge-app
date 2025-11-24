@@ -156,23 +156,39 @@ public class SequenceFolderResolver {
      * If no exact match, falls back to highest max_round (nearest match).
      */
     public ScheduleDTO findSchedule(String pilotClass, String roundType, int roundNumber) {
+        logger.info("FolderResolver.findSchedule called: class={}, type={}, round={}",
+                pilotClass, roundType, roundNumber);
         Map<Integer, ScheduleDTO> schedules = scheduleService.getSchedules();
-        if (schedules == null) return null;
+        if (schedules == null) {
+            logger.warn("Schedules is null!");
+            return null;
+        }
 
         ScheduleDTO bestMatch = null;
         int bestMinRound = -1;
 
         // First pass: Find exact match (round in range)
         for (ScheduleDTO sched : schedules.values()) {
+            // Add null checks to prevent NPE
+            if (sched.getComp_class() == null || sched.getType() == null) {
+                logger.warn("Schedule has null class or type, skipping");
+                continue;
+            }
             if (sched.getComp_class().equalsIgnoreCase(pilotClass) &&
                 sched.getType().equalsIgnoreCase(roundType) &&
+                sched.getMin_round() != null && sched.getMax_round() != null &&
                 sched.getMin_round() <= roundNumber &&
                 sched.getMax_round() >= roundNumber) {
+
+                logger.info("FolderResolver: Found match - min={}, max={}, short_desc={}",
+                        sched.getMin_round(), sched.getMax_round(), sched.getShort_desc());
 
                 // Prefer schedule with highest min_round (most specific)
                 if (sched.getMin_round() > bestMinRound) {
                     bestMinRound = sched.getMin_round();
                     bestMatch = sched;
+                    logger.info("FolderResolver: New best match: min_round={}, short_desc={}",
+                            bestMinRound, sched.getShort_desc());
                 }
                 // Tie-breaker: identical min_round - keep first match
                 // Pre-flight validation will have warned about this
@@ -182,21 +198,30 @@ public class SequenceFolderResolver {
         // Second pass: No exact match - find nearest (highest max_round)
         // This handles rounds beyond defined ranges (e.g., round 25 when max is 20)
         if (bestMatch == null) {
+            logger.warn("FolderResolver: No exact match, trying fallback...");
             int highestMaxRound = -1;
             for (ScheduleDTO sched : schedules.values()) {
-                if (sched.getComp_class().equalsIgnoreCase(pilotClass) &&
+                if (sched.getComp_class() != null && sched.getType() != null &&
+                    sched.getComp_class().equalsIgnoreCase(pilotClass) &&
                     sched.getType().equalsIgnoreCase(roundType)) {
 
-                    if (sched.getMax_round() > highestMaxRound) {
+                    if (sched.getMax_round() != null && sched.getMax_round() > highestMaxRound) {
                         highestMaxRound = sched.getMax_round();
                         bestMatch = sched;
                     }
                 }
             }
             if (bestMatch != null) {
-                logger.debug("No exact match for round {} - using schedule with max_round={}",
-                        roundNumber, highestMaxRound);
+                logger.info("FolderResolver: Fallback match with max_round={}, short_desc={}",
+                        highestMaxRound, bestMatch.getShort_desc());
             }
+        }
+
+        if (bestMatch != null) {
+            logger.info("FolderResolver RESULT: For round {} returning short_desc={}",
+                    roundNumber, bestMatch.getShort_desc());
+        } else {
+            logger.warn("FolderResolver RESULT: No schedule found!");
         }
 
         return bestMatch;

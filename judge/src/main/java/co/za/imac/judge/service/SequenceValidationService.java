@@ -175,8 +175,10 @@ public class SequenceValidationService {
     }
 
     /**
-     * Check 3: Round range conflicts.
-     * Checks for duplicate min_round and overlapping ranges within same class+type.
+     * Check 3: Duplicate and overlapping round range conflicts.
+     * Within same class+type:
+     * - Same short_desc = WARNING (redundant but harmless)
+     * - Different/no short_desc = ERROR (ambiguous, will use FAIL folder)
      */
     private void checkRoundRangeConflicts(ValidationResult result) {
         Map<String, List<ScheduleDTO>> byClassType = groupByClassType();
@@ -194,50 +196,40 @@ public class SequenceValidationService {
                     ScheduleDTO a = schedules.get(i);
                     ScheduleDTO b = schedules.get(j);
 
-                    // Check for identical min_round
-                    if (a.getMin_round() != null && b.getMin_round() != null &&
-                        a.getMin_round().equals(b.getMin_round())) {
+                    // Check for duplicate min_round OR overlapping ranges
+                    boolean isDuplicate = a.getMin_round() != null && b.getMin_round() != null &&
+                            a.getMin_round().equals(b.getMin_round());
+                    boolean isOverlapping = rangesOverlap(a, b);
 
-                        String aDesc = a.getShort_desc() != null ? a.getShort_desc() : "(blank)";
-                        String bDesc = b.getShort_desc() != null ? b.getShort_desc() : "(blank)";
+                    if (isDuplicate || isOverlapping) {
+                        String aDesc = a.getShort_desc() != null && !a.getShort_desc().trim().isEmpty()
+                                ? a.getShort_desc() : null;
+                        String bDesc = b.getShort_desc() != null && !b.getShort_desc().trim().isEmpty()
+                                ? b.getShort_desc() : null;
 
-                        if (!aDesc.equalsIgnoreCase(bDesc)) {
-                            // Different short_desc = ambiguous, ERROR
-                            result.addError(
-                                    key,
-                                    "Duplicate min_round=" + a.getMin_round() + " with different sequences",
-                                    "Found: " + aDesc + " and " + bDesc + " - fix by using different round ranges"
-                            );
-                        } else {
-                            // Same short_desc = redundant but harmless, WARNING
+                        boolean sameShortDesc = aDesc != null && bDesc != null && aDesc.equalsIgnoreCase(bDesc);
+
+                        String conflictType = isDuplicate ? "Duplicate" : "Overlapping";
+                        String roundInfo = isDuplicate
+                                ? "min_round=" + a.getMin_round()
+                                : "rounds " + a.getMin_round() + "-" + a.getMax_round() +
+                                  " and " + b.getMin_round() + "-" + b.getMax_round();
+
+                        if (sameShortDesc) {
+                            // Same short_desc = WARNING (redundant but works)
                             result.addWarning(
                                     key,
-                                    "Duplicate min_round=" + a.getMin_round() + " (redundant entry)",
+                                    conflictType + " sequences identified (" + roundInfo + ")",
                                     "Both use: " + aDesc
                             );
-                        }
-                    }
-
-                    // Check for overlap
-                    if (rangesOverlap(a, b)) {
-                        int overlapStart = Math.max(
-                                a.getMin_round() != null ? a.getMin_round() : 0,
-                                b.getMin_round() != null ? b.getMin_round() : 0);
-                        int overlapEnd = Math.min(
-                                a.getMax_round() != null ? a.getMax_round() : Integer.MAX_VALUE,
-                                b.getMax_round() != null ? b.getMax_round() : Integer.MAX_VALUE);
-
-                        String aDesc = a.getShort_desc() != null ? a.getShort_desc() : "(blank)";
-                        String bDesc = b.getShort_desc() != null ? b.getShort_desc() : "(blank)";
-
-                        // Only warn if they have different short_desc
-                        if (!aDesc.equalsIgnoreCase(bDesc)) {
-                            ScheduleDTO winner = (a.getMin_round() != null && b.getMin_round() != null &&
-                                    a.getMin_round() > b.getMin_round()) ? a : b;
-                            result.addWarning(
+                        } else {
+                            // Different or missing short_desc = ERROR (ambiguous)
+                            String foundDesc = (aDesc != null ? aDesc : "(blank)") +
+                                    " and " + (bDesc != null ? bDesc : "(blank)");
+                            result.addError(
                                     key,
-                                    "Rounds " + overlapStart + "-" + overlapEnd + " overlap",
-                                    "Using: " + (winner.getShort_desc() != null ? winner.getShort_desc() : "(blank)")
+                                    conflictType + " sequences - unable to resolve (" + roundInfo + ")",
+                                    "Found: " + foundDesc + " - Using FAIL folder"
                             );
                         }
                     }
@@ -304,10 +296,11 @@ public class SequenceValidationService {
                 if (nextMin > currentMax + 1) {
                     int gapStart = currentMax + 1;
                     int gapEnd = nextMin - 1;
+                    String gapRange = gapStart == gapEnd ? "round " + gapStart : "rounds " + gapStart + "-" + gapEnd;
                     result.addWarning(
                             key,
-                            "Round coverage gap: rounds " + gapStart + "-" + gapEnd + " undefined",
-                            "Will use highest max_round fallback (round " + currentMax + " sequence)"
+                            "Round coverage gap: " + gapRange + " undefined",
+                            "Will use FAIL folder for undefined rounds"
                     );
                 }
             }

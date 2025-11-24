@@ -54,19 +54,6 @@
         
             </div>
 
-            <div class="row">
-                <div class="col s12 center-align">
-                    <label th:for="'std_seqType'+${pilot.index}">
-                        <input class="with-gap" type="radio" value="std" th:id="'std_seqType'+${pilot.index}" th:checked="${comp.sequenceType}=='std'" th:onchange="'javascript:$(\'#sequenceType'+${pilot.index}+'\').val(\'std\')'" />
-                        <span class="black-text comp_action_text">STD</span>
-                    </label>
-                    <label th:for="'alt_seqType'+${pilot.index}">
-                        <input class="with-gap" type="radio" value="alt" th:id="'alt_seqType'+${pilot.index}" th:checked="${comp.sequenceType}=='alt'" th:onchange="'javascript:$(\'#sequenceType'+${pilot.index}+'\').val(\'alt\')'" />
-                        <span class="black-text comp_action_text">ALT</span>
-                    </label>
-                </div>
-            </div>
-
             <h6 class="black-text">Touch on KNOWN or UNKNOWN to start judging</h6>
             
             <div class="row">

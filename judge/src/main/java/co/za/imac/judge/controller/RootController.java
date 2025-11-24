@@ -242,6 +242,13 @@ public class RootController {
         logger.debug(new Gson().toJson(pilot));
         PilotScores pilotScores = pilotService.getPilotScores(pilot);
 
+        // DEBUG: Log the round number being used
+        logger.info("=== JUDGE PAGE DEBUG ===");
+        logger.info("Pilot: {} ({})", pilot.getName(), pilot.getClassString());
+        logger.info("Round Type: {}", roundType);
+        logger.info("Active Round from pilotScores: {}", pilotScores.getActiveRound());
+        logger.info("Active Sequence: {}", pilotScores.getActiveSequence());
+
         // Resolve the folder path for figures using the new folder structure
         String sequenceFolderPath = sequenceFolderResolver.resolve(
                 pilot.getClassString(),
@@ -249,6 +256,7 @@ public class RootController {
                 pilotScores.getActiveRound(),
                 sequenceType
         );
+        logger.info("Resolved folder path: {}", sequenceFolderPath);
 
         // Get round-aware schedule with figures
         ScheduleDTO schedule = scheduleService.getScheduleForRound(

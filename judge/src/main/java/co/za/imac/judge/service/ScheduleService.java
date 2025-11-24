@@ -85,6 +85,9 @@ public class ScheduleService {
         SettingDTO settingDTO = settingService.getSettings();
         SEQUENCES_DAT_URL = SEQUENCES_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
         FileUtils.copyURLToFile(new URL(SEQUENCES_DAT_URL), new File(SEQUENCES_DAT_PATH),1000,1000);
+        // Clear cache only after successful download - forces reload with new data on next access
+        this.schedules = null;
+        logger.info("Sequence cache cleared - will reload on next access.");
     }
 
     /************
@@ -212,11 +215,23 @@ public class ScheduleService {
      * @return matching ScheduleDTO or null if none found
      */
     public ScheduleDTO getScheduleForRound(String pilotClass, String roundType, int roundNumber) {
+        logger.info("getScheduleForRound called: class={}, type={}, round={}", pilotClass, roundType, roundNumber);
+
         if (schedules == null) {
             this.populateSequences();
         }
         if (schedules == null || schedules.isEmpty()) {
+            logger.warn("No schedules loaded!");
             return null;
+        }
+
+        // Log all loaded schedules for debugging
+        logger.info("=== All loaded schedules ({} total) ===", schedules.size());
+        for (Map.Entry<Integer, ScheduleDTO> entry : schedules.entrySet()) {
+            ScheduleDTO s = entry.getValue();
+            logger.info("  Schedule[{}]: class={}, type={}, min={}, max={}, short_desc={}",
+                    entry.getKey(), s.getComp_class(), s.getType(),
+                    s.getMin_round(), s.getMax_round(), s.getShort_desc());
         }
 
         ScheduleDTO bestMatch = null;
@@ -224,28 +239,37 @@ public class ScheduleService {
 
         // First pass: Find exact match (round in range)
         for (ScheduleDTO sched : schedules.values()) {
-            boolean classMatches = "FREESTYLE".equalsIgnoreCase(roundType) 
+            boolean classMatches = "FREESTYLE".equalsIgnoreCase(roundType)
                 || (sched.getComp_class() != null && sched.getComp_class().equalsIgnoreCase(pilotClass));
             boolean typeMatches = sched.getType() != null && sched.getType().equalsIgnoreCase(roundType);
-            
+
+            logger.debug("Checking schedule: class={}, type={}, min={}, max={} -> classMatches={}, typeMatches={}",
+                    sched.getComp_class(), sched.getType(), sched.getMin_round(), sched.getMax_round(),
+                    classMatches, typeMatches);
+
             if (classMatches && typeMatches &&
                 sched.getMin_round() != null && sched.getMax_round() != null &&
                 sched.getMin_round() <= roundNumber &&
                 sched.getMax_round() >= roundNumber) {
 
+                logger.info("Found matching schedule: min={}, max={}, short_desc={}, currentBestMin={}",
+                        sched.getMin_round(), sched.getMax_round(), sched.getShort_desc(), bestMinRound);
+
                 // Prefer schedule with highest min_round (most specific)
                 if (sched.getMin_round() > bestMinRound) {
                     bestMinRound = sched.getMin_round();
                     bestMatch = sched;
+                    logger.info("New best match: min_round={}, short_desc={}", bestMinRound, sched.getShort_desc());
                 }
             }
         }
 
         // Second pass: No exact match - find nearest (highest max_round)
         if (bestMatch == null) {
+            logger.warn("No exact match found, trying fallback...");
             int highestMaxRound = -1;
             for (ScheduleDTO sched : schedules.values()) {
-                boolean classMatches = "FREESTYLE".equalsIgnoreCase(roundType) 
+                boolean classMatches = "FREESTYLE".equalsIgnoreCase(roundType)
                     || (sched.getComp_class() != null && sched.getComp_class().equalsIgnoreCase(pilotClass));
                 boolean typeMatches = sched.getType() != null && sched.getType().equalsIgnoreCase(roundType);
 
@@ -257,9 +281,17 @@ public class ScheduleService {
                 }
             }
             if (bestMatch != null) {
-                logger.debug("No exact match for round {} - using schedule with max_round={}",
-                        roundNumber, highestMaxRound);
+                logger.info("Fallback match: using schedule with max_round={}, short_desc={}",
+                        highestMaxRound, bestMatch.getShort_desc());
             }
+        }
+
+        if (bestMatch != null) {
+            logger.info("FINAL RESULT: For round {} returning schedule with short_desc={}",
+                    roundNumber, bestMatch.getShort_desc());
+        } else {
+            logger.warn("FINAL RESULT: No matching schedule found for class={}, type={}, round={}",
+                    pilotClass, roundType, roundNumber);
         }
 
         return bestMatch;
