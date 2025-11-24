@@ -27,18 +27,17 @@
                 color: #424242;
             }
             .type-btn-label {
-                font-size: 1.1rem;
+                font-size: 0.9rem;
                 font-weight: 600;
                 color: #212121;
-                flex-grow: 1;
-                text-align: center;
-                margin: 0 10px;
+                margin: 0 8px;
+                white-space: nowrap;
             }
             .type-btn-round {
-                font-size: 1.4rem;
+                font-size: 1.6rem;
                 font-weight: 700;
                 color: #1565c0;
-                min-width: 30px;
+                min-width: 35px;
                 text-align: right;
             }
             @media only screen and (min-width: 601px) {
@@ -49,10 +48,10 @@
                     font-size: 2.5rem;
                 }
                 .type-btn-label {
-                    font-size: 1.4rem;
+                    font-size: 1.1rem;
                 }
                 .type-btn-round {
-                    font-size: 1.8rem;
+                    font-size: 2rem;
                 }
             }
             /* Battery warning indicator styles - only shown for warnings */
@@ -153,7 +152,7 @@
             })();
         </script>
 
-        <h5 th:text="${pilot.name}">Judging Pilot</h5>
+        <h5 th:text="${pilot.name}" style="font-size: 2.5rem; font-weight: 700; margin-bottom: 15px;">Judging Pilot</h5>
         <h6 class="black-text">SELECT ROUND DIRECTION & TYPE</h6>
         <form th:id="'judgeknown'+${pilot.index}" action="/judge" method="get">
             <input type="hidden" name="pilot_id" th:value="${pilot.primary_id}"/>
@@ -190,7 +189,7 @@
                     <a th:id="'act_known'+${pilot.index}" class="type-btn" href="#"
                        th:onclick="'javascript:$(\'#judgeknown'+${pilot.index}+'\').submit();'">
                         <i class="material-icons type-btn-icon">visibility</i>
-                        <span class="type-btn-label">KNOWN</span>
+                        <span class="type-btn-label">KN</span>
                         <span class="type-btn-round" th:text="${pilotScores[pilot.primary_id].getActiveRound('KNOWN')}"></span>
                     </a>
                 </div>
@@ -199,7 +198,7 @@
                     <a th:id="'act_unknown'+${pilot.index}" class="type-btn" href="#"
                        th:onclick="'javascript:$(\'#roundType'+${pilot.index}+'\').val(\'UNKNOWN\'); $(\'#judgeknown'+${pilot.index}+'\').submit();'">
                         <i class="material-icons type-btn-icon">visibility_off</i>
-                        <span class="type-btn-label">UNKNOWN</span>
+                        <span class="type-btn-label">UK</span>
                         <span class="type-btn-round" th:text="${pilotScores[pilot.primary_id].getActiveRound('UNKNOWN')}"></span>
                     </a>
                 </div>
@@ -208,7 +207,7 @@
                     <a th:id="'act_freestyle'+${pilot.index}" class="type-btn" href="#"
                        th:onclick="'javascript:$(\'#roundType'+${pilot.index}+'\').val(\'FREESTYLE\'); $(\'#judgeknown'+${pilot.index}+'\').submit();'">
                         <i class="material-icons type-btn-icon">diversity_2</i>
-                        <span class="type-btn-label">FREESTYLE</span>
+                        <span class="type-btn-label">FS</span>
                         <span class="type-btn-round" th:text="${pilotScores[pilot.primary_id].getActiveRound('FREESTYLE')}"></span>
                     </a>
                 </div>

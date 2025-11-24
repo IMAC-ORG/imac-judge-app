@@ -83,6 +83,10 @@ public class PilotScores {
         if (roundType == null) {
             roundType = "KNOWN";
         }
+        // Initialize map if null (handles deserialization of new format)
+        if (activeRoundByType == null) {
+            activeRoundByType = new HashMap<>(Map.of("KNOWN", 1, "UNKNOWN", 1, "FREESTYLE", 1));
+        }
         return activeRoundByType.getOrDefault(roundType.toUpperCase(), 1);
     }
 
@@ -101,6 +105,10 @@ public class PilotScores {
     public void setActiveRound(String roundType, int round) {
         if (roundType == null) {
             roundType = "KNOWN";
+        }
+        // Initialize map if null (handles deserialization of new format)
+        if (activeRoundByType == null) {
+            activeRoundByType = new HashMap<>(Map.of("KNOWN", 1, "UNKNOWN", 1, "FREESTYLE", 1));
         }
         activeRoundByType.put(roundType.toUpperCase(), round);
     }

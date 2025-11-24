@@ -95,8 +95,9 @@
             </div>
             <div class="row">
                 <div class="col s4 left" style="font-size: 4vh; font-weight: 500; margin-left: 10px;">
-                    <span th:text="'Round '+${activeRound + ' Seq ' + pilotScores.activeSequence}"></span>
-                    <span th:if="${roundType eq 'KNOWN' or dirletter eq 'C'}" th:text="'Dir ' + ${dirletter}"></span>
+                    <span>Round <span th:text="${activeRound}"></span></span>
+                    <span th:if="${roundType eq 'KNOWN'}"> Seq <span th:text="${pilotScores.activeSequence}"></span></span>
+                    <span th:if="${roundType eq 'KNOWN' or roundType eq 'UNKNOWN'}"> Dir <span th:text="${dirletter}"></span></span>
                 </div>
                 
                 <h2 th:text="'Figure '+${(iterStat.index + 1) + ' ' + maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
@@ -357,10 +358,38 @@
             $('.carousel').carousel('next');
             submitScores(false);
             if (score_index == (numOfManeuvers - 1)) {
+                // Dynamically populate summary modal rows based on actual number of maneuvers
+                populateSummaryModal();
                 $('#modal_summary').modal('open');
                 // This is done for every score now...
                 //submitScores();
             }
+        }
+
+        function populateSummaryModal() {
+            // Clear existing dynamic rows (keep header)
+            $('#modal_summary .scoresummary').not(':first').remove();
+
+            // Generate rows dynamically for each maneuver
+            for (var i = 0; i < numOfManeuvers; i++) {
+                var desc = sequenceJson[i] ? sequenceJson[i].description : '';
+                var scoreText = formatScoreForDisplay(scores[i]);
+
+                var row = $('<div class="row scoresummary">' +
+                    '<div class="col s2 m3 right-align">Fig ' + (i + 1) + '</div>' +
+                    '<div class="col s9 m7" id="ss_' + i + '_desc">' + desc + '</div>' +
+                    '<div class="col s1 m2 right-align" id="ss_' + i + '_text">' + scoreText + '</div>' +
+                    '</div>');
+                $('#modal_summary .modal-footer').before(row);
+            }
+        }
+
+        function formatScoreForDisplay(score) {
+            if (score === undefined || score === null) return '-';
+            if (score === -1) return 'Break';
+            if (score === -2) return 'N/O';
+            if (score === -3) return 'Deadline';
+            return score;
         }
 
         function submitScores(done = false) {
