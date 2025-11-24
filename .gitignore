@@ -32,4 +32,4 @@ dockerbuild/settings.json
 .devcontainer/judge/
 
 ### Local docs and notes (not for GitHub) ###
-dpg_docs/
+
