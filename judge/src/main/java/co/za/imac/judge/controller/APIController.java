@@ -241,4 +241,34 @@ public class APIController {
         InfoJson info = infoCollectorService.collectInfo();
         return info;
     }
+
+    @PostMapping("/api/pilot/{pilotId}/advance-round")
+    public ResponseEntity<PilotScores> advanceRound(
+            @PathVariable String pilotId,
+            @RequestParam(name = "type", required = true) String roundType)
+            throws IOException, ParserConfigurationException, SAXException {
+
+        logger.info("Advancing round for pilot {} type {}", pilotId, roundType);
+
+        // Get pilot
+        Pilot pilot = pilotService.getPilot(pilotId);
+        if (pilot == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pilot not found");
+        }
+
+        // Get pilot scores
+        PilotScores pilotScores = pilotService.getPilotScores(pilot);
+
+        // Increment the round for this type and reset sequence to 1
+        pilotScores.incrementActiveRound(roundType);
+        pilotScores.setActiveSequence(1);
+
+        // Save the updated pilot scores
+        pilotService.savePilotScoresToFile(pilotScores);
+
+        logger.info("Advanced pilot {} to round {} sequence 1 for type {}",
+                    pilotId, pilotScores.getActiveRound(roundType), roundType);
+
+        return ResponseEntity.ok(pilotScores);
+    }
 }

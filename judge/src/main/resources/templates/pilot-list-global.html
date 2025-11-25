@@ -67,24 +67,24 @@
         <div style="display: flex; justify-content: center; gap: 15px;">
 
           <!-- KNOWN Card -->
-          <div style="border: 1px solid #37474f; border-radius: 8px; padding: 10px 18px; background: #fffacd; min-width: 160px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <div style="text-align: center; font-weight: 600; font-size: 1.3rem; margin-bottom: 6px; color: #37474f;">KNOWN</div>
+          <div style="border-bottom: 1px solid #999; padding: 5px 15px; min-width: 140px;">
+            <div style="text-align: center; font-weight: 500; font-size: 1.1rem; color: #666;">KNOWN</div>
             <div style="text-align: center; font-size: 1.1rem; color: #666;">
               Round <span style="font-weight: 700; font-size: 2rem; color: #1976d2;" th:text="${pilotScores[pilot.primary_id].getActiveRound('KNOWN')}"></span>
             </div>
           </div>
 
           <!-- UNKNOWN Card -->
-          <div style="border: 1px solid #37474f; border-radius: 8px; padding: 10px 18px; background: #fffacd; min-width: 160px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <div style="text-align: center; font-weight: 600; font-size: 1.3rem; margin-bottom: 6px; color: #37474f;">UNKNOWN</div>
+          <div style="border-bottom: 1px solid #999; padding: 5px 15px; min-width: 140px;">
+            <div style="text-align: center; font-weight: 500; font-size: 1.1rem; color: #666;">UNKNOWN</div>
             <div style="text-align: center; font-size: 1.1rem; color: #666;">
               Round <span style="font-weight: 700; font-size: 2rem; color: #1976d2;" th:text="${pilotScores[pilot.primary_id].getActiveRound('UNKNOWN')}"></span>
             </div>
           </div>
 
           <!-- FREESTYLE Card -->
-          <div style="border: 1px solid #37474f; border-radius: 8px; padding: 10px 18px; background: #fffacd; min-width: 160px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <div style="text-align: center; font-weight: 600; font-size: 1.3rem; margin-bottom: 6px; color: #37474f;">FREESTYLE</div>
+          <div style="border-bottom: 1px solid #999; padding: 5px 15px; min-width: 140px;">
+            <div style="text-align: center; font-weight: 500; font-size: 1.1rem; color: #666;">FREESTYLE</div>
             <div style="text-align: center; font-size: 1.1rem; color: #666;">
               Round <span style="font-weight: 700; font-size: 2rem; color: #1976d2;" th:text="${pilotScores[pilot.primary_id].getActiveRound('FREESTYLE')}"></span>
             </div>
@@ -202,17 +202,33 @@
       }
     }
 
-      //add button listeners
-      $(document).on("keypress", function (e) {
-            //numpad 6
-            if (e.which == 54) {
-                carouselNext();
-            }
-            //numpad 4
-            if (e.which == 52) {
-                $('.carousel').carousel('prev');
-            }
-        });
+    // Instructions audio for new users
+    var instructionsAudio = null;
+    function playInstructions() {
+        if (instructionsAudio && !instructionsAudio.paused) {
+            instructionsAudio.pause();
+            instructionsAudio.currentTime = 0;
+        } else {
+            instructionsAudio = new Audio('/man/en/audio/instructions.mp3');
+            instructionsAudio.play();
+        }
+    }
+
+    //add button listeners
+    $(document).on("keypress", function (e) {
+        //numpad 6
+        if (e.which == 54) {
+            carouselNext();
+        }
+        //numpad 4
+        if (e.which == 52) {
+            $('.carousel').carousel('prev');
+        }
+        //numpad 0 - play instructions
+        if (e.which == 48) {
+            playInstructions();
+        }
+    });
   </script>
 
 </body>
