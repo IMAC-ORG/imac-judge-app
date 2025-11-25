@@ -380,4 +380,50 @@ public class RootController {
         logger.debug("Schedule Count: " + scheduleService.getSchedules().size());
         return "newround";
     }
+
+    @GetMapping("/admin/comp")
+    public String adminComp(Model model) throws IOException {
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+
+        boolean isComp = compService.isCurrentComp();
+        model.addAttribute("isCurrentComp", isComp);
+        if (isComp) {
+            CompDTO curComp = compService.getComp();
+            model.addAttribute("compName", curComp.getComp_name());
+            model.addAttribute("compId", curComp.getComp_id());
+            model.addAttribute("scoreMode", curComp.getScore_mode());
+            model.addAttribute("maxSeqPerRound", curComp.getSequences());
+            model.addAttribute("maxUnknownSeqPerRound", curComp.getUnknown_sequences());
+            model.addAttribute("sequenceType", curComp.getSequenceType());
+        } else {
+            model.addAttribute("compName", "No Competition");
+            model.addAttribute("compId", 0);
+            model.addAttribute("scoreMode", "byRound");
+            model.addAttribute("maxSeqPerRound", 2);
+            model.addAttribute("maxUnknownSeqPerRound", 1);
+            model.addAttribute("sequenceType", "std");
+        }
+        return "adminComp";
+    }
+
+    @GetMapping("/admin/device")
+    public String adminDevice(Model model) throws IOException {
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+
+        if (compService.isCurrentComp()) {
+            model.addAttribute("scoreMode", compService.getComp().getScore_mode());
+        } else {
+            model.addAttribute("scoreMode", "global");
+        }
+        return "adminDevice";
+    }
+
+    @GetMapping("/admin/scores")
+    public String adminScores(Model model) throws IOException {
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+        return "adminScores";
+    }
 }

@@ -100,8 +100,10 @@
                     <span th:if="${roundType eq 'KNOWN' or roundType eq 'UNKNOWN'}"> Dir <span th:text="${dirletter}"></span></span>
                 </div>
                 
-                <h2 th:text="'Figure '+${(iterStat.index + 1) + ' ' + maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
-                    th:id="'description_'+ ${iterStat.index}"></h2>
+                <h2 style="line-height: 1rem ; margin: 1rem ;" th:id="'description_'+ ${iterStat.index}">
+                    <span th:if="${roundType ne 'FREESTYLE'}" th:text="'Figure '+${(iterStat.index + 1) + ' ' + maneuver.description}"></span>
+                    <span th:if="${roundType eq 'FREESTYLE'}" th:text="${maneuver.description}"></span>
+                </h2>
             </div>
         </div>
     </div>

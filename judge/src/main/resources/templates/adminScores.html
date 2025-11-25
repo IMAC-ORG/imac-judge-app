@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
+  <title>Admin - Scores</title>
+
+  <!-- CSS  -->
+  <link href="materialize/css/material_lcons.css" rel="stylesheet">
+  <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+  <style>
+    .heading {
+      font-size: calc(2vw + 3vh) !important;
+      margin-bottom: 20px;
+      margin-top: 5px;
+    }
+    .admin-nav {
+      margin: 20px 0;
+      padding: 15px;
+      background: #fafafa;
+      border-radius: 8px;
+    }
+    .admin-nav-btn {
+      margin: 5px;
+    }
+    .placeholder-content {
+      background: #fff8e1;
+      border: 2px dashed #ffc107;
+      border-radius: 8px;
+      padding: 40px 30px;
+      margin-top: 30px;
+      text-align: center;
+    }
+    .placeholder-icon {
+      font-size: 4rem;
+      color: #ffc107;
+      margin-bottom: 20px;
+    }
+    .placeholder-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+    .placeholder-text {
+      font-size: 1.1rem;
+      color: #555;
+      line-height: 1.6;
+    }
+    .feature-list {
+      text-align: left;
+      max-width: 400px;
+      margin: 20px auto 0 auto;
+    }
+    .feature-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .feature-list li:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+
+<body class="yellow">
+  <div th:replace="~{banner::line_judge}"></div>
+  <div th:replace="~{banner::status}"></div>
+
+  <div class="section no-pad-bot yellow" id="index-banner">
+    <div class="container yellow black-text">
+
+      <!-- Header -->
+      <div class="row">
+        <div class="col s12 center-align">
+          <h2 class="heading">Score Admin</h2>
+        </div>
+      </div>
+
+      <!-- Admin Navigation -->
+      <div class="admin-nav center">
+        <a href="/admin/comp" class="waves-effect waves-light btn blue-grey admin-nav-btn">
+          <i class="material-icons left">settings</i>Scorekeeper Admin
+        </a>
+        <a href="/admin/device" class="waves-effect waves-light btn blue admin-nav-btn">
+          <i class="material-icons left">devices</i>Device Admin
+        </a>
+        <a href="/" class="waves-effect waves-light btn green admin-nav-btn">
+          <i class="material-icons left">home</i>Exit to Home
+        </a>
+      </div>
+
+      <!-- Placeholder Content -->
+      <div class="placeholder-content">
+        <i class="material-icons placeholder-icon">construction</i>
+        <div class="placeholder-title">Score Management - Coming Soon</div>
+        <div class="placeholder-text">
+          This is where a scorekeeper will be able to manage scoring corrections and updates.
+        </div>
+        <ul class="feature-list">
+          <li><i class="material-icons tiny" style="vertical-align: middle; margin-right: 8px;">swap_horiz</i> Move scores from one pilot to another if scored incorrectly</li>
+          <li><i class="material-icons tiny" style="vertical-align: middle; margin-right: 8px;">exposure_zero</i> Zero out unflown rounds</li>
+          <li><i class="material-icons tiny" style="vertical-align: middle; margin-right: 8px;">edit</i> Edit individual figure scores</li>
+          <li><i class="material-icons tiny" style="vertical-align: middle; margin-right: 8px;">history</i> View scoring history and changes</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="fixed-action-btn">
+    <a class="btn-floating btn-large red">
+      <i class="large material-icons">menu</i>
+    </a>
+    <ul>
+      <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">home</i></a></li>
+      <li><a class="btn-floating btn-large blue" href="/admin/comp"><i class="material-icons">settings</i></a></li>
+    </ul>
+  </div>
+
+  <!--  Scripts-->
+  <script src="jquery-3.6.4.min.js"></script>
+  <script src="materialize/js/materialize.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var elems = document.querySelectorAll('.fixed-action-btn');
+      M.FloatingActionButton.init(elems, { hoverEnabled: false });
+    });
+  </script>
+
+</body>
+
+</html>
