@@ -222,7 +222,7 @@ public class PilotService {
             // save to file
             pilotScores = savePilotScoresToFile(pilotScores);
         } else {
-            // REVIEWED-TODO 2025-11 DPG: update existing score
+            // BACKLOG 2025-11 DPG: update existing score
         }
         return pilotScores;
     }
