@@ -7,7 +7,7 @@
 - Consolidate competition setup and device configuration
 
 ### 2. Refactor Package Names
-- Replace all `co.za.imac` references with `imac`
+- Replace all `co.za.imac` references with `com.aerojudge`
 - Update package declarations, imports, and any hardcoded references
 
 ### 3. Code Cleanup Review
