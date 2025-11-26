@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
-  <title>Sequence Configuration Errors</title>
+  <title>Sequence Validation</title>
 
   <!-- CSS  -->
   <link href="materialize/css/material_lcons.css" rel="stylesheet">
@@ -70,6 +70,31 @@
       color: #ef6c00;
     }
 
+    .success-card {
+      background-color: #e8f5e9;
+      border: 2px solid #4caf50;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .success-icon {
+      font-size: 5rem !important;
+      color: #2e7d32;
+    }
+
+    .success-title {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #2e7d32;
+      margin: 15px 0;
+    }
+
+    .success-message {
+      font-size: 1.2rem;
+      color: #333;
+    }
+
     .action-buttons {
       margin-top: 30px;
       margin-bottom: 20px;
@@ -104,8 +129,18 @@
   <div class="section no-pad-bot yellow" id="index-banner">
     <div class="container yellow black-text">
 
-      <!-- Header -->
-      <div class="row">
+      <!-- Success Header -->
+      <div th:if="${isSuccess}" class="row">
+        <div class="col s12 center-align">
+          <h2 class="heading" style="color: #2e7d32;">
+            <i class="material-icons" style="font-size: inherit; vertical-align: middle;">check_circle</i>
+            Sequence Validation
+          </h2>
+        </div>
+      </div>
+
+      <!-- Issues Header -->
+      <div th:unless="${isSuccess}" class="row">
         <div class="col s12 center-align">
           <h2 class="heading">
             <i class="material-icons" style="font-size: inherit; vertical-align: middle;">warning</i>
@@ -114,7 +149,19 @@
         </div>
       </div>
 
-      <div class="row">
+      <!-- Success Content -->
+      <div th:if="${isSuccess}" class="row">
+        <div class="col s12">
+          <div class="success-card">
+            <i class="material-icons success-icon">verified</i>
+            <div class="success-title">All Sequences Validated!</div>
+            <div class="success-message">All sequence configurations are correct and ready for judging.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Issues Description -->
+      <div th:unless="${isSuccess}" class="row">
         <div class="col s12 center-align">
           <p>The following issues were detected after sync. Please review before proceeding.</p>
         </div>
@@ -152,8 +199,8 @@
         </div>
       </div>
 
-      <!-- Help Text -->
-      <div class="row">
+      <!-- Help Text (only show when there are issues) -->
+      <div th:unless="${isSuccess}" class="row">
         <div class="col s12">
           <div class="help-text">
             <ul>
@@ -166,8 +213,34 @@
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="action-buttons">
+      <!-- Action Buttons - Success State -->
+      <div th:if="${isSuccess}" class="action-buttons">
+        <form action="/validate-sequences/continue" method="post">
+          <button type="submit" class="waves-effect waves-light btn-large green darken-1 pulse">
+            <i class="material-icons left">arrow_forward</i>
+            Continue to Judging
+          </button>
+        </form>
+      </div>
+
+      <!-- Action Buttons - Warnings Only (no errors) -->
+      <div th:if="${hasWarnings and !hasErrors}" class="action-buttons">
+        <form action="/validate-sequences/resync" method="post">
+          <button type="submit" class="waves-effect waves-light btn-large blue darken-1">
+            <i class="material-icons left">sync</i>
+            Re-Sync Now
+          </button>
+        </form>
+        <form action="/validate-sequences/continue" method="post">
+          <button type="submit" class="waves-effect waves-light btn-large green darken-1">
+            <i class="material-icons left">arrow_forward</i>
+            Continue
+          </button>
+        </form>
+      </div>
+
+      <!-- Action Buttons - Errors State -->
+      <div th:if="${hasErrors}" class="action-buttons">
         <form action="/validate-sequences/resync" method="post">
           <button type="submit" class="waves-effect waves-light btn-large blue darken-1">
             <i class="material-icons left">sync</i>

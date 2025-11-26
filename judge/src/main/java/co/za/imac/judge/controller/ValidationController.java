@@ -53,19 +53,20 @@ public class ValidationController {
 
         ValidationResult result = validationService.validateAll();
 
-        if (result.hasErrors() || result.hasWarnings()) {
-            model.addAttribute("settings", settingService.getSettings());
-            model.addAttribute("errors", result.getErrors());
-            model.addAttribute("warnings", result.getWarnings());
-            model.addAttribute("hasErrors", result.hasErrors());
-            model.addAttribute("hasWarnings", result.hasWarnings());
-            model.addAttribute("totalIssues", result.getTotalIssueCount());
-            return "sequence_validation_error";
+        model.addAttribute("settings", settingService.getSettings());
+        model.addAttribute("errors", result.getErrors());
+        model.addAttribute("warnings", result.getWarnings());
+        model.addAttribute("hasErrors", result.hasErrors());
+        model.addAttribute("hasWarnings", result.hasWarnings());
+        model.addAttribute("totalIssues", result.getTotalIssueCount());
+        model.addAttribute("isSuccess", !result.hasErrors() && !result.hasWarnings());
+
+        if (!result.hasErrors() && !result.hasWarnings()) {
+            logger.info("Validation passed - showing success page");
         }
 
-        // All good - redirect to normal flow
-        logger.info("Validation passed - redirecting to pilot list");
-        return "redirect:/pilot-list-global";
+        // Always show validation page - user clicks to continue
+        return "sequence_validation_error";
     }
 
     /**

@@ -151,9 +151,61 @@
   <script src="materialize/js/materialize.js"></script>
   <script>
     var windowHeight = window.innerHeight - 35; // reduce some for banner
+    // Battery check function - called when modal opens
+    function checkBatteryForModal(modal) {
+      var statusDiv = modal.querySelector('.battery-status');
+      if (!statusDiv) return;
+
+      $.ajax({
+        url: "/api/getinfo",
+        timeout: 3000,
+        cache: false,
+        success: function(data) {
+          if (data && data.info_lines) {
+            var batteryLine = data.info_lines.find(function(line) {
+              return line.label === "Battery Status:";
+            });
+            if (batteryLine && batteryLine.value) {
+              var match = batteryLine.value.match(/(\d+)%/);
+              if (match) {
+                var percent = parseInt(match[1]);
+                var icon, text, cssClass;
+
+                if (percent < 20) {
+                  icon = 'battery_alert';
+                  text = 'LOW BATTERY: ' + percent + '% - Charge soon!';
+                  cssClass = 'battery-low';
+                } else if (percent < 40) {
+                  icon = 'battery_3_bar';
+                  text = 'Warning: Battery at ' + percent + '%';
+                  cssClass = 'battery-mid';
+                } else {
+                  statusDiv.style.display = 'none';
+                  return;
+                }
+
+                statusDiv.className = 'battery-status ' + cssClass;
+                statusDiv.innerHTML = '<i class="material-icons">' + icon + '</i><span class="bat-text">' + text + '</span>';
+                statusDiv.style.display = 'flex';
+                return;
+              }
+            }
+          }
+          statusDiv.style.display = 'none';
+        },
+        error: function() {
+          statusDiv.style.display = 'none';
+        }
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       var elems = document.querySelectorAll('.modal');
-      var instances = M.Modal.init(elems);
+      var instances = M.Modal.init(elems, {
+        onOpenStart: function(modal) {
+          checkBatteryForModal(modal);
+        }
+      });
     });
     document.addEventListener('DOMContentLoaded', function () {
       var elems = document.querySelectorAll('.fixed-action-btn');
@@ -168,7 +220,19 @@
     }).height(windowHeight);
 
     
+    function closeAllModals() {
+      // Close all open modals before carousel navigation
+      var modals = document.querySelectorAll('.modal');
+      modals.forEach(function(modal) {
+        var instance = M.Modal.getInstance(modal);
+        if (instance && instance.isOpen) {
+          instance.close();
+        }
+      });
+    }
+
     function carouselNext() {
+      closeAllModals();
       $('.carousel').carousel('next');
     }
 
@@ -222,6 +286,7 @@
         }
         //numpad 4
         if (e.which == 52) {
+            closeAllModals();
             $('.carousel').carousel('prev');
         }
         //numpad 0 - play instructions

@@ -103,72 +103,8 @@
             }
         </style>
 
-        <!-- Battery Warning Indicator (only visible when battery is low) -->
-        <div th:id="'battery-status-'+${pilot.index}" class="battery-status"></div>
-        <script th:inline="javascript">
-            (function() {
-                var pilotIdx = /*[[${pilot.index}]]*/ '0';
-                var modalId = 'modal' + pilotIdx;
-                var statusDiv = document.getElementById('battery-status-' + pilotIdx);
-
-                function checkBattery() {
-                    $.ajax({
-                        url: "/api/getinfo",
-                        timeout: 3000,
-                        cache: false, // Always fetch fresh data
-                        success: function(data) {
-                            if (data && data.info_lines) {
-                                var batteryLine = data.info_lines.find(function(line) {
-                                    return line.label === "Battery Status:";
-                                });
-                                if (batteryLine && batteryLine.value) {
-                                    var match = batteryLine.value.match(/(\d+)%/);
-                                    if (match) {
-                                        var percent = parseInt(match[1]);
-                                        var icon, text, cssClass;
-
-                                        if (percent < 20) {
-                                            icon = 'battery_alert';
-                                            text = 'LOW BATTERY: ' + percent + '% - Charge soon!';
-                                            cssClass = 'battery-low';
-                                        } else if (percent < 40) {
-                                            icon = 'battery_3_bar';
-                                            text = 'Warning: Battery at ' + percent + '%';
-                                            cssClass = 'battery-mid';
-                                        } else {
-                                            // Battery OK - hide indicator
-                                            statusDiv.style.display = 'none';
-                                            return;
-                                        }
-
-                                        statusDiv.className = 'battery-status ' + cssClass;
-                                        statusDiv.innerHTML = '<i class="material-icons">' + icon + '</i><span class="bat-text">' + text + '</span>';
-                                        statusDiv.style.display = 'flex';
-                                        return;
-                                    }
-                                }
-                            }
-                            // No battery info or error - hide
-                            statusDiv.style.display = 'none';
-                        },
-                        error: function() {
-                            statusDiv.style.display = 'none';
-                        }
-                    });
-                }
-
-                // Watch for modal open (Materialize adds 'open' class)
-                var modal = document.getElementById(modalId);
-                if (modal) {
-                    var observer = new MutationObserver(function(mutations) {
-                        if (modal.classList.contains('open')) {
-                            checkBattery();
-                        }
-                    });
-                    observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
-                }
-            })();
-        </script>
+        <!-- Battery Warning Indicator (updated via onOpenStart callback in pilot-list pages) -->
+        <div class="battery-status"></div>
 
         <h5 th:text="${pilot.name}" style="font-size: 2.8rem; font-weight: 700; margin-bottom: 30px;">Judging Pilot</h5>
         <h6 class="black-text">SELECT ROUND DIRECTION & TYPE</h6>

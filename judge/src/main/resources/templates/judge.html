@@ -69,8 +69,8 @@
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-1);" id="btnsetbreak">Break</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-2);" id="btnsetno">N/O</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="longDescription();" id="btnspeak">speak</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="$('.carousel').carousel('prev');audiolongd.pause();audiolongd.currentTime = 0;shortdescription(-1);setLongDescription(-1);" id="btnnext">prev</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();audiolongd.pause();audiolongd.currentTime = 0;shortdescription(1);setLongDescription(1);" id="btnnext">next</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselPrev();" id="btnprev">prev</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();" id="btnnext">next</a>
         </div>
         <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item yellow black-text" href="#one!">
             <div class="row" style="margin-bottom: 0px; height: 10px;">
@@ -156,6 +156,7 @@
         const voices = synth.getVoices();
 
         let classFilter = localStorage.getItem("classFilter");
+        let carouselLocked = false;  // Prevents navigation when summary modal is open
 
         document.addEventListener('DOMContentLoaded', function () {
             var elems = document.querySelectorAll('.modal');
@@ -166,7 +167,11 @@
                 dismissible:false,
                 startingTop: '1%',
                 startingBottom: '1%',
-                onOpenStart: function (){
+                onOpenStart: function(modal){
+                    // Lock carousel when summary modal opens - must be handled before navigation resumes
+                    if (modal.id === 'modal_summary') {
+                        carouselLocked = true;
+                    }
                     for (var i in scores) {
                         var currentScore = '#ss_' + i + '_text';
                         switch (scores[i]) {
@@ -180,6 +185,12 @@
                                 $(currentScore).text(scores[i]);
                                 break;
                         }
+                    }
+                },
+                onCloseEnd: function(modal){
+                    // Unlock carousel when summary modal closes (Review or Save clicked)
+                    if (modal.id === 'modal_summary') {
+                        carouselLocked = false;
                     }
                 }
             });
@@ -270,7 +281,12 @@
         function NowJudgingMessage() {
             audio.pause();
             audio.currentTime = 0;
-            var audio_url = audioBasePath + '/now_judging_' + pilot_class + '_' + roundType + '_sequence.mp3';
+            var audio_url;
+            if (roundType === 'freestyle') {
+                audio_url = audioBasePath + '/now_judging_freestyle_sequence.mp3';
+            } else {
+                audio_url = audioBasePath + '/now_judging_' + pilot_class + '_' + roundType + '_sequence.mp3';
+            }
             audio = new Audio(audio_url.toLowerCase());
             audio.volume = 1.0;
             audio.onerror = function() {
@@ -283,6 +299,19 @@
                 shortdescription(0);
             });
 
+        }
+
+        function closeAllModals() {
+            // Close all open modals before carousel navigation
+            // EXCEPT summary modal - that requires explicit user action (Review/Save)
+            var modals = document.querySelectorAll('.modal');
+            modals.forEach(function(modal) {
+                if (modal.id === 'modal_summary') return;  // Skip summary modal
+                var instance = M.Modal.getInstance(modal);
+                if (instance && instance.isOpen) {
+                    instance.close();
+                }
+            });
         }
 
         function isNumber(n) {
@@ -356,8 +385,28 @@
         NowJudgingMessage();
         setLongDescription(0);
 
+        function carouselPrev() {
+            // Block navigation if summary modal is open - user must Review or Save first
+            if (carouselLocked) return;
+
+            closeAllModals();
+            $('.carousel').carousel('prev');
+            audiolongd.pause();
+            audiolongd.currentTime = 0;
+            shortdescription(-1);
+            setLongDescription(-1);
+        }
+
         function carouselNext() {
+            // Block navigation if summary modal is open - user must Review or Save first
+            if (carouselLocked) return;
+
+            closeAllModals();
             $('.carousel').carousel('next');
+            audiolongd.pause();
+            audiolongd.currentTime = 0;
+            shortdescription(1);
+            setLongDescription(1);
             submitScores(false);
             if (score_index == (numOfManeuvers - 1)) {
                 // Dynamically populate summary modal rows based on actual number of maneuvers
@@ -563,18 +612,10 @@
             //numpad 6
             if (e.which == 54) {
                 carouselNext();
-                audiolongd.pause();
-                audiolongd.currentTime = 0;
-                shortdescription(1);
-                setLongDescription(1);
             }
             //numpad 4
             if (e.which == 52) {
-                $('.carousel').carousel('prev');
-                audiolongd.pause();
-                audiolongd.currentTime = 0;
-                shortdescription(-1);
-                setLongDescription(-1);
+                carouselPrev();
             }
             //numpad 0
             if (e.which == 48) {
