@@ -5,7 +5,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+// REVIEWED-UNUSED 2025-11 DPG: import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -64,7 +65,8 @@ public class PilotService {
     public void getPilotsFileFromScore() throws MalformedURLException, IOException {
         SettingDTO settingDTO = settingService.getSettings();
         PILOT_DAT_URL = PILOT_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
-        FileUtils.copyURLToFile(new URL(PILOT_DAT_URL), new File(PILOT_DAT_PATH),1000,1000);
+        // Updated deprecated URL, changed new URL(x) to URI.create(x).toURL() 2025-11 DPG
+        FileUtils.copyURLToFile(URI.create(PILOT_DAT_URL).toURL(), new File(PILOT_DAT_PATH),1000,1000);
     }
 
     public boolean isPilots(){
@@ -220,7 +222,7 @@ public class PilotService {
             // save to file
             pilotScores = savePilotScoresToFile(pilotScores);
         } else {
-            // TODO update existing score
+            // REVIEWED-TODO 2025-11 DPG: update existing score
         }
         return pilotScores;
     }

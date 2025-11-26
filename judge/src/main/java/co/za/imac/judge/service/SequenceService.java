@@ -4,7 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+// REVIEWED-UNUSED 2025-11 DPG: import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,14 +19,14 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ResourceUtils;
+// REVIEWED-UNUSED 2025-11 DPG: import org.springframework.util.ResourceUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.google.gson.Gson;
+// REVIEWED-UNUSED 2025-11 DPG: import com.google.gson.Gson;
 
 import co.za.imac.judge.dto.FigureDTO;
 import co.za.imac.judge.dto.SettingDTO;
@@ -43,7 +44,8 @@ public class SequenceService {
     public void getSequenceFileFromScore() throws MalformedURLException, IOException {
         SettingDTO settingDTO = settingService.getSettings();
         SEQUENCES_DAT_URL = SEQUENCES_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
-        FileUtils.copyURLToFile(new URL(SEQUENCES_DAT_URL), new File(SEQUENCES_DAT_PATH),1000,1000);
+        // Updated deprecated URL, changed new URL(x) to URI.create(x).toURL() 2025-11 DPG
+        FileUtils.copyURLToFile(URI.create(SEQUENCES_DAT_URL).toURL(), new File(SEQUENCES_DAT_PATH),1000,1000);
     }
 
     public boolean isSequence(){

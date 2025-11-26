@@ -1,6 +1,6 @@
 package co.za.imac.judge.service;
 
-import co.za.imac.judge.dto.CompDTO;
+// REVIEWED-UNUSED 2025-11 DPG: import co.za.imac.judge.dto.CompDTO;
 import co.za.imac.judge.dto.FigureDTO;
 import co.za.imac.judge.dto.ScheduleDTO;
 import co.za.imac.judge.dto.SettingDTO;
@@ -24,7 +24,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+// REVIEWED-UNUSED 2025-11 DPG: import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -84,7 +85,8 @@ public class ScheduleService {
         logger.info("Loading sequences from Score.");
         SettingDTO settingDTO = settingService.getSettings();
         SEQUENCES_DAT_URL = SEQUENCES_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
-        FileUtils.copyURLToFile(new URL(SEQUENCES_DAT_URL), new File(SEQUENCES_DAT_PATH),1000,1000);
+        // Updated deprecated URL, changed new URL(x) to URI.create(x).toURL() 2025-11 DPG
+        FileUtils.copyURLToFile(URI.create(SEQUENCES_DAT_URL).toURL(), new File(SEQUENCES_DAT_PATH),1000,1000);
         // Clear cache only after successful download - forces reload with new data on next access
         this.schedules = null;
         logger.info("Sequence cache cleared - will reload on next access.");

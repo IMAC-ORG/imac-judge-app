@@ -84,7 +84,9 @@ public class InfoCollectorService {
                 return new InfoLine("WiFi:", "unknown", "0%");
             } //else assume linux/Pi
 
-            Process process = Runtime.getRuntime().exec("iwconfig");
+            // Updated deprecated Runtime.exec() to ProcessBuilder 2025-11 DPG
+            ProcessBuilder pb = new ProcessBuilder("iwconfig");
+            Process process = pb.start();
             java.io.BufferedReader reader = new java.io.BufferedReader(
                 new java.io.InputStreamReader(process.getInputStream()));
 

@@ -41,8 +41,8 @@ public class RootController {
     private RoundsService roundService;
     @Autowired
     private PilotService pilotService;
-    @Autowired
-    private SequenceService sequenceService;
+    // REVIEWED-UNUSED 2025-11 DPG: @Autowired
+    // REVIEWED-UNUSED 2025-11 DPG: private SequenceService sequenceService;
     @Autowired
     private ScheduleService scheduleService;
     @Autowired

@@ -8,11 +8,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.URI;
+// REVIEWED-UNUSED 2025-11 DPG: import java.net.URL;
+// REVIEWED-UNUSED 2025-11 DPG: import java.util.ArrayList;
+// REVIEWED-UNUSED 2025-11 DPG: import java.util.HashMap;
+// REVIEWED-UNUSED 2025-11 DPG: import java.util.List;
+// REVIEWED-UNUSED 2025-11 DPG: import java.util.Map;
 
 import co.za.imac.judge.dto.SettingDTO;
 import org.apache.commons.io.FileUtils;
@@ -28,7 +29,7 @@ import co.za.imac.judge.utils.SettingUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+// REVIEWED-UNUSED 2025-11 DPG: import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
@@ -60,7 +61,8 @@ public class CompService {
         SettingDTO settingDTO = settingService.getSettings();
         COMP_INFO_DAT_URL = COMP_INFO_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
         try {
-            FileUtils.copyURLToFile(new URL(COMP_INFO_DAT_URL), new File(COMP_INFO_DAT_PATH),1000,1000);
+            // Updated deprecated URL, changed new URL(x) to URI.create(x).toURL() 2025-11 DPG
+            FileUtils.copyURLToFile(URI.create(COMP_INFO_DAT_URL).toURL(), new File(COMP_INFO_DAT_PATH),1000,1000);
         } catch (Exception e) {
             try {
                 // Score is probably turned off.
@@ -75,7 +77,8 @@ public class CompService {
         SettingDTO settingDTO = settingService.getSettings();
         COMP_PREFS_DAT_URL = COMP_PREFS_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
         try {
-            FileUtils.copyURLToFile(new URL(COMP_PREFS_DAT_URL), new File(COMP_PREFS_DAT_PATH),1000,1000);
+            // Updated deprecated URL, changed new URL(x) to URI.create(x).toURL() 2025-11 DPG
+            FileUtils.copyURLToFile(URI.create(COMP_PREFS_DAT_URL).toURL(), new File(COMP_PREFS_DAT_PATH),1000,1000);
         } catch (Exception e) {
             try {
                 // Score is probably turned off.
