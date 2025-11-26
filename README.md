@@ -10,6 +10,7 @@
 1. VSCode
 2. Docker Desktop
 3. Score =>v4.52 with services enabled and started
+4. Java 17 or later (Java 21 works fine)
 
 ## RUN imac-judge-app
 1. Open in a dev container
