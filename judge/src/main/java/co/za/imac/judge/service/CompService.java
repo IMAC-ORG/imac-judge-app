@@ -138,6 +138,28 @@ public class CompService {
 
     }
 
+    /**
+     * Save comp settings locally without any Score server contact.
+     * Updates both in-memory compDTO and the comp.json file.
+     */
+    public boolean saveCompToFileLocal() throws IOException {
+        if (compDTO == null) {
+            logger.warn("Cannot save local comp settings - no comp loaded");
+            return false;
+        }
+
+        File newFile = new File(COMP_FILE_NAME);
+        newFile.createNewFile();
+        String compdtoJson = new Gson().toJson(compDTO);
+        byte[] strToBytes = compdtoJson.getBytes();
+        FileOutputStream outputStream = new FileOutputStream(COMP_FILE_NAME);
+        outputStream.write(strToBytes);
+        outputStream.close();
+
+        logger.info("Saved local comp settings to file");
+        return true;
+    }
+
     public CompDTO getComp() {
         return compDTO;
     }

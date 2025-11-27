@@ -4,137 +4,206 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
-  <title>Competition Setup</title>
+  <title>First Boot Setup</title>
 
   <!-- CSS  -->
   <link href="materialize/css/material_lcons.css" rel="stylesheet">
   <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
-  <link href="materialize/css/nouislider.css" type="text/css" rel="stylesheet" />
   <style>
-    .row {
-      margin-bottom: 5px;
-      margin-top: 5px;
-    }
-
-    p {
-      margin-bottom: 0px;
-      margin-top: 0px;
-    }
-
     .heading {
       font-size: calc(2vw + 3vh) !important;
-      margin-bottom: 10px;
-      margin-top: 5px;
-    }
-
-    .comp_info {
-      font-size: calc(1vw + 2vh) !important;
       margin-bottom: 5px;
       margin-top: 5px;
     }
-
-    .switch label input[type=checkbox]:checked+.lever:after {
-      background-color: #26a69a;
+    .admin-box {
+      border: 2px solid #90a4ae;
+      border-radius: 8px;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      background: #fafafa;
     }
-    .switch label input[type=checkbox]+.lever:after {
-      background-color: #26a69a;
+    .admin-box-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #455a64;
+    }
+    .step-number {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      background: #1565c0;
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 28px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+    }
+    .setting-label {
+      font-size: 1rem;
+      font-weight: 500;
+      min-width: 140px;
+    }
+    .radio-group {
+      display: flex;
+      gap: 25px;
+      flex-wrap: wrap;
     }
     [type="radio"]:not(:checked)+span, [type="radio"]:checked+span {
       padding-left: 25px;
+      font-size: 1rem;
     }
-
-    .comp_btn {
-      margin-top: 10px
+    .number-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    @media only screen and (min-width: 601px) { 
-      .comp_btn {
-        margin-top: 20px;
-      }
+    .number-btn {
+      width: 50px;
+      height: 50px;
+      font-size: 1.5rem;
+      padding: 0;
+      line-height: 50px;
     }
-
-    @font-face {
-      font-family: digitalFont;
-      src: url(font/digital-7.ttf);
+    .number-display {
+      font-size: 1.8rem;
+      font-weight: 600;
+      min-width: 50px;
+      text-align: center;
+    }
+    .load-box {
+      border: 2px solid #2e7d32;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 15px;
+      background: #e8f5e9;
+      text-align: center;
+    }
+    .load-box-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #2e7d32;
     }
   </style>
 </head>
 
-<body class="yellow">
+<body class="orange lighten-4">
   <div th:replace="~{banner::line_judge}"></div>
   <div th:replace="~{banner::status}"></div>
 
-  <div class="section no-pad-bot yellow" id="index-banner">
-    <div class="container yellow black-text">
-     <div class="row">
-        <div class="col s12 center-align"><h2 id="comp_name" th:text="${compName}" class="heading">Competition Name</h2></div>
+  <div class="section no-pad-bot orange lighten-4" id="index-banner">
+    <div class="container orange lighten-4 black-text">
+
+      <!-- Header -->
+      <div class="row" style="margin-bottom: 10px;">
+        <div class="col s12 center-align">
+          <h2 class="heading">First Boot - Event Setup Required</h2>
+        </div>
       </div>
-      <div class="row" hidden>
-        <div class="col s12 center-align"><span>Comp Id:</span>&nbsp;<span id="comp_id" th:text="${compId}" class="light">Competition ID</span></div>
-      </div>
-      <div class="row">
-        <div class="col s5 left"><span class="header">Sequence count</span></div>
-        <div class="col s7 left"><span class="header">Sequence type</span></div>
-      </div>
-      <div class="row">
-        <div class="col s5 left-align"><h5 class="comp_info">Known Seq / Round: <span id="seqvalue"></span></h5></div>
-        <div class="col s3 center">
-          <label class="black-text">
-            <input class="with-gap" name="sequenceType" type="radio" value="std" id="std_seqType" checked />
-            <span style="font-size: calc(1vw + 2vh) !important;">Std</span>
-          </label>
-          <label class="black-text">
+
+      <!-- Step 1: Event Settings -->
+      <div class="admin-box">
+        <div class="admin-box-title">
+          <span class="step-number">1</span>
+          Event Settings
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">Known Sequences:</div>
+          <div class="radio-group">
+            <label class="black-text">
+              <input class="with-gap" name="knownSeqCount" type="radio" value="1" id="seq_single" />
+              <span>Single (1)</span>
+            </label>
+            <label class="black-text">
+              <input class="with-gap" name="knownSeqCount" type="radio" value="2" id="seq_double" checked />
+              <span>Double (2)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">Sequence Type:</div>
+          <div class="radio-group">
+            <label class="black-text">
+              <input class="with-gap" name="sequenceType" type="radio" value="std" id="std_seqType" checked />
+              <span>Standard</span>
+            </label>
+            <label class="black-text">
               <input class="with-gap" name="sequenceType" type="radio" value="alt" id="alt_seqType" />
-              <span style="font-size: calc(1vw + 2vh) !important;">Alt</span>
-          </label></span>
+              <span>Alternate</span>
+            </label>
+          </div>
         </div>
-        <div class="col s4 right-align"><h5 class="comp_info">Unknown Seq / Round: <span id="unkseqvalue"></span></h5></div>
-      </div>
-      <div class="row">
-        <div class="col s4 center"><div class="black" id="sequence-slider"></div></div>
-        <div class="col s4 offset-s4 center"><div class="black" id="unknown-sequence-slider"></div></div>
-      </div>
-      <br>
-      <div class="row">
-        <div class="col s6 left-align">Scoring Mode</div>
-      </div>
-      <div class="row">
-        <div class="col s4 switch left-align">
-          <label class="black-text comp_info">
-            <input class="with-gap" name="score_mode" value="global" type="radio" checked />
-            <span class="comp_info">Global</span>
-          </label>
-        </div>
-        <div class="col s4 switch left-align">
-          <label class="black-text">
-            <input class="with-gap" name="score_mode" value="byRound" type="radio"/>
-            <span class="comp_info">Round by Round</span>
-          </label>
-        </div>
-        <div class="col s4 switch left-align">
-          <label class="black-text">
-            <input class="with-gap" name="score_mode" value="flightline" type="radio"/>
-            <span class="comp_info">Defined Rounds</span>
-          </label>
+
+        <div class="setting-row">
+          <div class="setting-label">Scoring Mode:</div>
+          <div class="radio-group">
+            <label class="black-text">
+              <input class="with-gap" name="score_mode" type="radio" value="global" checked />
+              <span>Global</span>
+            </label>
+            <label class="black-text">
+              <input class="with-gap" name="score_mode" type="radio" value="byRound" />
+              <span>By Round</span>
+            </label>
+            <label class="black-text">
+              <input class="with-gap" name="score_mode" type="radio" value="flightline" />
+              <span>Defined Rounds</span>
+            </label>
+          </div>
         </div>
       </div>
-      <div th:if="${isCurrentComp}" class="row">
-        <div class="col s12 switch center">
-          <label class="black-text">
-            <span class="comp_info">New</span>
-            <input type="checkbox" id="updateMode">
-            <span class="lever black"></span>
-            <span class="comp_info">Update</span>
-          </label>
+
+      <!-- Step 2: Device Identity -->
+      <div class="admin-box">
+        <div class="admin-box-title">
+          <span class="step-number">2</span>
+          Device Identity
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">Line Number:</div>
+          <div class="number-control">
+            <a href="#" class="btn number-btn blue" id="lineDown"><i class="material-icons">remove</i></a>
+            <span class="number-display" id="lineNumber">1</span>
+            <a href="#" class="btn number-btn blue" id="lineUp"><i class="material-icons">add</i></a>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">Judge Number:</div>
+          <div class="number-control">
+            <a href="#" class="btn number-btn blue" id="judgeDown"><i class="material-icons">remove</i></a>
+            <span class="number-display" id="judgeNumber">1</span>
+            <a href="#" class="btn number-btn blue" id="judgeUp"><i class="material-icons">add</i></a>
+          </div>
         </div>
       </div>
-      <div class="row hide-on-small-only">
-        <div class="col s12 "></div>
+
+      <!-- Step 3: Load Event -->
+      <div class="load-box">
+        <div class="load-box-title">
+          <span class="step-number" style="background: #2e7d32;">3</span>
+          Connect to Score Server
+        </div>
+        <p style="margin-bottom: 15px; color: #555;">This will connect to Score and load the event data.</p>
+        <a href="#" id="loadEvent" class="waves-effect waves-light btn-large green darken-1 pulse">
+          <i class="material-icons left">cloud_download</i>Load Event
+        </a>
       </div>
-      <div class="row center comp_btn">
-        <a href="#" id="createComp" class="waves-effect waves-light btn-large orange darken-1 pulse">Start</a>
-      </div>
+
     </div>
   </div>
+
   <div class="fixed-action-btn">
     <a class="btn-floating btn-large red">
       <i class="large material-icons">menu</i>
@@ -144,137 +213,145 @@
     </ul>
   </div>
 
-
   <!--  Scripts-->
   <script src="jquery-3.6.4.min.js"></script>
   <script src="materialize/js/materialize.js"></script>
-  <script src="materialize/js/nouislider.js"></script>
   <script th:inline="javascript">
     /*<![CDATA[*/
-    var sequenceslider = document.getElementById('sequence-slider');
-    var sequencesliderVal = document.getElementById('seqvalue');
-    var unknownsequenceslider = document.getElementById('unknown-sequence-slider');
-    var unksequencesliderVal = document.getElementById('unkseqvalue');
-    /*var valuesForRoundSlider = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50]; // 16 values */
-    var valuesForSequenceSlider = [1, 2]; // 16 values
-    var valuesForUnknownSequenceSlider = [0, 1, 2]; // 16 values
+    const lineNumber = /*[[${lineNumber}]]*/ 1;
+    const judgeId = /*[[${judgeId}]]*/ 1;
+    const maxSeqPerRound = /*[[${maxSeqPerRound}]]*/ 2;
+    const sequenceType = /*[[${sequenceType}]]*/ 'std';
+    const scoreMode = /*[[${scoreMode}]]*/ 'global';
 
-    const isCurrentComp = /*[[${isCurrentComp}]]*/ ;
-    const currentRound = /*[[${currentRounds}]]*/ ;
-    const scoreMode = /*[[${scoreMode}]]*/ ;
-    const maxSeqPerRound = /*[[${maxSeqPerRound}]]*/ ;
-    const maxUnknownSeqPerRound = /*[[${maxUnknownSeqPerRound}]]*/ ;
-    const sequenceType = /*[[${sequenceType}]]*/ ;
+    let currentLineNumber = lineNumber;
+    let currentJudgeId = judgeId;
 
     document.addEventListener('DOMContentLoaded', function () {
+      // Initialize floating action button
       var elems = document.querySelectorAll('.fixed-action-btn');
-      var instances = M.FloatingActionButton.init(elems, {
-        hoverEnabled: false
-      });
-    });
+      M.FloatingActionButton.init(elems, { hoverEnabled: false });
 
-    console.log(isCurrentComp);
-    console.log(currentRound);
+      // Set current values from server
+      $('#lineNumber').text(currentLineNumber);
+      $('#judgeNumber').text(currentJudgeId);
 
-    var seqformat = {
-      to: function (value) {
-        return valuesForSequenceSlider[Math.round(value)];
-      },
-      from: function (value) {
-        return valuesForSequenceSlider.indexOf(Number(value));
+      // Set sequence count
+      if (maxSeqPerRound == 1) {
+        $('#seq_single').prop('checked', true);
+      } else {
+        $('#seq_double').prop('checked', true);
       }
 
-    };
-
-    var unknownseqformat = {
-      to: function (value) {
-        return valuesForUnknownSequenceSlider[Math.round(value)];
-      },
-      from: function (value) {
-        return valuesForUnknownSequenceSlider.indexOf(Number(value));
-      }
-
-    };
-
-    noUiSlider.create(sequenceslider, {
-      start: 2,
-      // A linear range from 0 to 15 (16 values)
-      range: { min: 0, max: 1 },
-      // steps of 1
-      step: 1,
-      tooltips: true,
-      format: seqformat,
-     //pips: { mode: 'steps', format: seqformat },
-    });
-    noUiSlider.create(unknownsequenceslider, {
-      start: 0,
-      // A linear range from 0 to 15 (16 values)
-      range: { min: 0, max: 2 },
-      // steps of 1
-      step: 1,
-      tooltips: true,
-      format: unknownseqformat,
-      //pips: { mode: 'steps', format: unknownseqformat },
-    });
-    sequenceslider.noUiSlider.on('update', function (values, handle) {
-      sequencesliderVal.innerHTML = values[handle];
-    });
-    unknownsequenceslider.noUiSlider.on('update', function (values, handle) {
-      unksequencesliderVal.innerHTML = values[handle];
-    });
-
-    if (isCurrentComp) {
-      sequenceslider.noUiSlider.set(maxSeqPerRound);
-      unknownsequenceslider.noUiSlider.set(maxUnknownSeqPerRound);
-      $('#updateMode').attr('checked','checked')
-      $("input[name=score_mode][value=" + scoreMode + "]").prop('checked', true);
+      // Set sequence type
       $("input[name=sequenceType][value=" + sequenceType + "]").prop('checked', true);
-    }
 
-    $("#createComp").click(function () {
-      var editComp = $('#updateMode').is(":checked");
-      var sequences = sequenceslider.noUiSlider.get();
-      var unknownSequences = unknownsequenceslider.noUiSlider.get();
-      var scoreMode = $('input[name="score_mode"]:checked').val();
-      var sequenceType = $('input[name="sequenceType"]:checked').val();
+      // Set scoring mode
+      $("input[name=score_mode][value=" + scoreMode + "]").prop('checked', true);
+    });
+
+    // Line Number controls
+    $('#lineDown').click(function(e) {
+      e.preventDefault();
+      if (currentLineNumber > 1) {
+        currentLineNumber--;
+        $('#lineNumber').text(currentLineNumber);
+      }
+    });
+
+    $('#lineUp').click(function(e) {
+      e.preventDefault();
+      if (currentLineNumber < 8) {
+        currentLineNumber++;
+        $('#lineNumber').text(currentLineNumber);
+      }
+    });
+
+    // Judge Number controls
+    $('#judgeDown').click(function(e) {
+      e.preventDefault();
+      if (currentJudgeId > 1) {
+        currentJudgeId--;
+        $('#judgeNumber').text(currentJudgeId);
+      }
+    });
+
+    $('#judgeUp').click(function(e) {
+      e.preventDefault();
+      if (currentJudgeId < 8) {
+        currentJudgeId++;
+        $('#judgeNumber').text(currentJudgeId);
+      }
+    });
+
+    // Load Event button
+    $("#loadEvent").click(function(e) {
+      e.preventDefault();
+
+      var sequences = parseInt($('input[name="knownSeqCount"]:checked').val());
+      var seqType = $('input[name="sequenceType"]:checked').val();
+      var selectedMode = $('input[name="score_mode"]:checked').val();
+
+      // Step 1: Save settings (line_number, judge_id)
       $.ajax({
-        type: "POST",
-        url: "/api/comp?edit=" + editComp,
-        // The key needs to match your method's input parameter (case-sensitive).
-        data: JSON.stringify(
-          {
-            score_mode: scoreMode,
-            sequences: sequences,
-            unknown_sequences: unknownSequences,
-            sequenceType: sequenceType
-          }
-        ),
-        contentType: "application/json; charset=utf-8",
+        type: "GET",
+        url: "/api/settings",
         dataType: "json",
-        success: function (data) {
-          console.log(data.result + ":" + data.message);
-          compData = JSON.parse(data.comp);
-          if (data.result === "ok") {
-            $('#comp_name').text(compData.comp_name);
-            $('#comp_id').text(compData.comp_id);
-            M.toast({ html: data.message, completeCallback: function(){window.location = '/validate-sequences'}});
+        success: function(currentSettings) {
+          // Merge new values
+          currentSettings.line_number = currentLineNumber;
+          currentSettings.judge_id = currentJudgeId;
 
-          } else {
-            // We got back a data.result that is not OK but we still gave a good HTTP response (1xx, 2xx, 3xx)
-            M.toast({ html: 'Error: ' + data.message});
-          }
+          // Save merged settings
+          $.ajax({
+            type: "POST",
+            url: "/api/settings",
+            data: JSON.stringify(currentSettings),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function(data) {
+              if (data.result === "ok") {
+                // Step 2: Load NEW event (edit=false)
+                $.ajax({
+                  type: "POST",
+                  url: "/api/comp?edit=false",
+                  data: JSON.stringify({
+                    score_mode: selectedMode,
+                    sequences: sequences,
+                    unknown_sequences: 1,
+                    sequenceType: seqType
+                  }),
+                  contentType: "application/json; charset=utf-8",
+                  dataType: "json",
+                  success: function(data) {
+                    if (data.result === "ok") {
+                      M.toast({ html: 'Event loaded successfully', classes: 'green', displayLength: 2000 });
+                      setTimeout(function() {
+                        window.location = '/validate-sequences';
+                      }, 2000);
+                    } else {
+                      M.toast({ html: 'Error: ' + data.message, classes: 'red' });
+                    }
+                  },
+                  error: function(errObj) {
+                    var msg = 'Could not connect to Score server';
+                    if (typeof errObj.responseJSON != "undefined") {
+                      msg = 'Error: ' + errObj.responseJSON.message;
+                    }
+                    M.toast({ html: msg, classes: 'red', displayLength: 4000 });
+                  }
+                });
+              } else {
+                M.toast({ html: 'Error saving settings: ' + data.message, classes: 'red' });
+              }
+            },
+            error: function() {
+              M.toast({ html: 'Error saving settings', classes: 'red' });
+            }
+          });
         },
-        error: function (errObj, ajaxStatus, thrownError) {
-          // We got back a HTTP error response.
-          if (typeof errObj.responseJSON != "undefined") {
-            M.toast({html: 'Error: ' + errObj.responseJSON.message});
-          } else {
-            // We really have no idea what went wrong.   Log to console..
-            console.log("Ajax Options:" + ajaxStatus)
-            console.log("Thrown Error:" + thrownError)
-            console.log("Error Object:" + JSON.stringify(errObj))
-            M.toast({html: 'Error: Unknown error'});
-          }
+        error: function() {
+          M.toast({ html: 'Error fetching settings', classes: 'red' });
         }
       });
     });

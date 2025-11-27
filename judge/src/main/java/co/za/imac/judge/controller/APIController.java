@@ -67,6 +67,47 @@ public class APIController {
         return compService.getComp();
     }
 
+    /**
+     * Update local comp settings without contacting Score server.
+     * Accepts: sequences (int), sequenceType (String), score_mode (String)
+     */
+    @PostMapping("/api/comp/local")
+    public ResponseEntity<String> updateLocalCompSettings(@RequestBody CompDTO comp) throws IOException {
+        Map<String, Object> result = new HashMap<>();
+
+        CompDTO currentComp = compService.getComp();
+        if (currentComp == null) {
+            result.put("result", "fail");
+            result.put("message", "No competition loaded. Load an event first.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        // Update only the local settings that were provided
+        if (comp.getSequences() > 0) {
+            currentComp.setSequences(comp.getSequences());
+            logger.info("Updated sequences to: {}", comp.getSequences());
+        }
+        if (comp.getSequenceType() != null) {
+            currentComp.setSequenceType(comp.getSequenceType());
+            logger.info("Updated sequenceType to: {}", comp.getSequenceType());
+        }
+        if (comp.getScore_mode() != null) {
+            currentComp.setScore_mode(comp.getScore_mode());
+            logger.info("Updated score_mode to: {}", comp.getScore_mode());
+        }
+
+        // Save locally without Score contact
+        if (compService.saveCompToFileLocal()) {
+            result.put("result", "ok");
+            result.put("message", "Local settings updated.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+        } else {
+            result.put("result", "fail");
+            result.put("message", "Could not save settings.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/api/comp")
     public ResponseEntity<String> createComp(@RequestBody CompDTO comp,
             @RequestParam(name = "edit", required = true) Boolean editComp)

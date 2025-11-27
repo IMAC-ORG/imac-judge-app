@@ -7,107 +7,132 @@
   <title>Admin - Device</title>
 
   <!-- CSS  -->
-  <link href="materialize/css/material_lcons.css" rel="stylesheet">
-  <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+  <link href="/materialize/css/material_lcons.css" rel="stylesheet">
+  <link href="/materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
   <style>
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
     .heading {
-      font-size: calc(2vw + 3vh) !important;
-      margin-bottom: 20px;
-      margin-top: 5px;
+      font-size: calc(1.5vw + 2.5vh) !important;
+      margin: 0;
     }
-    .section-title {
-      font-size: 1.4rem;
-      font-weight: 600;
-      margin: 25px 0 15px 0;
+    .nav-buttons {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .admin-nav-btn {
+      margin: 2px;
+      padding: 0 12px;
+    }
+    .admin-box {
+      border: 2px solid #90a4ae;
+      border-radius: 8px;
       padding: 10px 15px;
-      background: #e0e0e0;
-      border-radius: 4px;
-    }
-    .section-content {
-      padding: 15px 20px;
-      background: #fafafa;
-      border-radius: 4px;
       margin-bottom: 10px;
+      background: #fafafa;
+    }
+    .admin-box-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #455a64;
     }
     .setting-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid #eee;
-    }
-    .setting-row:last-child {
-      border-bottom: none;
+      padding: 4px 0;
     }
     .setting-label {
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       font-weight: 500;
-    }
-    .setting-desc {
-      font-size: 0.9rem;
-      color: #666;
-      margin-top: 2px;
-    }
-    [type="radio"]:not(:checked)+span, [type="radio"]:checked+span {
-      padding-left: 25px;
-      font-size: 1.1rem;
+      min-width: 120px;
     }
     .radio-group {
       display: flex;
-      gap: 20px;
+      gap: 15px;
+      flex-wrap: wrap;
     }
-    .future-note {
-      background: #fff8e1;
-      border-left: 4px solid #ffc107;
-      padding: 15px;
-      margin-top: 20px;
-      border-radius: 4px;
+    [type="radio"]:not(:checked)+span, [type="radio"]:checked+span {
+      padding-left: 25px;
+      font-size: 0.95rem;
     }
-    .future-note-title {
+    .number-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .number-btn {
+      width: 50px;
+      height: 50px;
+      font-size: 1.5rem;
+      padding: 0;
+      line-height: 50px;
+    }
+    .number-display {
+      font-size: 1.8rem;
       font-weight: 600;
-      margin-bottom: 5px;
+      min-width: 50px;
+      text-align: center;
+    }
+    .warning-box {
+      background: #ffebee;
+      border: 2px solid #ef5350;
+      border-radius: 8px;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+    }
+    .warning-box-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #c62828;
+    }
+    .warning-text {
+      font-size: 0.8rem;
+      color: #b71c1c;
     }
   </style>
 </head>
 
-<body class="yellow">
+<body class="orange lighten-4">
   <div th:replace="~{banner::line_judge}"></div>
   <div th:replace="~{banner::status}"></div>
 
-  <div class="section no-pad-bot yellow" id="index-banner">
-    <div class="container yellow black-text">
+  <div class="section no-pad-bot orange lighten-4" id="index-banner">
+    <div class="container orange lighten-4 black-text">
 
-      <!-- Header -->
-      <div class="row">
-        <div class="col s12 center-align">
-          <h2 class="heading">Device Admin</h2>
+      <!-- Header + Navigation -->
+      <div class="header-row">
+        <h2 class="heading">Device Settings</h2>
+        <div class="nav-buttons">
+          <a href="/admin/comp" class="waves-effect waves-light btn blue-grey admin-nav-btn">
+            <i class="material-icons left">settings</i>Scorekeeper
+          </a>
+          <a href="/admin/scores" class="waves-effect waves-light btn green admin-nav-btn">
+            <i class="material-icons left">assessment</i>Scores
+          </a>
+          <a href="/" class="waves-effect waves-light btn teal admin-nav-btn">
+            <i class="material-icons left">home</i>Home
+          </a>
         </div>
       </div>
 
-      <!-- Admin Navigation -->
-      <div class="row center" style="margin: 20px 0; padding: 15px; background: #fafafa; border-radius: 8px;">
-        <a href="/admin/comp" class="waves-effect waves-light btn blue-grey" style="margin: 5px;">
-          <i class="material-icons left">settings</i>Scorekeeper Admin
-        </a>
-        <a href="/admin/scores" class="waves-effect waves-light btn green" style="margin: 5px;">
-          <i class="material-icons left">assessment</i>Score Admin
-        </a>
-        <a href="/" class="waves-effect waves-light btn teal" style="margin: 5px;">
-          <i class="material-icons left">home</i>Exit to Home
-        </a>
-      </div>
+      <!-- Box 1: Scoring Mode -->
+      <div class="admin-box">
+        <div class="admin-box-title">
+          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.2rem;">dashboard</i>
+          Scoring Mode
+        </div>
 
-      <!-- Scoring Mode Section -->
-      <div class="section-title">
-        <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">dashboard</i>
-        Scoring Mode
-      </div>
-      <div class="section-content">
         <div class="setting-row">
-          <div>
-            <div class="setting-label">Select Scoring Mode</div>
-            <div class="setting-desc">How pilots are presented for scoring</div>
-          </div>
+          <div class="setting-label">Mode:</div>
           <div class="radio-group">
             <label class="black-text">
               <input class="with-gap" name="score_mode" type="radio" value="global" checked />
@@ -115,7 +140,7 @@
             </label>
             <label class="black-text">
               <input class="with-gap" name="score_mode" type="radio" value="byRound" />
-              <span>Round by Round</span>
+              <span>By Round</span>
             </label>
             <label class="black-text">
               <input class="with-gap" name="score_mode" type="radio" value="flightline" />
@@ -124,21 +149,59 @@
           </div>
         </div>
 
-        <div class="center" style="margin-top: 20px;">
-          <a href="#" id="saveScoringMode" class="waves-effect waves-light btn-large orange darken-1">
-            <i class="material-icons left">save</i>Save Scoring Mode
+        <div class="center" style="margin-top: 8px;">
+          <a href="#" id="saveScoringMode" class="waves-effect waves-light btn orange darken-1">
+            <i class="material-icons left">save</i>Save Mode
           </a>
         </div>
       </div>
 
-      <!-- Future Settings Note -->
-      <div class="future-note">
-        <div class="future-note-title">
-          <i class="material-icons" style="vertical-align: middle; font-size: 1.2rem;">info</i>
-          Coming Soon
+      <!-- Box 2: Device Identity -->
+      <div class="warning-box">
+        <div class="warning-box-title">
+          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1rem;">warning</i>
+          Device Identity
         </div>
-        <div>
-          Future device settings will include: Line Number, Judge Number, Audio Settings, Display Preferences, and Network Configuration.
+        <div class="warning-text" style="margin-bottom: 6px;">
+          Changing these requires Score connection. Current scores will be archived.
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">Line Number:</div>
+          <div class="number-control">
+            <a href="#" class="btn number-btn blue" id="lineDown"><i class="material-icons">remove</i></a>
+            <span class="number-display" id="lineNumber">1</span>
+            <a href="#" class="btn number-btn blue" id="lineUp"><i class="material-icons">add</i></a>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">Judge Number:</div>
+          <div class="number-control">
+            <a href="#" class="btn number-btn blue" id="judgeDown"><i class="material-icons">remove</i></a>
+            <span class="number-display" id="judgeNumber">1</span>
+            <a href="#" class="btn number-btn blue" id="judgeUp"><i class="material-icons">add</i></a>
+          </div>
+        </div>
+
+        <div class="center" style="margin-top: 6px;">
+          <a href="#" id="saveDeviceIdentity" class="waves-effect waves-light btn red darken-1">
+            <i class="material-icons left">save</i>Save & Load NEW
+          </a>
+        </div>
+      </div>
+
+      <!-- Confirmation Modal for Device Identity -->
+      <div id="confirmDeviceModal" class="modal">
+        <div class="modal-content" style="padding: 15px 20px 10px;">
+          <h5 style="margin-top: 0;"><i class="material-icons red-text" style="vertical-align: middle; margin-right: 8px;">warning</i>Change Device Identity?</h5>
+          <p style="font-size: 0.95rem; color: #666; margin: 10px 0;">
+            This will save new Line/Judge numbers, connect to Score, archive current scores, and load fresh event data.
+          </p>
+        </div>
+        <div class="modal-footer" style="padding: 10px 20px;">
+          <a href="#!" class="modal-close waves-effect waves-red btn-flat">Cancel</a>
+          <a href="#!" id="confirmDeviceBtn" class="waves-effect waves-light btn red">Yes, Save & Load</a>
         </div>
       </div>
 
@@ -151,52 +214,207 @@
     </a>
     <ul>
       <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">home</i></a></li>
-      <li><a class="btn-floating btn-large blue" href="/admin/comp"><i class="material-icons">settings</i></a></li>
+      <li><a class="btn-floating btn-large blue-grey" href="/admin/comp"><i class="material-icons">settings</i></a></li>
     </ul>
   </div>
 
   <!--  Scripts-->
-  <script src="jquery-3.6.4.min.js"></script>
-  <script src="materialize/js/materialize.js"></script>
+  <script src="/jquery-3.6.4.min.js"></script>
+  <script src="/materialize/js/materialize.js"></script>
   <script th:inline="javascript">
     /*<![CDATA[*/
     const scoreMode = /*[[${scoreMode}]]*/ 'global';
+    const lineNumber = /*[[${lineNumber}]]*/ 1;
+    const judgeId = /*[[${judgeId}]]*/ 1;
+
+    // Store original values for rollback
+    let originalLineNumber = lineNumber;
+    let originalJudgeId = judgeId;
+    let currentLineNumber = lineNumber;
+    let currentJudgeId = judgeId;
 
     document.addEventListener('DOMContentLoaded', function () {
+      // Initialize floating action button
       var elems = document.querySelectorAll('.fixed-action-btn');
       M.FloatingActionButton.init(elems, { hoverEnabled: false });
 
-      // Set current scoring mode
+      // Initialize modal
+      var modalElems = document.querySelectorAll('.modal');
+      M.Modal.init(modalElems);
+
+      // Set current values
       $("input[name=score_mode][value=" + scoreMode + "]").prop('checked', true);
+      $('#lineNumber').text(currentLineNumber);
+      $('#judgeNumber').text(currentJudgeId);
     });
 
+    // Line Number controls
+    $('#lineDown').click(function(e) {
+      e.preventDefault();
+      if (currentLineNumber > 1) {
+        currentLineNumber--;
+        $('#lineNumber').text(currentLineNumber);
+      }
+    });
+
+    $('#lineUp').click(function(e) {
+      e.preventDefault();
+      if (currentLineNumber < 8) {
+        currentLineNumber++;
+        $('#lineNumber').text(currentLineNumber);
+      }
+    });
+
+    // Judge Number controls
+    $('#judgeDown').click(function(e) {
+      e.preventDefault();
+      if (currentJudgeId > 1) {
+        currentJudgeId--;
+        $('#judgeNumber').text(currentJudgeId);
+      }
+    });
+
+    $('#judgeUp').click(function(e) {
+      e.preventDefault();
+      if (currentJudgeId < 8) {
+        currentJudgeId++;
+        $('#judgeNumber').text(currentJudgeId);
+      }
+    });
+
+    // Save Scoring Mode (local only)
     $("#saveScoringMode").click(function(e) {
       e.preventDefault();
       var selectedMode = $('input[name="score_mode"]:checked').val();
 
       $.ajax({
         type: "POST",
-        url: "/api/comp?edit=true",
+        url: "/api/comp/local",
         data: JSON.stringify({
-          score_mode: selectedMode,
-          sequences: 2,
-          unknown_sequences: 1,
-          sequenceType: 'std'
+          score_mode: selectedMode
         }),
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (data) {
           if (data.result === "ok") {
-            M.toast({ html: 'Scoring mode saved', classes: 'green', displayLength: 3000 });
+            M.toast({ html: 'Scoring mode saved', classes: 'green', displayLength: 2000 });
           } else {
             M.toast({ html: 'Error: ' + data.message, classes: 'red' });
           }
         },
         error: function () {
-          M.toast({ html: 'Error saving scoring mode', classes: 'red' });
+          M.toast({ html: 'Error saving mode', classes: 'red' });
         }
       });
     });
+
+    // Save Device Identity - show confirmation modal
+    $("#saveDeviceIdentity").click(function(e) {
+      e.preventDefault();
+
+      // Check if values actually changed
+      if (currentLineNumber === originalLineNumber && currentJudgeId === originalJudgeId) {
+        M.toast({ html: 'No changes to save', classes: 'blue', displayLength: 2000 });
+        return;
+      }
+
+      var modal = M.Modal.getInstance(document.getElementById('confirmDeviceModal'));
+      modal.open();
+    });
+
+    // Confirm device identity change - atomic operation
+    $("#confirmDeviceBtn").click(function(e) {
+      e.preventDefault();
+      var modal = M.Modal.getInstance(document.getElementById('confirmDeviceModal'));
+      modal.close();
+
+      // Step 1: Fetch current settings to preserve score_host/score_http_port
+      $.ajax({
+        type: "GET",
+        url: "/api/settings",
+        dataType: "json",
+        success: function (currentSettings) {
+          // Step 2: Merge new values into current settings
+          currentSettings.line_number = currentLineNumber;
+          currentSettings.judge_id = currentJudgeId;
+
+          // Step 3: Save merged settings
+          $.ajax({
+            type: "POST",
+            url: "/api/settings",
+            data: JSON.stringify(currentSettings),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+              if (data.result === "ok") {
+                // Step 4: Attempt NEW event load
+                $.ajax({
+                  type: "POST",
+                  url: "/api/comp?edit=false",
+                  data: JSON.stringify({
+                    score_mode: $('input[name="score_mode"]:checked').val(),
+                    sequences: 2,
+                    unknown_sequences: 1,
+                    sequenceType: 'std'
+                  }),
+                  contentType: "application/json; charset=utf-8",
+                  dataType: "json",
+                  success: function (data) {
+                    if (data.result === "ok") {
+                      M.toast({ html: 'Device updated & new event loaded', classes: 'green', displayLength: 2000 });
+                      setTimeout(function() {
+                        window.location = '/validate-sequences';
+                      }, 2000);
+                    } else {
+                      // Rollback settings
+                      rollbackSettings(currentSettings);
+                      M.toast({ html: 'Error loading event: ' + data.message + '. Settings NOT changed.', classes: 'red', displayLength: 5000 });
+                    }
+                  },
+                  error: function (errObj) {
+                    // Rollback settings
+                    rollbackSettings(currentSettings);
+                    var msg = 'Could not connect to Score. Settings NOT changed.';
+                    if (typeof errObj.responseJSON != "undefined") {
+                      msg = 'Error: ' + errObj.responseJSON.message + '. Settings NOT changed.';
+                    }
+                    M.toast({ html: msg, classes: 'red', displayLength: 5000 });
+                  }
+                });
+              } else {
+                M.toast({ html: 'Error saving settings: ' + data.message, classes: 'red' });
+              }
+            },
+            error: function () {
+              M.toast({ html: 'Error saving settings', classes: 'red' });
+            }
+          });
+        },
+        error: function () {
+          M.toast({ html: 'Error fetching current settings', classes: 'red' });
+        }
+      });
+    });
+
+    // Rollback settings to original values
+    function rollbackSettings(currentSettings) {
+      currentSettings.line_number = originalLineNumber;
+      currentSettings.judge_id = originalJudgeId;
+      $.ajax({
+        type: "POST",
+        url: "/api/settings",
+        data: JSON.stringify(currentSettings),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function () {
+          // Reset display to original values
+          currentLineNumber = originalLineNumber;
+          currentJudgeId = originalJudgeId;
+          $('#lineNumber').text(currentLineNumber);
+          $('#judgeNumber').text(currentJudgeId);
+        }
+      });
+    }
 
     /*]]>*/
   </script>

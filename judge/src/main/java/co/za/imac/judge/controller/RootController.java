@@ -126,11 +126,19 @@ public class RootController {
                 pilot_classes.add(className);
             }
         }
+        // Add FREESTYLE option if any pilot has freestyle=true
+        if (pilots.stream().anyMatch(p -> Boolean.TRUE.equals(p.getFreestyle()))) {
+            pilot_classes.add("FREESTYLE");
+        }
         model.addAttribute("pilotClasses", pilot_classes);
-        
 
-        if(classFilter != null && !classFilter.isEmpty() && classFilter != "global"){
-            pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
+
+        if(classFilter != null && !classFilter.isEmpty() && !classFilter.equals("global")){
+            if (classFilter.equalsIgnoreCase("FREESTYLE")) {
+                pilots = pilots.stream().filter(pilot -> Boolean.TRUE.equals(pilot.getFreestyle())).toList();
+            } else {
+                pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
+            }
         }
 
         // Get settings so we can show them
@@ -168,8 +176,12 @@ public class RootController {
         logger.info("Is there a comp? : " + compService.isCurrentComp());
         List<Pilot> pilots = pilotService.getPilots();
 
-        if(classFilter != null && !classFilter.isEmpty() && classFilter != "global"){
-            pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
+        if(classFilter != null && !classFilter.isEmpty() && !classFilter.equals("global")){
+            if (classFilter.equalsIgnoreCase("FREESTYLE")) {
+                pilots = pilots.stream().filter(pilot -> Boolean.TRUE.equals(pilot.getFreestyle())).toList();
+            } else {
+                pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
+            }
         }
         if (!compService.isCurrentComp()) {
             logger.debug("Redirect to newcomp page.");
@@ -194,8 +206,12 @@ public class RootController {
                 pilot_classes.add(className);
             }
         }
+        // Add FREESTYLE option if any pilot has freestyle=true
+        if (pilots.stream().anyMatch(p -> Boolean.TRUE.equals(p.getFreestyle()))) {
+            pilot_classes.add("FREESTYLE");
+        }
         model.addAttribute("pilotClasses", pilot_classes);
-        
+
         List<Pilot> filteredPilots = new ArrayList<>();
 
         for (Pilot p : pilots) {
@@ -306,6 +322,8 @@ public class RootController {
         // Get settings so we can show them
         SettingDTO settings = settingService.getSettings();
         model.addAttribute("settings", settings);
+        model.addAttribute("lineNumber", settings.getLine_number());
+        model.addAttribute("judgeId", settings.getJudge_id());
 
         boolean isComp = compService.isCurrentComp();
         logger.info("Is there a comp? : " + isComp);
@@ -420,6 +438,8 @@ public class RootController {
     public String adminDevice(Model model) throws IOException {
         SettingDTO settings = settingService.getSettings();
         model.addAttribute("settings", settings);
+        model.addAttribute("lineNumber", settings.getLine_number());
+        model.addAttribute("judgeId", settings.getJudge_id());
 
         if (compService.isCurrentComp()) {
             model.addAttribute("scoreMode", compService.getComp().getScore_mode());

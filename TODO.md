@@ -2,15 +2,11 @@
 
 ## High Priority (New - 2025-11)
 
-### 1. Create Admin Pages (replace newcomp)
-- Build proper admin interface to replace the current newcomp page
-- Consolidate competition setup and device configuration
-
-### 2. Refactor Package Names
+### 1. Refactor Package Names
 - Replace all `co.za.imac` references with `com.aerojudge`
 - Update package declarations, imports, and any hardcoded references
 
-### 3. Code Cleanup Review
+### 2. Code Cleanup Review
 - Review all `REVIEWED-UNUSED` commented imports - decide to keep or delete
 - Review all `BACKLOG` comments (e.g., PilotService:225 "update existing score")
 - Review `@Deprecated` methods (e.g., ScheduleService.getAllSequences_old())
@@ -26,6 +22,19 @@
 - [ ] Consider try-with-resources for FileOutputStream in CompService
 
 ---
+
+## Completed (v2.0)
+
+- [x] Admin pages redesign with compact mobile-friendly layout
+- [x] Local settings API (`/api/comp/local`) - update settings without Score contact
+- [x] newcomp.html redesigned as 3-step first boot wizard
+- [x] FREESTYLE filter option in pilot class filters
+- [x] Configurable timeout settings for Score communication
+- [x] Sequence validation auto-advance (10 seconds)
+- [x] Battery warning threshold changed to 30%
+- [x] Info icon enlarged, status popup auto-close on carousel
+- [x] Fixed admin page 404 errors (path issues)
+- [x] Device identity preloads current values
 
 ## Completed (v1.2)
 
