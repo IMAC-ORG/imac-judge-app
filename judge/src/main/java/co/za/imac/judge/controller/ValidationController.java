@@ -66,7 +66,7 @@ public class ValidationController {
         }
 
         // Always show validation page - user clicks to continue
-        return "sequence_validation_error";
+        return "sequence_validation";
     }
 
     /**

@@ -147,6 +147,11 @@ public class RootController {
 
         model.addAttribute("comp", compService.getComp());
         model.addAttribute("dirflip", false);
+
+        // Sequence availability for modal buttons
+        model.addAttribute("classesWithUnknown", scheduleService.getClassesWithUnknown());
+        model.addAttribute("hasFreestyle", scheduleService.hasFreestyle());
+
         return "pilot-list-global";
     }
 
@@ -215,6 +220,10 @@ public class RootController {
         // Get settings so we can show them
         SettingDTO settings = settingService.getSettings();
         model.addAttribute("settings", settings);
+
+        // Sequence availability for modal buttons
+        model.addAttribute("classesWithUnknown", scheduleService.getClassesWithUnknown());
+        model.addAttribute("hasFreestyle", scheduleService.hasFreestyle());
 
         return "pilot-list-round";
     }

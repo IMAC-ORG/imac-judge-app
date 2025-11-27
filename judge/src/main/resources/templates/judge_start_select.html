@@ -22,6 +22,12 @@
                 background: #fff9c4;
                 border-color: #ff9800;
             }
+            .type-btn.disabled {
+                opacity: 0.4;
+                pointer-events: none;
+                background: #e0e0e0;
+                border-color: #bdbdbd;
+            }
             .type-btn-icon {
                 font-size: 2rem;
                 color: #424242;
@@ -149,8 +155,9 @@
                 </div>
 
                 <div class="col s4">
-                    <a th:id="'act_unknown'+${pilot.index}" class="type-btn" href="#"
-                       th:onclick="'javascript:$(\'#roundType'+${pilot.index}+'\').val(\'UNKNOWN\'); $(\'#judgeknown'+${pilot.index}+'\').submit();'">
+                    <a th:id="'act_unknown'+${pilot.index}" href="#"
+                       th:class="${classesWithUnknown.contains(pilot.classString.toUpperCase())} ? 'type-btn' : 'type-btn disabled'"
+                       th:onclick="${classesWithUnknown.contains(pilot.classString.toUpperCase())} ? 'javascript:$(\'#roundType'+${pilot.index}+'\').val(\'UNKNOWN\'); $(\'#judgeknown'+${pilot.index}+'\').submit();' : null">
                         <i class="material-icons type-btn-icon">visibility_off</i>
                         <span class="type-btn-label">UK</span>
                         <span class="type-btn-round" th:text="${pilotScores[pilot.primary_id].getActiveRound('UNKNOWN')}"></span>
@@ -158,8 +165,9 @@
                 </div>
 
                 <div class="col s4">
-                    <a th:id="'act_freestyle'+${pilot.index}" class="type-btn" href="#"
-                       th:onclick="'javascript:$(\'#roundType'+${pilot.index}+'\').val(\'FREESTYLE\'); $(\'#judgeknown'+${pilot.index}+'\').submit();'">
+                    <a th:id="'act_freestyle'+${pilot.index}" href="#"
+                       th:class="${hasFreestyle} ? 'type-btn' : 'type-btn disabled'"
+                       th:onclick="${hasFreestyle} ? 'javascript:$(\'#roundType'+${pilot.index}+'\').val(\'FREESTYLE\'); $(\'#judgeknown'+${pilot.index}+'\').submit();' : null">
                         <i class="material-icons type-btn-icon">diversity_2</i>
                         <span class="type-btn-label">FS</span>
                         <span class="type-btn-round" th:text="${pilotScores[pilot.primary_id].getActiveRound('FREESTYLE')}"></span>

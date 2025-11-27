@@ -28,8 +28,10 @@ import java.net.URI;
 // REVIEWED-UNUSED 2025-11 DPG: import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class ScheduleService {
@@ -66,6 +68,39 @@ public class ScheduleService {
     public ScheduleService setSchedules(Map<Integer, ScheduleDTO> schedules) {
         this.schedules = schedules;
         return this;
+    }
+
+    /**
+     * Returns a Set of class names that have UNKNOWN sequences defined in sequences.dat.
+     */
+    public Set<String> getClassesWithUnknown() {
+        Set<String> classesWithUnknown = new HashSet<>();
+        Map<Integer, ScheduleDTO> scheds = getSchedules();
+        if (scheds == null) {
+            return classesWithUnknown;
+        }
+        for (ScheduleDTO sched : scheds.values()) {
+            if ("UNKNOWN".equalsIgnoreCase(sched.getType()) && sched.getComp_class() != null) {
+                classesWithUnknown.add(sched.getComp_class().toUpperCase());
+            }
+        }
+        return classesWithUnknown;
+    }
+
+    /**
+     * Returns true if FREESTYLE sequences are defined in sequences.dat.
+     */
+    public boolean hasFreestyle() {
+        Map<Integer, ScheduleDTO> scheds = getSchedules();
+        if (scheds == null) {
+            return false;
+        }
+        for (ScheduleDTO sched : scheds.values()) {
+            if ("FREESTYLE".equalsIgnoreCase(sched.getType())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void populateSequences() {
