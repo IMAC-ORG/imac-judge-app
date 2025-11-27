@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,8 +64,9 @@ public class PilotService {
 
     public void getPilotsFileFromScore() throws MalformedURLException, IOException {
         SettingDTO settingDTO = settingService.getSettings();
+        int timeout = (int)Duration.ofSeconds(settingDTO.getScore_timeout()).toMillis();
         PILOT_DAT_URL = PILOT_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
-        FileUtils.copyURLToFile(new URL(PILOT_DAT_URL), new File(PILOT_DAT_PATH),1000,1000);
+        FileUtils.copyURLToFile(new URL(PILOT_DAT_URL), new File(PILOT_DAT_PATH),timeout,timeout);
     }
 
     public boolean isPilots(){
@@ -339,7 +341,7 @@ public class PilotService {
         BufferedWriter bw = new BufferedWriter(fw);
         bw.write(xml);
         bw.close();
-        Unirest.setTimeouts(0, 0);
+        Unirest.setTimeouts(Duration.ofSeconds(settingDTO.getScore_timeout()).toMillis(), Duration.ofSeconds(settingDTO.getScore_timeout()).toMillis());
         HttpResponse<String> response = Unirest.post(SCORE_UPLOAD_URL)
                 .header("Accept-Language", "en-au")
                 .field("uploadtype", "flightdata")

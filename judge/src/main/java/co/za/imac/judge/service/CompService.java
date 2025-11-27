@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +61,8 @@ public class CompService {
         SettingDTO settingDTO = settingService.getSettings();
         COMP_INFO_DAT_URL = COMP_INFO_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
         try {
-            FileUtils.copyURLToFile(new URL(COMP_INFO_DAT_URL), new File(COMP_INFO_DAT_PATH),1000,1000);
+            int timeout = (int)Duration.ofSeconds(settingDTO.getScore_timeout()).toMillis();
+            FileUtils.copyURLToFile(new URL(COMP_INFO_DAT_URL), new File(COMP_INFO_DAT_PATH),timeout,timeout);
         } catch (Exception e) {
             try {
                 // Score is probably turned off.
@@ -75,7 +77,8 @@ public class CompService {
         SettingDTO settingDTO = settingService.getSettings();
         COMP_PREFS_DAT_URL = COMP_PREFS_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
         try {
-            FileUtils.copyURLToFile(new URL(COMP_PREFS_DAT_URL), new File(COMP_PREFS_DAT_PATH),1000,1000);
+            int timeout = (int)Duration.ofSeconds(settingDTO.getScore_timeout()).toMillis();
+            FileUtils.copyURLToFile(new URL(COMP_PREFS_DAT_URL), new File(COMP_PREFS_DAT_PATH),timeout,timeout);
         } catch (Exception e) {
             try {
                 // Score is probably turned off.
