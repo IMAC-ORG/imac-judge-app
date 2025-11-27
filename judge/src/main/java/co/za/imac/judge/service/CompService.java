@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.time.Duration;
 // REVIEWED-UNUSED 2025-11 DPG: import java.net.URL;
 // REVIEWED-UNUSED 2025-11 DPG: import java.util.ArrayList;
 // REVIEWED-UNUSED 2025-11 DPG: import java.util.HashMap;
@@ -61,8 +62,9 @@ public class CompService {
         SettingDTO settingDTO = settingService.getSettings();
         COMP_INFO_DAT_URL = COMP_INFO_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
         try {
+            int timeout = (int)Duration.ofSeconds(settingDTO.getScore_timeout()).toMillis();
             // Updated deprecated URL, changed new URL(x) to URI.create(x).toURL() 2025-11 DPG
-            FileUtils.copyURLToFile(URI.create(COMP_INFO_DAT_URL).toURL(), new File(COMP_INFO_DAT_PATH),1000,1000);
+            FileUtils.copyURLToFile(URI.create(COMP_INFO_DAT_URL).toURL(), new File(COMP_INFO_DAT_PATH),timeout,timeout);
         } catch (Exception e) {
             try {
                 // Score is probably turned off.
@@ -77,8 +79,9 @@ public class CompService {
         SettingDTO settingDTO = settingService.getSettings();
         COMP_PREFS_DAT_URL = COMP_PREFS_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
         try {
+            int timeout = (int)Duration.ofSeconds(settingDTO.getScore_timeout()).toMillis();
             // Updated deprecated URL, changed new URL(x) to URI.create(x).toURL() 2025-11 DPG
-            FileUtils.copyURLToFile(URI.create(COMP_PREFS_DAT_URL).toURL(), new File(COMP_PREFS_DAT_PATH),1000,1000);
+            FileUtils.copyURLToFile(URI.create(COMP_PREFS_DAT_URL).toURL(), new File(COMP_PREFS_DAT_PATH),timeout,timeout);
         } catch (Exception e) {
             try {
                 // Score is probably turned off.

@@ -99,5 +99,7 @@ public class CommandLineAppStartupRunner implements ApplicationRunner {
         logger.info ("Line No.: " + settingDTO.getLine_number());
         logger.info ("Score Host: " + settingDTO.getScore_host());
         logger.info ("Score Port: " + settingDTO.getScore_http_port());
+        logger.info ("Score Timeout: " + settingDTO.getScore_timeout());
+        logger.info ("Score Poll Timeout: " + settingDTO.getScore_poll_timeout());
     }
 }

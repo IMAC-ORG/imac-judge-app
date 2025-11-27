@@ -108,6 +108,10 @@
       min-width: 200px;
     }
 
+    .action-buttons form.half-width {
+      width: 50%;
+    }
+
     .action-buttons .btn-large {
       width: 100%;
     }
@@ -215,8 +219,8 @@
 
       <!-- Action Buttons - Success State -->
       <div th:if="${isSuccess}" class="action-buttons">
-        <form action="/validate-sequences/continue" method="post">
-          <button type="submit" class="waves-effect waves-light btn-large green darken-1 pulse" style="min-width: 250px;">
+        <form id="successForm" action="/validate-sequences/continue" method="post" class="half-width">
+          <button type="submit" class="waves-effect waves-light btn-large green darken-1 pulse">
             <i class="material-icons left">arrow_forward</i>
             Continue to Judging
           </button>
@@ -270,6 +274,16 @@
   <!--  Scripts-->
   <script src="jquery-3.6.4.min.js"></script>
   <script src="materialize/js/materialize.js"></script>
+  <script th:if="${isSuccess}">
+    document.addEventListener('DOMContentLoaded', function() {
+      var form = document.getElementById('successForm');
+      setTimeout(function() {
+        if (form) {
+          form.submit();
+        }
+      }, 10000);
+    });
+  </script>
 </body>
 
 </html>

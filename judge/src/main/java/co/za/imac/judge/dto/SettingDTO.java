@@ -6,6 +6,8 @@ public class SettingDTO {
     private String score_host = "192.168.1.4";
     private int score_http_port = 8181;
     private int line_number = 1;
+    private int score_poll_timeout = 2; //seconds
+    private int score_timeout = 10; //seconds
     
     public int getLine_number() {
         return line_number;
@@ -36,5 +38,19 @@ public class SettingDTO {
     public void setScore_http_port(int score_http_port) {
         this.score_http_port = score_http_port;
     }
-    
+
+    public int getScore_poll_timeout() {
+        return score_poll_timeout;
+    }
+    public void setScore_poll_timeout(int score_poll_timeout) {
+        this.score_poll_timeout = score_poll_timeout;
+    }
+
+    public int getScore_timeout() {
+        return score_timeout;
+    }
+    public void setScore_timeout(int score_timeout) {
+        this.score_timeout = score_timeout;
+    }
+
 }

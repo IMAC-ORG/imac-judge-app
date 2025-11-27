@@ -175,7 +175,7 @@
                   icon = 'battery_alert';
                   text = 'LOW BATTERY: ' + percent + '% - Charge soon!';
                   cssClass = 'battery-low';
-                } else if (percent < 40) {
+                } else if (percent < 30) {
                   icon = 'battery_3_bar';
                   text = 'Warning: Battery at ' + percent + '%';
                   cssClass = 'battery-mid';
@@ -229,6 +229,11 @@
           instance.close();
         }
       });
+      // Close status info popup if open
+      if (typeof stopStatusInfoUpdates === 'function') {
+        stopStatusInfoUpdates();
+        document.getElementById('statusInfo').classList.add('hidden');
+      }
     }
 
     function carouselNext() {
