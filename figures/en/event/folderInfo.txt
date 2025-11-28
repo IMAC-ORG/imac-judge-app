@@ -1,0 +1,4 @@
+This file is a placeholder just to maintain the figures/en/event folder structure. 
+This new (empty) folder is where uploaded event sequence folders will be stored. 
+
+Nov 2025. DPG.

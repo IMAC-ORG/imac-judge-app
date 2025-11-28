@@ -1,6 +1,8 @@
 package co.za.imac.judge.controller;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -438,5 +440,66 @@ public class APIController {
             result.put("retry", true);
             return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PostMapping("/api/system/update")
+    public ResponseEntity<String> runSystemUpdate() {
+        Map<String, Object> result = new HashMap<>();
+
+        // Primary URL (GitHub)
+        String primaryUrl = "https://raw.githubusercontent.com/IMAC-ORG/imac-judge-updater/main/script/judge_update.sh";
+        // Fallback URL (mirror)
+        String fallbackUrl = "http://aero-judge.com/update_mirror/judge_update.sh";
+
+        logger.info("System update requested");
+
+        try {
+            // Try primary URL first
+            int exitCode = executeUpdateScript(primaryUrl);
+
+            if (exitCode != 0) {
+                // Try fallback URL
+                logger.warn("Primary update source failed, trying fallback...");
+                exitCode = executeUpdateScript(fallbackUrl);
+            }
+
+            if (exitCode == 0) {
+                result.put("result", "ok");
+                result.put("message", "Update completed successfully");
+                result.put("restart", true);
+                logger.info("System update completed successfully");
+                return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+            } else {
+                result.put("result", "fail");
+                result.put("message", "Update script returned error code: " + exitCode);
+                logger.error("System update failed with exit code: {}", exitCode);
+                return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+        } catch (Exception e) {
+            logger.error("System update failed: {}", e.getMessage());
+            result.put("result", "fail");
+            result.put("message", "Update failed: " + e.getMessage());
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private int executeUpdateScript(String url) throws IOException, InterruptedException {
+        // Use curl to fetch and pipe to bash
+        ProcessBuilder pb = new ProcessBuilder("bash", "-c",
+                "curl -sfS " + url + " | bash");
+        pb.redirectErrorStream(true);
+
+        Process process = pb.start();
+
+        // Read output for logging
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                logger.info("Update: {}", line);
+            }
+        }
+
+        return process.waitFor();
     }
 }
