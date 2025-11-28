@@ -442,6 +442,220 @@ public class APIController {
         }
     }
 
+    @GetMapping("/api/scores/mismatches")
+    public ResponseEntity<String> getScoreMismatches() throws IOException, ParserConfigurationException, SAXException {
+        Map<String, Object> result = new HashMap<>();
+        List<Map<String, Object>> mismatches = new ArrayList<>();
+
+        // Get all pilots and their scores
+        List<Pilot> pilots = pilotService.getPilots();
+
+        // Group pilots by class
+        Map<String, List<Pilot>> pilotsByClass = new HashMap<>();
+        for (Pilot pilot : pilots) {
+            String className = pilot.getClassString();
+            if (className == null) continue;
+            pilotsByClass.computeIfAbsent(className.toUpperCase(), k -> new ArrayList<>()).add(pilot);
+        }
+
+        // Check each class for each round type
+        String[] roundTypes = {"KNOWN", "UNKNOWN", "FREESTYLE"};
+
+        for (String className : pilotsByClass.keySet()) {
+            List<Pilot> classPilots = pilotsByClass.get(className);
+
+            for (String roundType : roundTypes) {
+                // Skip FREESTYLE unless it applies to this class (handled differently)
+                if ("FREESTYLE".equals(roundType)) {
+                    // Only check pilots with freestyle=true
+                    classPilots = pilots.stream()
+                            .filter(p -> Boolean.TRUE.equals(p.getFreestyle()))
+                            .toList();
+                    if (classPilots.isEmpty()) continue;
+                }
+
+                // Get round counts for each pilot
+                Map<Pilot, Integer> roundCounts = new HashMap<>();
+                for (Pilot pilot : classPilots) {
+                    PilotScores scores = pilotService.getPilotScores(pilot);
+                    int count = countRoundsForType(scores, roundType);
+                    roundCounts.put(pilot, count);
+                }
+
+                if (roundCounts.isEmpty()) continue;
+
+                // Find expected count using mode (most common value), or median if no clear mode
+                Map<Integer, Long> countFrequency = roundCounts.values().stream()
+                        .collect(java.util.stream.Collectors.groupingBy(c -> c, java.util.stream.Collectors.counting()));
+
+                // Find max frequency
+                long maxFreq = countFrequency.values().stream().max(Long::compare).orElse(0L);
+
+                // Count how many values have the max frequency
+                long countWithMaxFreq = countFrequency.values().stream().filter(f -> f == maxFreq).count();
+
+                int expectedCount;
+                if (countWithMaxFreq == 1) {
+                    // Clear mode - one value appears more than others
+                    expectedCount = countFrequency.entrySet().stream()
+                            .filter(e -> e.getValue() == maxFreq)
+                            .map(Map.Entry::getKey)
+                            .findFirst()
+                            .orElse(0);
+                } else {
+                    // No clear mode - use median
+                    List<Integer> sortedCounts = roundCounts.values().stream()
+                            .sorted()
+                            .toList();
+                    int mid = sortedCounts.size() / 2;
+                    expectedCount = sortedCounts.get(mid);
+                }
+
+                // Find pilots that deviate
+                List<Map<String, Object>> tooMany = new ArrayList<>();
+                List<Map<String, Object>> tooFew = new ArrayList<>();
+
+                for (Map.Entry<Pilot, Integer> entry : roundCounts.entrySet()) {
+                    Pilot pilot = entry.getKey();
+                    int count = entry.getValue();
+
+                    if (count > expectedCount) {
+                        Map<String, Object> pilotInfo = new HashMap<>();
+                        pilotInfo.put("pilotId", pilot.getPrimary_id());
+                        pilotInfo.put("name", pilot.getName());
+                        pilotInfo.put("roundCount", count);
+                        tooMany.add(pilotInfo);
+                    } else if (count < expectedCount) {
+                        Map<String, Object> pilotInfo = new HashMap<>();
+                        pilotInfo.put("pilotId", pilot.getPrimary_id());
+                        pilotInfo.put("name", pilot.getName());
+                        pilotInfo.put("roundCount", count);
+                        tooFew.add(pilotInfo);
+                    }
+                }
+
+                // Only report if there are resolvable mismatches (both source AND destination exist)
+                if (!tooMany.isEmpty() && !tooFew.isEmpty()) {
+                    Map<String, Object> mismatch = new HashMap<>();
+                    mismatch.put("className", "FREESTYLE".equals(roundType) ? "FREESTYLE" : className);
+                    mismatch.put("roundType", roundType);
+                    mismatch.put("expectedRounds", expectedCount);
+                    mismatch.put("tooMany", tooMany);
+                    mismatch.put("tooFew", tooFew);
+                    mismatches.add(mismatch);
+                }
+
+                // Break out of round type loop if we just did FREESTYLE
+                if ("FREESTYLE".equals(roundType)) break;
+            }
+        }
+
+        result.put("mismatches", mismatches);
+        return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+    }
+
+    private int countRoundsForType(PilotScores scores, String roundType) {
+        if (scores == null || scores.getScores() == null) return 0;
+
+        Set<Integer> rounds = new HashSet<>();
+        for (PScore score : scores.getScores()) {
+            if (roundType.equalsIgnoreCase(score.getType())) {
+                rounds.add(score.getRound());
+            }
+        }
+        return rounds.size();
+    }
+
+    @PostMapping("/api/scores/move-round")
+    public ResponseEntity<String> moveRound(@RequestBody Map<String, Object> payload)
+            throws IOException, ParserConfigurationException, SAXException {
+        Map<String, Object> result = new HashMap<>();
+
+        String sourcePilotId = (String) payload.get("sourcePilotId");
+        String destPilotId = (String) payload.get("destPilotId");
+        String roundType = (String) payload.get("roundType");
+        int sourceRound = ((Number) payload.get("sourceRound")).intValue();
+
+        logger.info("Moving {} round {} from pilot {} to pilot {}",
+                roundType, sourceRound, sourcePilotId, destPilotId);
+
+        // Get pilots and their scores
+        Pilot sourcePilot = pilotService.getPilot(sourcePilotId);
+        Pilot destPilot = pilotService.getPilot(destPilotId);
+
+        if (sourcePilot == null || destPilot == null) {
+            result.put("result", "fail");
+            result.put("message", "Pilot not found");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        PilotScores sourceScores = pilotService.getPilotScores(sourcePilot);
+        PilotScores destScores = pilotService.getPilotScores(destPilot);
+
+        // Find the scores to move (all sequences for that round+type)
+        List<PScore> scoresToMove = new ArrayList<>();
+        List<PScore> remainingSourceScores = new ArrayList<>();
+
+        for (PScore score : sourceScores.getScores()) {
+            if (roundType.equalsIgnoreCase(score.getType()) && score.getRound() == sourceRound) {
+                scoresToMove.add(score);
+            } else {
+                remainingSourceScores.add(score);
+            }
+        }
+
+        if (scoresToMove.isEmpty()) {
+            result.put("result", "fail");
+            result.put("message", "No scores found for that round");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        // Determine destination round number
+        int destRound = countRoundsForType(destScores, roundType) + 1;
+
+        // Add audit comment timestamp
+        String auditComment = String.format("[%s] Round moved from pilot %s",
+                java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                sourcePilot.getName());
+
+        // Move scores to destination with new round number
+        List<PScore> destScoreList = new ArrayList<>(destScores.getScores());
+        for (PScore score : scoresToMove) {
+            PScore movedScore = new PScore(destRound, score.getSequence(), score.getScores(), score.getType());
+            // Note: audit comment would need to be added to PScore if we want per-score comments
+            destScoreList.add(movedScore);
+        }
+        destScores.setScores(destScoreList);
+
+        // Renumber source pilot's remaining rounds (decrement rounds higher than moved one)
+        for (PScore score : remainingSourceScores) {
+            if (roundType.equalsIgnoreCase(score.getType()) && score.getRound() > sourceRound) {
+                // Create new score with decremented round number
+                PScore renumbered = new PScore(score.getRound() - 1, score.getSequence(), score.getScores(), score.getType());
+                remainingSourceScores.set(remainingSourceScores.indexOf(score), renumbered);
+            }
+        }
+        sourceScores.setScores(remainingSourceScores);
+
+        // Update active round numbers for both pilots
+        int newActiveRound = destRound + 1;
+        sourceScores.setActiveRound(roundType, newActiveRound);
+        destScores.setActiveRound(roundType, newActiveRound);
+
+        // Save both pilots
+        pilotService.savePilotScoresToFile(sourceScores);
+        pilotService.savePilotScoresToFile(destScores);
+
+        logger.info("Successfully moved round. Source now has {} {} rounds, dest has {} {} rounds",
+                countRoundsForType(sourceScores, roundType), roundType,
+                countRoundsForType(destScores, roundType), roundType);
+
+        result.put("result", "ok");
+        result.put("message", "Round moved successfully");
+        result.put("audit", auditComment);
+        return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+    }
+
     @PostMapping("/api/system/update")
     public ResponseEntity<String> runSystemUpdate() {
         Map<String, Object> result = new HashMap<>();

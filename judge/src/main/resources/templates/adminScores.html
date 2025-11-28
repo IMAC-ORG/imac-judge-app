@@ -38,32 +38,29 @@
       background: #fafafa;
       text-align: center;
     }
-    .placeholder-icon {
+    .tool-box {
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .tool-icon {
       font-size: 2.5rem;
-      color: #ffc107;
       margin-bottom: 8px;
     }
-    .placeholder-title {
-      font-size: 1.2rem;
+    .tool-title {
+      font-size: 1.1rem;
       font-weight: 600;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
-    .placeholder-text {
-      font-size: 0.95rem;
+    .tool-text {
+      font-size: 0.85rem;
       color: #555;
+      max-width: 250px;
     }
-    .feature-list {
-      text-align: left;
-      max-width: 350px;
-      margin: 10px auto 0 auto;
-      font-size: 0.9rem;
-    }
-    .feature-list li {
-      padding: 4px 0;
-      border-bottom: 1px solid #eee;
-    }
-    .feature-list li:last-child {
-      border-bottom: none;
+    .disabled-tool {
+      opacity: 0.6;
     }
   </style>
 </head>
@@ -91,19 +88,61 @@
         </div>
       </div>
 
-      <!-- Placeholder Content -->
-      <div class="admin-box">
-        <i class="material-icons placeholder-icon">construction</i>
-        <div class="placeholder-title">Score Management - Coming Soon</div>
-        <div class="placeholder-text">
-          Scorekeeper tools for corrections and updates.
+      <!-- Score Tools -->
+      <div class="row">
+        <div class="col s12 m6">
+          <div class="admin-box tool-box">
+            <i class="material-icons tool-icon green-text">swap_horiz</i>
+            <div class="tool-title">Resolve Mismatches</div>
+            <div class="tool-text">
+              Move rounds between pilots when scores were recorded to the wrong pilot.
+            </div>
+            <a href="/admin/scores/resolve" class="waves-effect waves-light btn green darken-1" style="margin-top: 10px;">
+              <i class="material-icons left">build</i>Open Tool
+            </a>
+          </div>
         </div>
-        <ul class="feature-list">
-          <li><i class="material-icons tiny" style="vertical-align: middle; margin-right: 8px;">swap_horiz</i> Move scores between pilots</li>
-          <li><i class="material-icons tiny" style="vertical-align: middle; margin-right: 8px;">exposure_zero</i> Zero out unflown rounds</li>
-          <li><i class="material-icons tiny" style="vertical-align: middle; margin-right: 8px;">edit</i> Edit individual figure scores</li>
-          <li><i class="material-icons tiny" style="vertical-align: middle; margin-right: 8px;">history</i> View scoring history</li>
-        </ul>
+
+        <div class="col s12 m6">
+          <div class="admin-box tool-box disabled-tool">
+            <i class="material-icons tool-icon grey-text">exposure_zero</i>
+            <div class="tool-title">Zero Unflown Rounds</div>
+            <div class="tool-text">
+              Mark rounds as zeros for pilots who didn't fly.
+            </div>
+            <span class="btn grey lighten-1" style="margin-top: 10px;">
+              <i class="material-icons left">schedule</i>Coming Soon
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col s12 m6">
+          <div class="admin-box tool-box disabled-tool">
+            <i class="material-icons tool-icon grey-text">edit</i>
+            <div class="tool-title">Edit Scores</div>
+            <div class="tool-text">
+              Manually edit individual figure scores.
+            </div>
+            <span class="btn grey lighten-1" style="margin-top: 10px;">
+              <i class="material-icons left">schedule</i>Coming Soon
+            </span>
+          </div>
+        </div>
+
+        <div class="col s12 m6">
+          <div class="admin-box tool-box disabled-tool">
+            <i class="material-icons tool-icon grey-text">history</i>
+            <div class="tool-title">Audit Log</div>
+            <div class="tool-text">
+              View history of score changes and corrections.
+            </div>
+            <span class="btn grey lighten-1" style="margin-top: 10px;">
+              <i class="material-icons left">schedule</i>Coming Soon
+            </span>
+          </div>
+        </div>
       </div>
 
     </div>

@@ -455,4 +455,11 @@ public class RootController {
         model.addAttribute("settings", settings);
         return "adminScores";
     }
+
+    @GetMapping("/admin/scores/resolve")
+    public String adminScoresResolve(Model model) throws IOException {
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+        return "adminScoresResolve";
+    }
 }
