@@ -68,11 +68,29 @@
   </div>
 
   <div class="admin-section">
-    <a href="/admin/comp" class="waves-effect btn-large admin-btn">
+    <a href="#adminModal" class="waves-effect btn-large admin-btn modal-trigger">
       <i class="material-icons left">settings</i>ADMIN PAGE
     </a>
   </div>
 
+  <!-- Admin Access Confirmation Modal -->
+  <div id="adminModal" class="modal">
+    <div class="modal-content">
+      <h5>Admin Access</h5>
+      <p style="font-size: 1.2rem;">This is an admin page that should only be used by the <strong>Contest Director</strong> or <strong>Scorekeeper</strong>.</p>
+      <p style="font-size: 1rem; color: #666;">Changes made here may affect the competition setup.</p>
+    </div>
+    <div class="modal-footer" style="text-align: center;">
+      <a href="/admin/comp" class="waves-effect waves-green btn green" style="text-align: center; width: 120px; margin-right: 60px;">Continue</a>
+      <a href="#!" class="modal-close waves-effect waves-red btn red" style="text-align: center; width: 120px;">Exit</a>
+    </div>
+  </div>
+
   <script src="materialize/js/materialize.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      M.Modal.init(document.querySelectorAll('.modal'));
+    });
+  </script>
 </body>
 </html>
