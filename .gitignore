@@ -25,7 +25,12 @@ hs_err_pid*
 
 ### VS Code ###
 .vscode/
+*.code-workspace
 
 ### Judge Files not needing to be tracked ###
 dockerbuild/settings.json
 .devcontainer/judge/
+
+### Local docs and notes (not for GitHub) ###
+dpg_docs/
+.claude/

@@ -69,8 +69,8 @@
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-1);" id="btnsetbreak">Break</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="setScore(-2);" id="btnsetno">N/O</a>
             <a class="btn waves-effect white grey-text darken-text-2" onclick="longDescription();" id="btnspeak">speak</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="$('.carousel').carousel('prev');audiolongd.pause();audiolongd.currentTime = 0;shortdescription(-1);setLongDescription(-1);" id="btnnext">prev</a>
-            <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();audiolongd.pause();audiolongd.currentTime = 0;shortdescription(1);setLongDescription(1);" id="btnnext">next</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselPrev();" id="btnprev">prev</a>
+            <a class="btn waves-effect white grey-text darken-text-2" onclick="carouselNext();" id="btnnext">next</a>
         </div>
         <div th:each="maneuver,iterStat : ${maneuvers}" class="carousel-item yellow black-text" href="#one!">
             <div class="row" style="margin-bottom: 0px; height: 10px;">
@@ -88,18 +88,22 @@
                     <div class="col s8">
                     <br>
                     <img id="my-svg" style="width:60vw; height:70vh;" class="figure-wrapper" alt="Figure Image"
-                    th:src="@{/man/en/{sequenceType}/{roundType}/{class}/{index}{dirletter}.svg(sequenceType=${sequenceType},class=${pilot.getClassString().toLowerCase()}, index=${iterStat.index + 1}, roundType=${roundType.toLowerCase()}, dirletter=${dirletter})}">
+                    th:src="@{/man/en/{sequenceFolderPath}/{index}{dirletter}.svg(sequenceFolderPath=${sequenceFolderPath}, index=${iterStat.index + 1}, dirletter=${dirletter})}"
+                    onerror="this.onerror=null; this.src='/man/en/default/FAIL/fig_missing.svg';">
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col s4 left" style="font-size: 4vh; font-weight: 500; margin-left: 10px;">
-                    <span th:text="'Round '+${pilotScores.activeRound + ' Seq ' + pilotScores.activeSequence}"></span>
-                    <span th:if="${roundType eq 'KNOWN' or dirletter eq 'C'}" th:text="'Dir ' + ${dirletter}"></span>
+                    <span>Round <span th:text="${activeRound}"></span></span>
+                    <span th:if="${roundType eq 'KNOWN'}"> Seq <span th:text="${pilotScores.activeSequence}"></span></span>
+                    <span th:if="${roundType eq 'KNOWN' or roundType eq 'UNKNOWN'}"> Dir <span th:text="${dirletter}"></span></span>
                 </div>
                 
-                <h2 th:text="'Figure '+${(iterStat.index + 1) + ' ' + maneuver.description}" style="line-height: 1rem ; margin: 1rem ;"
-                    th:id="'description_'+ ${iterStat.index}"></h2>
+                <h2 style="line-height: 1rem ; margin: 1rem ;" th:id="'description_'+ ${iterStat.index}">
+                    <span th:if="${roundType ne 'FREESTYLE'}" th:text="'Figure '+${(iterStat.index + 1) + ' ' + maneuver.description}"></span>
+                    <span th:if="${roundType eq 'FREESTYLE'}" th:text="${maneuver.description}"></span>
+                </h2>
             </div>
         </div>
     </div>
@@ -132,7 +136,7 @@
         var windowHeight = window.innerHeight;
         const scores = [];
         const numOfManeuvers = /*[[${numOfManeuvers}]]*/ ;
-        const round =  /*[[${pilotScores.activeRound}]]*/ ;
+        const round =  /*[[${activeRound}]]*/ ;
         const sequence =  /*[[${pilotScores.activeSequence}]]*/ ;
         const primary_id =  /*[[${pilot.primary_id}]]*/ ;
         const pilot_name =  /*[[${pilot.name}]]*/ ;
@@ -143,13 +147,16 @@
 
         //TODO: read language from settings
         const sequencesBasePath = "/man/en";
-        const sequenceType = /*[[${sequenceType}]]*/ ;
+        const sequenceFolderPath = /*[[${sequenceFolderPath}]]*/ ;
+        const audioBasePath = sequencesBasePath + "/audio";  // Score audio, Now Judging audio
+        const sequenceType = /*[[${sequenceType}]]*/ ;  // Kept for backward compatibility
 
         const welcome_text = 'Now judging ' + pilot_name + ' ' + pilot_class + ' round ' + round + ' sequence ' + sequence + ' ' + roundType;
         const synth = window.speechSynthesis;
         const voices = synth.getVoices();
 
         let classFilter = localStorage.getItem("classFilter");
+        let carouselLocked = false;  // Prevents navigation when summary modal is open
 
         document.addEventListener('DOMContentLoaded', function () {
             var elems = document.querySelectorAll('.modal');
@@ -160,7 +167,11 @@
                 dismissible:false,
                 startingTop: '1%',
                 startingBottom: '1%',
-                onOpenStart: function (){
+                onOpenStart: function(modal){
+                    // Lock carousel when summary modal opens - must be handled before navigation resumes
+                    if (modal.id === 'modal_summary') {
+                        carouselLocked = true;
+                    }
                     for (var i in scores) {
                         var currentScore = '#ss_' + i + '_text';
                         switch (scores[i]) {
@@ -174,6 +185,12 @@
                                 $(currentScore).text(scores[i]);
                                 break;
                         }
+                    }
+                },
+                onCloseEnd: function(modal){
+                    // Unlock carousel when summary modal closes (Review or Save clicked)
+                    if (modal.id === 'modal_summary') {
+                        carouselLocked = false;
                     }
                 }
             });
@@ -230,13 +247,22 @@
         function shortdescription(caller_index) {
             audio.pause();
             audio.currentTime = 0;
-            var audio_url = sequencesBasePath+'/'+ sequenceType + '/' + roundType + '/' + pilot_class + '/fig' + ( score_index + caller_index + 1 ) + '.mp3';
-            audio = new Audio(audio_url.toLowerCase());
-            audio.volume = 0.5;
+            var audio_url = sequencesBasePath + '/' + sequenceFolderPath + '/fig' + ( score_index + caller_index + 1 ) + '.mp3';
+            audio = new Audio(audio_url);
+            audio.volume = 1.0;
+            audio.onerror = function() {
+                console.warn('Figure audio not found: ' + audio_url);
+            };
             audio.play();
         }
 
         function longDescription() {
+            // Stop short description if playing, so caller audio takes priority
+            if (audio && !audio.paused) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+
             if (audiolongd.paused) {
                 audiolongd.play();
             } else {
@@ -245,21 +271,47 @@
         }  
         
         function setLongDescription(caller_index) {
-            var audiolongurl = sequencesBasePath + '/'+ sequenceType + '/' + roundType + '/' + pilot_class + '/call' + ( score_index + caller_index + 1 ) + '.mp3';
-            audiolongd = new Audio(audiolongurl.toLowerCase());
+            var audiolongurl = sequencesBasePath + '/' + sequenceFolderPath + '/call' + ( score_index + caller_index + 1 ) + '.mp3';
+            audiolongd = new Audio(audiolongurl);
+            audiolongd.onerror = function() {
+                console.warn('Call audio not found: ' + audiolongurl);
+            };
         }
 
         function NowJudgingMessage() {
             audio.pause();
             audio.currentTime = 0;
-            var audio_url = sequencesBasePath + '/now_judging_' + pilot_class + '_' + roundType + '_sequence.mp3';
+            var audio_url;
+            if (roundType === 'freestyle') {
+                audio_url = audioBasePath + '/now_judging_freestyle_sequence.mp3';
+            } else {
+                audio_url = audioBasePath + '/now_judging_' + pilot_class + '_' + roundType + '_sequence.mp3';
+            }
             audio = new Audio(audio_url.toLowerCase());
-            audio.volume = 0.5;
+            audio.volume = 1.0;
+            audio.onerror = function() {
+                console.warn('Now Judging audio not found: ' + audio_url);
+                // Still call shortdescription even if Now Judging audio fails
+                shortdescription(0);
+            };
             audio.play();
             audio.addEventListener("ended", (event) => {
                 shortdescription(0);
             });
 
+        }
+
+        function closeAllModals() {
+            // Close all open modals before carousel navigation
+            // EXCEPT summary modal - that requires explicit user action (Review/Save)
+            var modals = document.querySelectorAll('.modal');
+            modals.forEach(function(modal) {
+                if (modal.id === 'modal_summary') return;  // Skip summary modal
+                var instance = M.Modal.getInstance(modal);
+                if (instance && instance.isOpen) {
+                    instance.close();
+                }
+            });
         }
 
         function isNumber(n) {
@@ -271,25 +323,25 @@
                 //this is a number lets build url to wave file
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = sequencesBasePath + '/score/' + text + '.mp3';
+                var audio_url = audioBasePath + '/score/' + text + '.mp3';
                 audio = new Audio(audio_url);
-                audio.volume = 0.5;
+                audio.volume = 1.0;
                 audio.play();
 
             } else if (text == 'BREAK') {
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = sequencesBasePath + '/score/break.mp3';
+                var audio_url = audioBasePath + '/score/break.mp3';
                 audio = new Audio(audio_url);
-                audio.volume = 0.5;
+                audio.volume = 1.0;
                 audio.play();
 
             } else if (text == 'Not Observed') {
                 audio.pause();
                 audio.currentTime = 0;
-                var audio_url = sequencesBasePath + '/score/not_observed.mp3';
+                var audio_url = audioBasePath + '/score/not_observed.mp3';
                 audio = new Audio(audio_url);
-                audio.volume = 0.5;
+                audio.volume = 1.0;
                 audio.play();
 
             } else {
@@ -333,14 +385,62 @@
         NowJudgingMessage();
         setLongDescription(0);
 
+        function carouselPrev() {
+            // Block navigation if summary modal is open - user must Review or Save first
+            if (carouselLocked) return;
+
+            closeAllModals();
+            $('.carousel').carousel('prev');
+            audiolongd.pause();
+            audiolongd.currentTime = 0;
+            shortdescription(-1);
+            setLongDescription(-1);
+        }
+
         function carouselNext() {
+            // Block navigation if summary modal is open - user must Review or Save first
+            if (carouselLocked) return;
+
+            closeAllModals();
             $('.carousel').carousel('next');
+            audiolongd.pause();
+            audiolongd.currentTime = 0;
+            shortdescription(1);
+            setLongDescription(1);
             submitScores(false);
             if (score_index == (numOfManeuvers - 1)) {
+                // Dynamically populate summary modal rows based on actual number of maneuvers
+                populateSummaryModal();
                 $('#modal_summary').modal('open');
                 // This is done for every score now...
                 //submitScores();
             }
+        }
+
+        function populateSummaryModal() {
+            // Clear existing dynamic rows (keep header)
+            $('#modal_summary .scoresummary').not(':first').remove();
+
+            // Generate rows dynamically for each maneuver
+            for (var i = 0; i < numOfManeuvers; i++) {
+                var desc = sequenceJson[i] ? sequenceJson[i].description : '';
+                var scoreText = formatScoreForDisplay(scores[i]);
+
+                var row = $('<div class="row scoresummary">' +
+                    '<div class="col s2 m3 right-align">Fig ' + (i + 1) + '</div>' +
+                    '<div class="col s9 m7" id="ss_' + i + '_desc">' + desc + '</div>' +
+                    '<div class="col s1 m2 right-align" id="ss_' + i + '_text">' + scoreText + '</div>' +
+                    '</div>');
+                $('#modal_summary .modal-footer').before(row);
+            }
+        }
+
+        function formatScoreForDisplay(score) {
+            if (score === undefined || score === null) return '-';
+            if (score === -1) return 'Break';
+            if (score === -2) return 'N/O';
+            if (score === -3) return 'Deadline';
+            return score;
         }
 
         function submitScores(done = false) {
@@ -459,7 +559,8 @@
 
         function nextEvent(responseData) {
             if (responseData.isActive) {
-                if (responseData.activeRound > round) {
+                // Use per-type round tracking - check if round advanced for current type
+                if (responseData.activeRoundByType[roundType] > round) {
                     if (classFilter && classFilter != "global") {
                         window.location.replace("/pilot-list-global?classFilter=" + classFilter);
                     } else {
@@ -511,18 +612,10 @@
             //numpad 6
             if (e.which == 54) {
                 carouselNext();
-                audiolongd.pause();
-                audiolongd.currentTime = 0;
-                shortdescription(1);
-                setLongDescription(1);
             }
             //numpad 4
             if (e.which == 52) {
-                $('.carousel').carousel('prev');
-                audiolongd.pause();
-                audiolongd.currentTime = 0;
-                shortdescription(-1);
-                setLongDescription(-1);
+                carouselPrev();
             }
             //numpad 0
             if (e.which == 48) {

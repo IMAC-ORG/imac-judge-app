@@ -1,11 +1,23 @@
 package co.za.imac.judge.controller;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -18,14 +30,18 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.xml.sax.SAXException;
 
 import com.google.gson.Gson;
 
+import co.za.imac.judge.utils.SettingUtils;
+
 import co.za.imac.judge.service.CompService;
 import co.za.imac.judge.service.InfoCollectorService;
 import co.za.imac.judge.service.PilotService;
+import co.za.imac.judge.service.ScheduleService;
 import co.za.imac.judge.service.SequenceService;
 import co.za.imac.judge.service.SettingService;
 
@@ -45,10 +61,53 @@ public class APIController {
     private SettingService settingService;
     @Autowired
     private InfoCollectorService infoCollectorService;
+    @Autowired
+    private ScheduleService scheduleService;
 
     @GetMapping("/api/comp")
     public CompDTO getComp() throws IOException, ParserConfigurationException, SAXException {
         return compService.getComp();
+    }
+
+    /**
+     * Update local comp settings without contacting Score server.
+     * Accepts: sequences (int), sequenceType (String), score_mode (String)
+     */
+    @PostMapping("/api/comp/local")
+    public ResponseEntity<String> updateLocalCompSettings(@RequestBody CompDTO comp) throws IOException {
+        Map<String, Object> result = new HashMap<>();
+
+        CompDTO currentComp = compService.getComp();
+        if (currentComp == null) {
+            result.put("result", "fail");
+            result.put("message", "No competition loaded. Load an event first.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        // Update only the local settings that were provided
+        if (comp.getSequences() > 0) {
+            currentComp.setSequences(comp.getSequences());
+            logger.info("Updated sequences to: {}", comp.getSequences());
+        }
+        if (comp.getSequenceType() != null) {
+            currentComp.setSequenceType(comp.getSequenceType());
+            logger.info("Updated sequenceType to: {}", comp.getSequenceType());
+        }
+        if (comp.getScore_mode() != null) {
+            currentComp.setScore_mode(comp.getScore_mode());
+            logger.info("Updated score_mode to: {}", comp.getScore_mode());
+        }
+
+        // Save locally without Score contact
+        if (compService.saveCompToFileLocal()) {
+            result.put("result", "ok");
+            result.put("message", "Local settings updated.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+        } else {
+            result.put("result", "fail");
+            result.put("message", "Could not save settings.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/api/comp")
@@ -183,6 +242,8 @@ public class APIController {
         // fetch pilots
         pilotService.getPilotsFileFromScore();
         sequenceService.getSequenceFileFromScore();
+        // Force reload ScheduleService cache with new sequence data
+        scheduleService.populateSequences();
         // pilotService.setupPilotScores();
         Map<String, Object> result = new HashMap<>();
         result.put("sync", "ok");
@@ -235,5 +296,424 @@ public class APIController {
     public InfoJson getLatestInfo() {
         InfoJson info = infoCollectorService.collectInfo();
         return info;
+    }
+
+    @PostMapping("/api/pilot/{pilotId}/advance-round")
+    public ResponseEntity<PilotScores> advanceRound(
+            @PathVariable String pilotId,
+            @RequestParam(name = "type", required = true) String roundType)
+            throws IOException, ParserConfigurationException, SAXException {
+
+        logger.info("Advancing round for pilot {} type {}", pilotId, roundType);
+
+        // Get pilot
+        Pilot pilot = pilotService.getPilot(pilotId);
+        if (pilot == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pilot not found");
+        }
+
+        // Get pilot scores
+        PilotScores pilotScores = pilotService.getPilotScores(pilot);
+
+        // Increment the round for this type and reset sequence to 1
+        pilotScores.incrementActiveRound(roundType);
+        pilotScores.setActiveSequence(1);
+
+        // Save the updated pilot scores
+        pilotService.savePilotScoresToFile(pilotScores);
+
+        logger.info("Advanced pilot {} to round {} sequence 1 for type {}",
+                    pilotId, pilotScores.getActiveRound(roundType), roundType);
+
+        return ResponseEntity.ok(pilotScores);
+    }
+
+    @PostMapping("/api/sequence/upload")
+    public ResponseEntity<String> uploadSequenceZip(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(name = "expectedFolders", required = false) List<String> expectedFolders) {
+
+        Map<String, Object> result = new HashMap<>();
+
+        if (file.isEmpty()) {
+            result.put("result", "fail");
+            result.put("message", "No file provided.");
+            result.put("retry", true);
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.toLowerCase().endsWith(".zip")) {
+            result.put("result", "fail");
+            result.put("message", "File must be a ZIP archive.");
+            result.put("retry", true);
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        // Target directory: {configPath}/figures/en/event/
+        Path eventDir = Paths.get(SettingUtils.getApplicationConfigPath(), "figures", "en", "event");
+
+        try {
+            // Ensure event directory exists
+            Files.createDirectories(eventDir);
+
+            Set<String> extractedFolders = new HashSet<>();
+
+            try (ZipInputStream zis = new ZipInputStream(file.getInputStream())) {
+                ZipEntry entry;
+                while ((entry = zis.getNextEntry()) != null) {
+                    String entryName = entry.getName();
+
+                    // Security: prevent path traversal attacks
+                    if (entryName.contains("..")) {
+                        logger.warn("Skipping suspicious entry: {}", entryName);
+                        continue;
+                    }
+
+                    // Parse the entry path
+                    String[] parts = entryName.replace('\\', '/').split("/");
+
+                    // Skip files at root level (only process folders and their contents)
+                    if (parts.length < 1 || (parts.length == 1 && !entry.isDirectory())) {
+                        continue;
+                    }
+
+                    String topLevelFolder = parts[0];
+                    if (topLevelFolder.isEmpty()) {
+                        continue;
+                    }
+
+                    extractedFolders.add(topLevelFolder);
+
+                    // Build target path
+                    Path targetPath = eventDir.resolve(entryName);
+
+                    if (entry.isDirectory()) {
+                        Files.createDirectories(targetPath);
+                    } else {
+                        // Ensure parent directories exist
+                        Files.createDirectories(targetPath.getParent());
+                        Files.copy(zis, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                    }
+
+                    zis.closeEntry();
+                }
+            }
+
+            if (extractedFolders.isEmpty()) {
+                result.put("result", "fail");
+                result.put("message", "No folders found in ZIP file.");
+                result.put("retry", true);
+                return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+            }
+
+            // Verify expected folders if provided
+            if (expectedFolders != null && !expectedFolders.isEmpty()) {
+                List<String> missingFolders = new ArrayList<>();
+                for (String expected : expectedFolders) {
+                    if (!extractedFolders.contains(expected)) {
+                        missingFolders.add(expected);
+                    }
+                }
+
+                if (!missingFolders.isEmpty()) {
+                    result.put("result", "fail");
+                    result.put("message", "Missing expected folders: " + String.join(", ", missingFolders));
+                    result.put("extractedFolders", extractedFolders);
+                    result.put("retry", true);
+                    return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+                }
+            }
+
+            result.put("result", "ok");
+            result.put("message", "Upload complete. Extracted " + extractedFolders.size() + " folder(s).");
+            result.put("extractedFolders", extractedFolders);
+            result.put("retry", false);
+
+            logger.info("Sequence upload complete. Extracted folders: {}", extractedFolders);
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+
+        } catch (IOException e) {
+            logger.error("Failed to extract ZIP file: {}", e.getMessage());
+            result.put("result", "fail");
+            result.put("message", "Failed to extract ZIP: " + e.getMessage());
+            result.put("retry", true);
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/api/scores/mismatches")
+    public ResponseEntity<String> getScoreMismatches() throws IOException, ParserConfigurationException, SAXException {
+        Map<String, Object> result = new HashMap<>();
+        List<Map<String, Object>> mismatches = new ArrayList<>();
+
+        // Get all pilots and their scores
+        List<Pilot> pilots = pilotService.getPilots();
+
+        // Group pilots by class
+        Map<String, List<Pilot>> pilotsByClass = new HashMap<>();
+        for (Pilot pilot : pilots) {
+            String className = pilot.getClassString();
+            if (className == null) continue;
+            pilotsByClass.computeIfAbsent(className.toUpperCase(), k -> new ArrayList<>()).add(pilot);
+        }
+
+        // Check each class for each round type
+        String[] roundTypes = {"KNOWN", "UNKNOWN", "FREESTYLE"};
+
+        for (String className : pilotsByClass.keySet()) {
+            List<Pilot> classPilots = pilotsByClass.get(className);
+
+            for (String roundType : roundTypes) {
+                // Skip FREESTYLE unless it applies to this class (handled differently)
+                if ("FREESTYLE".equals(roundType)) {
+                    // Only check pilots with freestyle=true
+                    classPilots = pilots.stream()
+                            .filter(p -> Boolean.TRUE.equals(p.getFreestyle()))
+                            .toList();
+                    if (classPilots.isEmpty()) continue;
+                }
+
+                // Get round counts for each pilot
+                Map<Pilot, Integer> roundCounts = new HashMap<>();
+                for (Pilot pilot : classPilots) {
+                    PilotScores scores = pilotService.getPilotScores(pilot);
+                    int count = countRoundsForType(scores, roundType);
+                    roundCounts.put(pilot, count);
+                }
+
+                if (roundCounts.isEmpty()) continue;
+
+                // Find expected count using mode (most common value), or median if no clear mode
+                Map<Integer, Long> countFrequency = roundCounts.values().stream()
+                        .collect(java.util.stream.Collectors.groupingBy(c -> c, java.util.stream.Collectors.counting()));
+
+                // Find max frequency
+                long maxFreq = countFrequency.values().stream().max(Long::compare).orElse(0L);
+
+                // Count how many values have the max frequency
+                long countWithMaxFreq = countFrequency.values().stream().filter(f -> f == maxFreq).count();
+
+                int expectedCount;
+                if (countWithMaxFreq == 1) {
+                    // Clear mode - one value appears more than others
+                    expectedCount = countFrequency.entrySet().stream()
+                            .filter(e -> e.getValue() == maxFreq)
+                            .map(Map.Entry::getKey)
+                            .findFirst()
+                            .orElse(0);
+                } else {
+                    // No clear mode - use median
+                    List<Integer> sortedCounts = roundCounts.values().stream()
+                            .sorted()
+                            .toList();
+                    int mid = sortedCounts.size() / 2;
+                    expectedCount = sortedCounts.get(mid);
+                }
+
+                // Find pilots that deviate
+                List<Map<String, Object>> tooMany = new ArrayList<>();
+                List<Map<String, Object>> tooFew = new ArrayList<>();
+
+                for (Map.Entry<Pilot, Integer> entry : roundCounts.entrySet()) {
+                    Pilot pilot = entry.getKey();
+                    int count = entry.getValue();
+
+                    if (count > expectedCount) {
+                        Map<String, Object> pilotInfo = new HashMap<>();
+                        pilotInfo.put("pilotId", pilot.getPrimary_id());
+                        pilotInfo.put("name", pilot.getName());
+                        pilotInfo.put("roundCount", count);
+                        tooMany.add(pilotInfo);
+                    } else if (count < expectedCount) {
+                        Map<String, Object> pilotInfo = new HashMap<>();
+                        pilotInfo.put("pilotId", pilot.getPrimary_id());
+                        pilotInfo.put("name", pilot.getName());
+                        pilotInfo.put("roundCount", count);
+                        tooFew.add(pilotInfo);
+                    }
+                }
+
+                // Only report if there are resolvable mismatches (both source AND destination exist)
+                if (!tooMany.isEmpty() && !tooFew.isEmpty()) {
+                    Map<String, Object> mismatch = new HashMap<>();
+                    mismatch.put("className", "FREESTYLE".equals(roundType) ? "FREESTYLE" : className);
+                    mismatch.put("roundType", roundType);
+                    mismatch.put("expectedRounds", expectedCount);
+                    mismatch.put("tooMany", tooMany);
+                    mismatch.put("tooFew", tooFew);
+                    mismatches.add(mismatch);
+                }
+
+                // Break out of round type loop if we just did FREESTYLE
+                if ("FREESTYLE".equals(roundType)) break;
+            }
+        }
+
+        result.put("mismatches", mismatches);
+        return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+    }
+
+    private int countRoundsForType(PilotScores scores, String roundType) {
+        if (scores == null || scores.getScores() == null) return 0;
+
+        Set<Integer> rounds = new HashSet<>();
+        for (PScore score : scores.getScores()) {
+            if (roundType.equalsIgnoreCase(score.getType())) {
+                rounds.add(score.getRound());
+            }
+        }
+        return rounds.size();
+    }
+
+    @PostMapping("/api/scores/move-round")
+    public ResponseEntity<String> moveRound(@RequestBody Map<String, Object> payload)
+            throws IOException, ParserConfigurationException, SAXException {
+        Map<String, Object> result = new HashMap<>();
+
+        String sourcePilotId = (String) payload.get("sourcePilotId");
+        String destPilotId = (String) payload.get("destPilotId");
+        String roundType = (String) payload.get("roundType");
+        int sourceRound = ((Number) payload.get("sourceRound")).intValue();
+
+        logger.info("Moving {} round {} from pilot {} to pilot {}",
+                roundType, sourceRound, sourcePilotId, destPilotId);
+
+        // Get pilots and their scores
+        Pilot sourcePilot = pilotService.getPilot(sourcePilotId);
+        Pilot destPilot = pilotService.getPilot(destPilotId);
+
+        if (sourcePilot == null || destPilot == null) {
+            result.put("result", "fail");
+            result.put("message", "Pilot not found");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        PilotScores sourceScores = pilotService.getPilotScores(sourcePilot);
+        PilotScores destScores = pilotService.getPilotScores(destPilot);
+
+        // Find the scores to move (all sequences for that round+type)
+        List<PScore> scoresToMove = new ArrayList<>();
+        List<PScore> remainingSourceScores = new ArrayList<>();
+
+        for (PScore score : sourceScores.getScores()) {
+            if (roundType.equalsIgnoreCase(score.getType()) && score.getRound() == sourceRound) {
+                scoresToMove.add(score);
+            } else {
+                remainingSourceScores.add(score);
+            }
+        }
+
+        if (scoresToMove.isEmpty()) {
+            result.put("result", "fail");
+            result.put("message", "No scores found for that round");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        // Determine destination round number
+        int destRound = countRoundsForType(destScores, roundType) + 1;
+
+        // Add audit comment timestamp
+        String auditComment = String.format("[%s] Round moved from pilot %s",
+                java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                sourcePilot.getName());
+
+        // Move scores to destination with new round number
+        List<PScore> destScoreList = new ArrayList<>(destScores.getScores());
+        for (PScore score : scoresToMove) {
+            PScore movedScore = new PScore(destRound, score.getSequence(), score.getScores(), score.getType());
+            // Note: audit comment would need to be added to PScore if we want per-score comments
+            destScoreList.add(movedScore);
+        }
+        destScores.setScores(destScoreList);
+
+        // Renumber source pilot's remaining rounds (decrement rounds higher than moved one)
+        for (PScore score : remainingSourceScores) {
+            if (roundType.equalsIgnoreCase(score.getType()) && score.getRound() > sourceRound) {
+                // Create new score with decremented round number
+                PScore renumbered = new PScore(score.getRound() - 1, score.getSequence(), score.getScores(), score.getType());
+                remainingSourceScores.set(remainingSourceScores.indexOf(score), renumbered);
+            }
+        }
+        sourceScores.setScores(remainingSourceScores);
+
+        // Update active round numbers for both pilots
+        int newActiveRound = destRound + 1;
+        sourceScores.setActiveRound(roundType, newActiveRound);
+        destScores.setActiveRound(roundType, newActiveRound);
+
+        // Save both pilots
+        pilotService.savePilotScoresToFile(sourceScores);
+        pilotService.savePilotScoresToFile(destScores);
+
+        logger.info("Successfully moved round. Source now has {} {} rounds, dest has {} {} rounds",
+                countRoundsForType(sourceScores, roundType), roundType,
+                countRoundsForType(destScores, roundType), roundType);
+
+        result.put("result", "ok");
+        result.put("message", "Round moved successfully");
+        result.put("audit", auditComment);
+        return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+    }
+
+    @PostMapping("/api/system/update")
+    public ResponseEntity<String> runSystemUpdate() {
+        Map<String, Object> result = new HashMap<>();
+
+        // Primary URL (GitHub)
+        String primaryUrl = "https://raw.githubusercontent.com/IMAC-ORG/imac-judge-updater/main/script/judge_update.sh";
+        // Fallback URL (mirror)
+        String fallbackUrl = "http://aero-judge.com/update_mirror/judge_update.sh";
+
+        logger.info("System update requested");
+
+        try {
+            // Try primary URL first
+            int exitCode = executeUpdateScript(primaryUrl);
+
+            if (exitCode != 0) {
+                // Try fallback URL
+                logger.warn("Primary update source failed, trying fallback...");
+                exitCode = executeUpdateScript(fallbackUrl);
+            }
+
+            if (exitCode == 0) {
+                result.put("result", "ok");
+                result.put("message", "Update completed successfully");
+                result.put("restart", true);
+                logger.info("System update completed successfully");
+                return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+            } else {
+                result.put("result", "fail");
+                result.put("message", "Update script returned error code: " + exitCode);
+                logger.error("System update failed with exit code: {}", exitCode);
+                return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+        } catch (Exception e) {
+            logger.error("System update failed: {}", e.getMessage());
+            result.put("result", "fail");
+            result.put("message", "Update failed: " + e.getMessage());
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private int executeUpdateScript(String url) throws IOException, InterruptedException {
+        // Use curl to fetch and pipe to bash
+        ProcessBuilder pb = new ProcessBuilder("bash", "-c",
+                "curl -sfS " + url + " | bash");
+        pb.redirectErrorStream(true);
+
+        Process process = pb.start();
+
+        // Read output for logging
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                logger.info("Update: {}", line);
+            }
+        }
+
+        return process.waitFor();
     }
 }

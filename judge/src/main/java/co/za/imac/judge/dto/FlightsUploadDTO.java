@@ -1,6 +1,6 @@
 package co.za.imac.judge.dto;
 
-import java.util.ArrayList;
+// REVIEWED-UNUSED 2025-11 DPG: import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;

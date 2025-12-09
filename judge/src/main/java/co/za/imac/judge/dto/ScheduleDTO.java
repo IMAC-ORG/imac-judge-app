@@ -1,21 +1,24 @@
 package co.za.imac.judge.dto;
 
-import java.util.ArrayList;
+// REVIEWED-UNUSED 2025-11 DPG: import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+// REVIEWED-UNUSED 2025-11 DPG: import java.util.List;
 import java.util.Map;
 
 public class ScheduleDTO {
 
     /********
+     * Schedule/Sequence DTO - represents a single sequence entry from sequences.dat
+     * 
+     * XML structure:
      *          <sequence_id></sequence_id>
      *          <type>KNOWN</type>
      *          <class>INTERMEDIATE</class>
      *          <min_round>1</min_round>
      *          <max_round>20</max_round>
      *          <description></description>
-     *          <short_desc></short_desc>   <----  Ignore this one, will be deprecated...
-     *          <lang>en</lang>             <----  Ignore this one, it's wrong anyway...
+     *          <short_desc></short_desc>   <---- ESSENTIAL: Folder path for figure assets (e.g., "SPK_26S")
+     *          <lang>en</lang>             <---- Language code for audio files
      */
 
     private String sequence_id;              // Currently unused, will be a UUID.
@@ -24,8 +27,8 @@ public class ScheduleDTO {
     private Integer min_round;
     private Integer max_round;
     private String description;
-    private String short_desc;               // Eventually will remove this...
-    private String lang;                     // Eventually will remove this...
+    private String short_desc;               // ESSENTIAL: Folder path for figure assets (e.g., "SPK_26S")
+    private String lang;                     // Language code for audio (e.g., "en")
     private Map<Integer, FigureDTO> figures;
     //private List<FigureDTO> figures;
 

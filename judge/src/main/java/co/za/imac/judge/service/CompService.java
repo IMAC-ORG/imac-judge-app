@@ -8,12 +8,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+// REVIEWED-UNUSED 2025-11 DPG: import java.net.URL;
+// REVIEWED-UNUSED 2025-11 DPG: import java.util.ArrayList;
+// REVIEWED-UNUSED 2025-11 DPG: import java.util.HashMap;
+// REVIEWED-UNUSED 2025-11 DPG: import java.util.List;
+// REVIEWED-UNUSED 2025-11 DPG: import java.util.Map;
 
 import co.za.imac.judge.dto.SettingDTO;
 import org.apache.commons.io.FileUtils;
@@ -29,7 +30,7 @@ import co.za.imac.judge.utils.SettingUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+// REVIEWED-UNUSED 2025-11 DPG: import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
@@ -62,7 +63,8 @@ public class CompService {
         COMP_INFO_DAT_URL = COMP_INFO_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
         try {
             int timeout = (int)Duration.ofSeconds(settingDTO.getScore_timeout()).toMillis();
-            FileUtils.copyURLToFile(new URL(COMP_INFO_DAT_URL), new File(COMP_INFO_DAT_PATH),timeout,timeout);
+            // Updated deprecated URL, changed new URL(x) to URI.create(x).toURL() 2025-11 DPG
+            FileUtils.copyURLToFile(URI.create(COMP_INFO_DAT_URL).toURL(), new File(COMP_INFO_DAT_PATH),timeout,timeout);
         } catch (Exception e) {
             try {
                 // Score is probably turned off.
@@ -78,7 +80,8 @@ public class CompService {
         COMP_PREFS_DAT_URL = COMP_PREFS_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
         try {
             int timeout = (int)Duration.ofSeconds(settingDTO.getScore_timeout()).toMillis();
-            FileUtils.copyURLToFile(new URL(COMP_PREFS_DAT_URL), new File(COMP_PREFS_DAT_PATH),timeout,timeout);
+            // Updated deprecated URL, changed new URL(x) to URI.create(x).toURL() 2025-11 DPG
+            FileUtils.copyURLToFile(URI.create(COMP_PREFS_DAT_URL).toURL(), new File(COMP_PREFS_DAT_PATH),timeout,timeout);
         } catch (Exception e) {
             try {
                 // Score is probably turned off.
@@ -133,6 +136,28 @@ public class CompService {
 
         return true;
 
+    }
+
+    /**
+     * Save comp settings locally without any Score server contact.
+     * Updates both in-memory compDTO and the comp.json file.
+     */
+    public boolean saveCompToFileLocal() throws IOException {
+        if (compDTO == null) {
+            logger.warn("Cannot save local comp settings - no comp loaded");
+            return false;
+        }
+
+        File newFile = new File(COMP_FILE_NAME);
+        newFile.createNewFile();
+        String compdtoJson = new Gson().toJson(compDTO);
+        byte[] strToBytes = compdtoJson.getBytes();
+        FileOutputStream outputStream = new FileOutputStream(COMP_FILE_NAME);
+        outputStream.write(strToBytes);
+        outputStream.close();
+
+        logger.info("Saved local comp settings to file");
+        return true;
     }
 
     public CompDTO getComp() {

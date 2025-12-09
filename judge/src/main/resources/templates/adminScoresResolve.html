@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
+  <title>Admin - Resolve Score Mismatches</title>
+
+  <!-- CSS  -->
+  <link href="/materialize/css/material_lcons.css" rel="stylesheet">
+  <link href="/materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+  <style>
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .heading {
+      font-size: calc(1.2vw + 2vh) !important;
+      margin: 0;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .admin-nav-btn {
+      margin: 2px;
+      padding: 0 12px;
+    }
+    .mismatch-card {
+      border: 2px solid #90a4ae;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background: #fafafa;
+    }
+    .mismatch-header {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #455a64;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+    .mismatch-header i {
+      margin-right: 8px;
+      color: #ff9800;
+    }
+    .expected-badge {
+      background: #e3f2fd;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      margin-left: 10px;
+    }
+    .pilot-group {
+      margin: 10px 0;
+    }
+    .pilot-group-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    .pilot-row {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 5px;
+    }
+    .pilot-row.too-many {
+      border-left: 4px solid #4caf50;
+    }
+    .pilot-row.too-few {
+      border-left: 4px solid #f44336;
+    }
+    .pilot-row label {
+      flex: 1;
+      margin: 0;
+    }
+    .pilot-name {
+      font-weight: 500;
+    }
+    .pilot-rounds {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    .round-badge {
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .round-badge.plus {
+      background: #c8e6c9;
+      color: #2e7d32;
+    }
+    .round-badge.minus {
+      background: #ffcdd2;
+      color: #c62828;
+    }
+    .resolve-btn {
+      margin-top: 10px;
+    }
+    .no-mismatches {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    .no-mismatches i {
+      font-size: 4rem;
+      color: #4caf50;
+      display: block;
+      margin-bottom: 15px;
+    }
+    /* Resolve Modal */
+    .resolve-modal {
+      max-width: 600px;
+    }
+    .modal-pilot-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    .modal-pilot-box {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .modal-pilot-box.source {
+      background: #e8f5e9;
+      margin-right: 10px;
+    }
+    .modal-pilot-box.dest {
+      background: #ffebee;
+    }
+    .modal-pilot-name {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .modal-pilot-rounds {
+      font-size: 0.85rem;
+      color: #666;
+    }
+    .round-select-title {
+      font-weight: 500;
+      margin: 15px 0 10px 0;
+    }
+    .round-option {
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      background: #fff;
+    }
+    .round-option:hover {
+      background: #f5f5f5;
+    }
+    .preview-box {
+      background: #fff3e0;
+      border: 1px solid #ffcc80;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      display: none;
+    }
+    .preview-title {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #e65100;
+    }
+    .preview-item {
+      font-size: 0.9rem;
+      padding: 3px 0;
+    }
+    .preview-item i {
+      font-size: 1rem;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+    .loading-spinner {
+      text-align: center;
+      padding: 40px;
+    }
+  </style>
+</head>
+
+<body class="orange lighten-4">
+  <div th:replace="~{banner::line_judge}"></div>
+  <div th:replace="~{banner::status}"></div>
+
+  <div class="section no-pad-bot orange lighten-4" id="index-banner">
+    <div class="container orange lighten-4 black-text">
+
+      <!-- Header + Navigation -->
+      <div class="header-row">
+        <h2 class="heading">Resolve Score Mismatches</h2>
+        <div class="nav-buttons">
+          <a href="/admin/scores" class="waves-effect waves-light btn green admin-nav-btn">
+            <i class="material-icons left">arrow_back</i>Back
+          </a>
+          <a href="/" class="waves-effect waves-light btn teal admin-nav-btn">
+            <i class="material-icons left">home</i>Home
+          </a>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="loading-spinner">
+        <div class="preloader-wrapper big active">
+          <div class="spinner-layer spinner-blue-only">
+            <div class="circle-clipper left"><div class="circle"></div></div>
+            <div class="gap-patch"><div class="circle"></div></div>
+            <div class="circle-clipper right"><div class="circle"></div></div>
+          </div>
+        </div>
+        <p>Scanning for mismatches...</p>
+      </div>
+
+      <!-- No Mismatches State -->
+      <div id="noMismatches" class="no-mismatches" style="display: none;">
+        <i class="material-icons">check_circle</i>
+        <div style="font-size: 1.2rem; font-weight: 500;">All scores look good!</div>
+        <div style="margin-top: 5px;">No round count mismatches detected.</div>
+        <a href="/admin/scores" class="waves-effect waves-light btn green" style="margin-top: 20px;">
+          <i class="material-icons left">arrow_back</i>Back to Score Admin
+        </a>
+      </div>
+
+      <!-- Mismatches Container -->
+      <div id="mismatchesContainer"></div>
+
+    </div>
+  </div>
+
+  <!-- Resolve Modal -->
+  <div id="resolveModal" class="modal resolve-modal">
+    <div class="modal-content">
+      <h5 style="margin-top: 0;">
+        <i class="material-icons orange-text" style="vertical-align: middle; margin-right: 8px;">swap_horiz</i>
+        Move Round
+      </h5>
+
+      <div class="modal-pilot-header">
+        <div class="modal-pilot-box source">
+          <div style="font-size: 0.8rem; color: #388e3c;">Source (too many)</div>
+          <div class="modal-pilot-name" id="modalSourceName">-</div>
+          <div class="modal-pilot-rounds" id="modalSourceRounds">-</div>
+        </div>
+        <div class="modal-pilot-box dest">
+          <div style="font-size: 0.8rem; color: #c62828;">Destination (too few)</div>
+          <div class="modal-pilot-name" id="modalDestName">-</div>
+          <div class="modal-pilot-rounds" id="modalDestRounds">-</div>
+        </div>
+      </div>
+
+      <div class="round-select-title">Which round on source pilot belongs to destination?</div>
+      <div id="roundOptions"></div>
+
+      <div class="preview-box" id="previewBox">
+        <div class="preview-title">Preview Changes:</div>
+        <div id="previewContent"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close waves-effect waves-red btn-flat">Cancel</a>
+      <a href="#!" id="confirmMoveBtn" class="waves-effect waves-light btn green disabled">
+        <i class="material-icons left">check</i>Confirm Move
+      </a>
+    </div>
+  </div>
+
+  <!--  Scripts-->
+  <script src="/jquery-3.6.4.min.js"></script>
+  <script src="/materialize/js/materialize.js"></script>
+  <script>
+    let currentMismatch = null;
+    let selectedRound = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize modals
+      M.Modal.init(document.querySelectorAll('.modal'));
+
+      // Load mismatches
+      loadMismatches();
+    });
+
+    function loadMismatches() {
+      $('#loadingState').show();
+      $('#noMismatches').hide();
+      $('#mismatchesContainer').empty();
+
+      $.ajax({
+        type: "GET",
+        url: "/api/scores/mismatches",
+        dataType: "json",
+        success: function(data) {
+          $('#loadingState').hide();
+
+          if (!data.mismatches || data.mismatches.length === 0) {
+            $('#noMismatches').show();
+            return;
+          }
+
+          renderMismatches(data.mismatches);
+        },
+        error: function(err) {
+          $('#loadingState').hide();
+          M.toast({ html: 'Error loading mismatches', classes: 'red' });
+        }
+      });
+    }
+
+    function renderMismatches(mismatches) {
+      const container = $('#mismatchesContainer');
+
+      mismatches.forEach(function(mismatch, idx) {
+        const card = $('<div class="mismatch-card">');
+
+        // Header
+        const header = $('<div class="mismatch-header">');
+        header.append('<i class="material-icons">warning</i>');
+        header.append('<span>' + mismatch.className + ' - ' + mismatch.roundType + '</span>');
+        header.append('<span class="expected-badge">Expected: ' + mismatch.expectedRounds + ' rounds</span>');
+        card.append(header);
+
+        // Too many group
+        if (mismatch.tooMany && mismatch.tooMany.length > 0) {
+          const tooManyGroup = $('<div class="pilot-group">');
+          tooManyGroup.append('<div class="pilot-group-title">Too many rounds:</div>');
+
+          mismatch.tooMany.forEach(function(pilot) {
+            const row = $('<div class="pilot-row too-many">');
+            row.append('<label><input type="radio" name="source_' + idx + '" class="with-gap source-radio" data-pilot=\'' + JSON.stringify(pilot) + '\'/><span class="pilot-name">' + pilot.name + '</span></label>');
+            row.append('<span class="round-badge plus">+' + (pilot.roundCount - mismatch.expectedRounds) + ' (' + pilot.roundCount + ' rounds)</span>');
+            tooManyGroup.append(row);
+          });
+          card.append(tooManyGroup);
+        }
+
+        // Too few group
+        if (mismatch.tooFew && mismatch.tooFew.length > 0) {
+          const tooFewGroup = $('<div class="pilot-group">');
+          tooFewGroup.append('<div class="pilot-group-title">Too few rounds:</div>');
+
+          mismatch.tooFew.forEach(function(pilot) {
+            const row = $('<div class="pilot-row too-few">');
+            row.append('<label><input type="radio" name="dest_' + idx + '" class="with-gap dest-radio" data-pilot=\'' + JSON.stringify(pilot) + '\'/><span class="pilot-name">' + pilot.name + '</span></label>');
+            row.append('<span class="round-badge minus">' + (pilot.roundCount - mismatch.expectedRounds) + ' (' + pilot.roundCount + ' rounds)</span>');
+            tooFewGroup.append(row);
+          });
+          card.append(tooFewGroup);
+        }
+
+        // Resolve button
+        card.append('<div class="center"><a href="#" class="waves-effect waves-light btn orange darken-1 resolve-btn" data-idx="' + idx + '"><i class="material-icons left">build</i>Resolve Selected</a></div>');
+
+        container.append(card);
+      });
+
+      // Use event delegation for reliable click handling
+      container.off('click', '.resolve-btn').on('click', '.resolve-btn', function(e) {
+        e.preventDefault();
+        const idx = $(this).data('idx');
+        openResolveModal(idx, mismatches[idx]);
+      });
+    }
+
+    function openResolveModal(idx, mismatch) {
+      // Get selected pilots
+      const sourceRadio = $('input[name="source_' + idx + '"]:checked');
+      const destRadio = $('input[name="dest_' + idx + '"]:checked');
+
+      if (sourceRadio.length === 0 || destRadio.length === 0) {
+        M.toast({ html: 'Select one pilot from each group', classes: 'orange' });
+        return;
+      }
+
+      const sourcePilot = sourceRadio.data('pilot');
+      const destPilot = destRadio.data('pilot');
+
+      currentMismatch = {
+        mismatch: mismatch,
+        sourcePilot: sourcePilot,
+        destPilot: destPilot
+      };
+
+      // Update modal
+      $('#modalSourceName').text(sourcePilot.name);
+      $('#modalSourceRounds').text(sourcePilot.roundCount + ' ' + mismatch.roundType + ' rounds');
+      $('#modalDestName').text(destPilot.name);
+      $('#modalDestRounds').text(destPilot.roundCount + ' ' + mismatch.roundType + ' rounds');
+
+      // Generate round options - rounds after what dest already has could be the misscored one
+      const roundOptions = $('#roundOptions');
+      roundOptions.empty();
+
+      const startRound = destPilot.roundCount + 1;
+      for (let r = startRound; r <= sourcePilot.roundCount; r++) {
+        const option = $('<div class="round-option">');
+        option.append('<label><input type="radio" name="round_select" class="with-gap" value="' + r + '"/><span>Round ' + r + '</span></label>');
+        roundOptions.append(option);
+      }
+
+      // Reset state
+      selectedRound = null;
+      $('#previewBox').hide();
+      $('#confirmMoveBtn').addClass('disabled');
+
+      // Bind round selection
+      $('input[name="round_select"]').change(function() {
+        selectedRound = parseInt($(this).val());
+        showPreview();
+      });
+
+      // Open modal
+      M.Modal.getInstance(document.getElementById('resolveModal')).open();
+    }
+
+    function showPreview() {
+      if (!selectedRound || !currentMismatch) return;
+
+      const source = currentMismatch.sourcePilot;
+      const dest = currentMismatch.destPilot;
+      const mismatch = currentMismatch.mismatch;
+      const destRound = dest.roundCount + 1;
+
+      let preview = '';
+      preview += '<div class="preview-item"><i class="material-icons green-text">arrow_forward</i>Move ' + mismatch.roundType + ' Round ' + selectedRound + ' from ' + source.name + ' to ' + dest.name + ' as Round ' + destRound + '</div>';
+
+      // If moving a middle round, show renumbering
+      if (selectedRound < source.roundCount) {
+        for (let r = selectedRound + 1; r <= source.roundCount; r++) {
+          preview += '<div class="preview-item"><i class="material-icons blue-text">swap_vert</i>' + source.name + ' Round ' + r + ' becomes Round ' + (r - 1) + '</div>';
+        }
+      }
+
+      const newActiveRound = Math.max(source.roundCount - 1, destRound) + 1;
+      preview += '<div class="preview-item"><i class="material-icons orange-text">update</i>Both pilots: next ' + mismatch.roundType + ' round = ' + newActiveRound + '</div>';
+      preview += '<div class="preview-item"><i class="material-icons purple-text">comment</i>Audit comment added to moved round</div>';
+
+      $('#previewContent').html(preview);
+      $('#previewBox').show();
+      $('#confirmMoveBtn').removeClass('disabled');
+    }
+
+    $('#confirmMoveBtn').click(function(e) {
+      e.preventDefault();
+      if ($(this).hasClass('disabled')) return;
+
+      const payload = {
+        sourcePilotId: currentMismatch.sourcePilot.pilotId,
+        destPilotId: currentMismatch.destPilot.pilotId,
+        roundType: currentMismatch.mismatch.roundType,
+        sourceRound: selectedRound
+      };
+
+      $(this).addClass('disabled').text('Moving...');
+
+      $.ajax({
+        type: "POST",
+        url: "/api/scores/move-round",
+        data: JSON.stringify(payload),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function(data) {
+          M.Modal.getInstance(document.getElementById('resolveModal')).close();
+          M.toast({ html: 'Round moved successfully', classes: 'green' });
+
+          // Reload mismatches
+          loadMismatches();
+        },
+        error: function(err) {
+          $('#confirmMoveBtn').removeClass('disabled').html('<i class="material-icons left">check</i>Confirm Move');
+          var msg = 'Error moving round';
+          if (err.responseJSON && err.responseJSON.message) {
+            msg = err.responseJSON.message;
+          }
+          M.toast({ html: msg, classes: 'red' });
+        }
+      });
+    });
+  </script>
+
+</body>
+
+</html>

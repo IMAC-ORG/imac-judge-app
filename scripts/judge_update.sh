@@ -70,7 +70,8 @@ if [ "$latest_tag" != "$last_release" ]; then
     fi
 
     if [ -f figures.zip ]; then
-        unzip -quo figures.zip -d /var/opt/judge
+        rm -rf /var/opt/judge/figures
+        unzip -qo figures.zip -d /var/opt/judge
         rm figures.zip
         echo Installed/Upgraded judge figures to version $latest_tag
     fi

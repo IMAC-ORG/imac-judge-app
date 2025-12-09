@@ -13,13 +13,15 @@ public class FlightUploadDTO {
 	public FiguresUploadDTO figures;
     @JacksonXmlProperty(isAttribute = true, localName = "index")
 	public int index = 0;
-    
+    // Duration in seconds for FREESTYLE flights (default 240 = 4 minutes)
+    public Integer duration_seconds;
+
     public FlightUploadDTO(String pilot_primary_id, String type, int round, int sequence, int judge,
             boolean missing_pilot_panel, FiguresUploadDTO figures, int index, int line_number) {
         this.pilot_primary_id = pilot_primary_id;
         this.type = type;
         if (line_number > 1) {
-            if (round < 10) { 
+            if (round < 10) {
                 this.round = (line_number * 10)+round;
             }
             else {this.round = (line_number * 100)+round;
@@ -37,6 +39,10 @@ public class FlightUploadDTO {
         this.missing_pilot_panel = missing_pilot_panel;
         this.figures = figures;
         this.index = index;
+        // Set duration_seconds for FREESTYLE flights (default 240 seconds = 4 minutes)
+        if ("FREESTYLE".equalsIgnoreCase(type)) {
+            this.duration_seconds = 240;
+        }
     }
     public String getPilot_primary_id() {
         return pilot_primary_id;
@@ -86,7 +92,12 @@ public class FlightUploadDTO {
     public void setIndex(int index) {
         this.index = index;
     }
- 
 
+    public Integer getDuration_seconds() {
+        return duration_seconds;
+    }
 
+    public void setDuration_seconds(Integer duration_seconds) {
+        this.duration_seconds = duration_seconds;
+    }
 }

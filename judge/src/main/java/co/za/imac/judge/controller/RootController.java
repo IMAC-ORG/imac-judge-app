@@ -27,6 +27,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 import co.za.imac.judge.dto.CompDTO;
 import co.za.imac.judge.dto.FigureDTO;
+import co.za.imac.judge.dto.ScheduleDTO;
 import co.za.imac.judge.dto.Pilot;
 import co.za.imac.judge.dto.PilotScores;
 
@@ -40,12 +41,14 @@ public class RootController {
     private RoundsService roundService;
     @Autowired
     private PilotService pilotService;
-    @Autowired
-    private SequenceService sequenceService;
+    // REVIEWED-UNUSED 2025-11 DPG: @Autowired
+    // REVIEWED-UNUSED 2025-11 DPG: private SequenceService sequenceService;
     @Autowired
     private ScheduleService scheduleService;
     @Autowired
     private SettingService settingService;
+    @Autowired
+    private SequenceFolderResolver sequenceFolderResolver;
 
     @GetMapping("/")
     public String home(Model model)
@@ -123,11 +126,19 @@ public class RootController {
                 pilot_classes.add(className);
             }
         }
+        // Add FREESTYLE option if any pilot has freestyle=true
+        if (pilots.stream().anyMatch(p -> Boolean.TRUE.equals(p.getFreestyle()))) {
+            pilot_classes.add("FREESTYLE");
+        }
         model.addAttribute("pilotClasses", pilot_classes);
-        
 
-        if(classFilter != null && !classFilter.isEmpty() && classFilter != "global"){
-            pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
+
+        if(classFilter != null && !classFilter.isEmpty() && !classFilter.equals("global")){
+            if (classFilter.equalsIgnoreCase("FREESTYLE")) {
+                pilots = pilots.stream().filter(pilot -> Boolean.TRUE.equals(pilot.getFreestyle())).toList();
+            } else {
+                pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
+            }
         }
 
         // Get settings so we can show them
@@ -144,6 +155,11 @@ public class RootController {
 
         model.addAttribute("comp", compService.getComp());
         model.addAttribute("dirflip", false);
+
+        // Sequence availability for modal buttons
+        model.addAttribute("classesWithUnknown", scheduleService.getClassesWithUnknown());
+        model.addAttribute("hasFreestyle", scheduleService.hasFreestyle());
+
         return "pilot-list-global";
     }
 
@@ -160,8 +176,12 @@ public class RootController {
         logger.info("Is there a comp? : " + compService.isCurrentComp());
         List<Pilot> pilots = pilotService.getPilots();
 
-        if(classFilter != null && !classFilter.isEmpty() && classFilter != "global"){
-            pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
+        if(classFilter != null && !classFilter.isEmpty() && !classFilter.equals("global")){
+            if (classFilter.equalsIgnoreCase("FREESTYLE")) {
+                pilots = pilots.stream().filter(pilot -> Boolean.TRUE.equals(pilot.getFreestyle())).toList();
+            } else {
+                pilots = pilots.stream().filter(pilot -> pilot.getClassString().equalsIgnoreCase(classFilter)).toList();
+            }
         }
         if (!compService.isCurrentComp()) {
             logger.debug("Redirect to newcomp page.");
@@ -186,8 +206,12 @@ public class RootController {
                 pilot_classes.add(className);
             }
         }
+        // Add FREESTYLE option if any pilot has freestyle=true
+        if (pilots.stream().anyMatch(p -> Boolean.TRUE.equals(p.getFreestyle()))) {
+            pilot_classes.add("FREESTYLE");
+        }
         model.addAttribute("pilotClasses", pilot_classes);
-        
+
         List<Pilot> filteredPilots = new ArrayList<>();
 
         for (Pilot p : pilots) {
@@ -213,36 +237,77 @@ public class RootController {
         SettingDTO settings = settingService.getSettings();
         model.addAttribute("settings", settings);
 
+        // Sequence availability for modal buttons
+        model.addAttribute("classesWithUnknown", scheduleService.getClassesWithUnknown());
+        model.addAttribute("hasFreestyle", scheduleService.hasFreestyle());
+
         return "pilot-list-round";
     }
 
     @GetMapping("/judge")
     public String judge(@RequestParam(name = "pilot_id", required = true) String pilot_id,
             @RequestParam(name = "roundType", required = true) String roundType,
-            @RequestParam(name = "dirflip", required = true, defaultValue = "false") Boolean dirflip, 
-            @RequestParam(name = "sequenceType", required = true, defaultValue = "std") String sequenceType, Model model)
+            @RequestParam(name = "dirflip", required = false, defaultValue = "false") Boolean dirflip, 
+            @RequestParam(name = "sequenceType", required = false) String sequenceType, Model model)
             throws IOException, ParserConfigurationException, SAXException {
 
         if (!compService.isCurrentComp()) {
             logger.debug("Redirect to newcomp page.");
             return "redirect:/newcomp";
         }
+        
+        // Get sequenceType from CompDTO if not provided (legacy fallback for blank short_desc)
+        if (sequenceType == null || sequenceType.isEmpty()) {
+            sequenceType = compService.getComp().getSequenceType();
+            if (sequenceType == null) sequenceType = "std";
+        }
+        
         Pilot pilot = pilotService.getPilot(pilot_id);
         logger.debug("Pilot data:");
         logger.debug(new Gson().toJson(pilot));
         PilotScores pilotScores = pilotService.getPilotScores(pilot);
 
-        List<FigureDTO> sequences = sequenceService.getAllSequenceForClass(pilot.getClassString().toUpperCase(),
-                roundType.toUpperCase());
-        if (sequences == null || sequences.size() == 0 || sequences.isEmpty()) {
+        // DEBUG: Log the round number being used
+        // Use per-type round number (KNOWN, UNKNOWN, FREESTYLE each have independent counters)
+        int activeRoundForType = pilotScores.getActiveRound(roundType);
+        logger.info("=== JUDGE PAGE DEBUG ===");
+        logger.info("Pilot: {} ({})", pilot.getName(), pilot.getClassString());
+        logger.info("Round Type: {}", roundType);
+        logger.info("Active Round for {}: {}", roundType, activeRoundForType);
+        logger.info("Active Sequence: {}", pilotScores.getActiveSequence());
+        logger.info("All rounds by type: {}", pilotScores.getActiveRoundByType());
+
+        // Resolve the folder path for figures using the new folder structure
+        String sequenceFolderPath = sequenceFolderResolver.resolve(
+                pilot.getClassString(),
+                roundType,
+                activeRoundForType,
+                sequenceType
+        );
+        logger.info("Resolved folder path: {}", sequenceFolderPath);
+
+        // Get round-aware schedule with figures
+        ScheduleDTO schedule = scheduleService.getScheduleForRound(
+                pilot.getClassString(),
+                roundType,
+                activeRoundForType
+        );
+        if (schedule == null || schedule.getFigures() == null || schedule.getFigures().isEmpty()) {
             return "noseq";
         }
+        
+        // Convert figures map to list (sorted by figure number)
+        List<FigureDTO> sequences = new ArrayList<>(schedule.getFigures().values());
+        sequences.sort((a, b) -> Integer.compare(a.getFigNum(), b.getFigNum()));
+        
         model.addAttribute("maneuvers", sequences);
         model.addAttribute("numOfManeuvers", sequences.size());
         model.addAttribute("pilot", pilot);
         model.addAttribute("pilotScores", pilotScores);
+        model.addAttribute("activeRound", activeRoundForType);
         model.addAttribute("roundType", roundType.toUpperCase());
         model.addAttribute("sequenceType", sequenceType);
+        model.addAttribute("sequenceFolderPath", sequenceFolderPath);
         model.addAttribute("pilot_class", pilot.getClassString());
         String sequencesJson = new Gson().toJson(sequences);
         model.addAttribute("sequencesjson", sequencesJson);
@@ -257,6 +322,8 @@ public class RootController {
         // Get settings so we can show them
         SettingDTO settings = settingService.getSettings();
         model.addAttribute("settings", settings);
+        model.addAttribute("lineNumber", settings.getLine_number());
+        model.addAttribute("judgeId", settings.getJudge_id());
 
         boolean isComp = compService.isCurrentComp();
         logger.info("Is there a comp? : " + isComp);
@@ -339,5 +406,60 @@ public class RootController {
         model.addAttribute("schedules", scheduleService.getSchedules());
         logger.debug("Schedule Count: " + scheduleService.getSchedules().size());
         return "newround";
+    }
+
+    @GetMapping("/admin/comp")
+    public String adminComp(Model model) throws IOException {
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+
+        boolean isComp = compService.isCurrentComp();
+        model.addAttribute("isCurrentComp", isComp);
+        if (isComp) {
+            CompDTO curComp = compService.getComp();
+            model.addAttribute("compName", curComp.getComp_name());
+            model.addAttribute("compId", curComp.getComp_id());
+            model.addAttribute("scoreMode", curComp.getScore_mode());
+            model.addAttribute("maxSeqPerRound", curComp.getSequences());
+            model.addAttribute("maxUnknownSeqPerRound", curComp.getUnknown_sequences());
+            model.addAttribute("sequenceType", curComp.getSequenceType());
+        } else {
+            model.addAttribute("compName", "No Competition");
+            model.addAttribute("compId", 0);
+            model.addAttribute("scoreMode", "byRound");
+            model.addAttribute("maxSeqPerRound", 2);
+            model.addAttribute("maxUnknownSeqPerRound", 1);
+            model.addAttribute("sequenceType", "std");
+        }
+        return "adminComp";
+    }
+
+    @GetMapping("/admin/device")
+    public String adminDevice(Model model) throws IOException {
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+        model.addAttribute("lineNumber", settings.getLine_number());
+        model.addAttribute("judgeId", settings.getJudge_id());
+
+        if (compService.isCurrentComp()) {
+            model.addAttribute("scoreMode", compService.getComp().getScore_mode());
+        } else {
+            model.addAttribute("scoreMode", "global");
+        }
+        return "adminDevice";
+    }
+
+    @GetMapping("/admin/scores")
+    public String adminScores(Model model) throws IOException {
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+        return "adminScores";
+    }
+
+    @GetMapping("/admin/scores/resolve")
+    public String adminScoresResolve(Model model) throws IOException {
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+        return "adminScoresResolve";
     }
 }

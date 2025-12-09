@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
+  <title>Admin - Scorekeeper</title>
+
+  <!-- CSS  -->
+  <link href="/materialize/css/material_lcons.css" rel="stylesheet">
+  <link href="/materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+  <style>
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .heading {
+      font-size: calc(1.5vw + 2.5vh) !important;
+      margin: 0;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .admin-nav-btn {
+      margin: 2px;
+      padding: 0 12px;
+    }
+    .admin-box {
+      border: 2px solid #90a4ae;
+      border-radius: 8px;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      background: #fafafa;
+    }
+    .admin-box-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #455a64;
+    }
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 0;
+    }
+    .setting-label {
+      font-size: 0.95rem;
+      font-weight: 500;
+      min-width: 140px;
+    }
+    .radio-group {
+      display: flex;
+      gap: 20px;
+    }
+    [type="radio"]:not(:checked)+span, [type="radio"]:checked+span {
+      padding-left: 25px;
+      font-size: 0.95rem;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .warning-note {
+      font-size: 0.8rem;
+      color: #c62828;
+      margin-top: 5px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body class="orange lighten-4">
+  <div th:replace="~{banner::line_judge}"></div>
+  <div th:replace="~{banner::status}"></div>
+
+  <div class="section no-pad-bot orange lighten-4" id="index-banner">
+    <div class="container orange lighten-4 black-text">
+
+      <!-- Header + Navigation -->
+      <div class="header-row">
+        <h2 class="heading">Scorekeeper Admin</h2>
+        <div class="nav-buttons">
+          <a href="/admin/device" class="waves-effect waves-light btn blue admin-nav-btn">
+            <i class="material-icons left">devices</i>Device
+          </a>
+          <a href="/admin/scores" class="waves-effect waves-light btn green admin-nav-btn">
+            <i class="material-icons left">assessment</i>Scores
+          </a>
+          <a href="/" class="waves-effect waves-light btn teal admin-nav-btn">
+            <i class="material-icons left">home</i>Home
+          </a>
+        </div>
+      </div>
+
+      <!-- Box 1: Local Device Settings -->
+      <div class="admin-box">
+        <div class="admin-box-title">
+          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.2rem;">tune</i>
+          Local Device Settings
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">Known Sequence Count:</div>
+          <div class="radio-group">
+            <label class="black-text">
+              <input class="with-gap" name="knownSeqCount" type="radio" value="1" id="seq_single" />
+              <span>Single (1)</span>
+            </label>
+            <label class="black-text">
+              <input class="with-gap" name="knownSeqCount" type="radio" value="2" id="seq_double" checked />
+              <span>Double (2)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">Default Sequence Type:</div>
+          <div class="radio-group">
+            <label class="black-text">
+              <input class="with-gap" name="sequenceType" type="radio" value="std" id="std_seqType" checked />
+              <span>Standard</span>
+            </label>
+            <label class="black-text">
+              <input class="with-gap" name="sequenceType" type="radio" value="alt" id="alt_seqType" />
+              <span>Alternate</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="center" style="margin-top: 8px;">
+          <a href="#" id="updateLocalSettings" class="waves-effect waves-light btn orange darken-1">
+            <i class="material-icons left">save</i>Update Settings
+          </a>
+        </div>
+      </div>
+
+      <!-- Box 2: Score Server Actions -->
+      <div class="admin-box">
+        <div class="admin-box-title">
+          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.2rem;">cloud_sync</i>
+          Score Server Actions
+        </div>
+
+        <div class="action-buttons">
+          <a href="#" id="refreshEvent" class="waves-effect waves-light btn blue">
+            <i class="material-icons left">sync</i>Refresh Event
+          </a>
+          <a href="#" id="loadNewEvent" class="waves-effect waves-light btn red darken-1">
+            <i class="material-icons left">fiber_new</i>Load NEW Event
+          </a>
+        </div>
+        <div class="warning-note">
+          <i class="material-icons" style="vertical-align: middle; font-size: 1rem;">warning</i>
+          Load NEW archives current scores
+        </div>
+      </div>
+
+      <!-- Confirmation Modal for New Event -->
+      <div id="confirmNewEventModal" class="modal">
+        <div class="modal-content" style="padding: 15px 20px 10px;">
+          <h5 style="margin-top: 0;"><i class="material-icons red-text" style="vertical-align: middle; margin-right: 8px;">warning</i>Load NEW Event?</h5>
+          <p style="font-size: 0.95rem; color: #666; margin: 10px 0;">
+            This will archive current scores, clear pilot data, and load fresh data from Score.
+          </p>
+        </div>
+        <div class="modal-footer" style="padding: 10px 20px;">
+          <a href="#!" class="modal-close waves-effect waves-red btn-flat">Cancel</a>
+          <a href="#!" id="confirmNewEventBtn" class="waves-effect waves-light btn red">Yes, Load New</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="fixed-action-btn">
+    <a class="btn-floating btn-large red">
+      <i class="large material-icons">menu</i>
+    </a>
+    <ul>
+      <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">home</i></a></li>
+    </ul>
+  </div>
+
+  <!--  Scripts-->
+  <script src="/jquery-3.6.4.min.js"></script>
+  <script src="/materialize/js/materialize.js"></script>
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    const isCurrentComp = /*[[${isCurrentComp}]]*/ false;
+    const maxSeqPerRound = /*[[${maxSeqPerRound}]]*/ 2;
+    const sequenceType = /*[[${sequenceType}]]*/ 'std';
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Initialize floating action button
+      var elems = document.querySelectorAll('.fixed-action-btn');
+      M.FloatingActionButton.init(elems, { hoverEnabled: false });
+
+      // Initialize modal
+      var modalElems = document.querySelectorAll('.modal');
+      M.Modal.init(modalElems);
+
+      // Set current values
+      if (maxSeqPerRound == 1) {
+        $('#seq_single').prop('checked', true);
+      } else {
+        $('#seq_double').prop('checked', true);
+      }
+      $("input[name=sequenceType][value=" + sequenceType + "]").prop('checked', true);
+    });
+
+    // Update Local Settings (no Score contact)
+    $("#updateLocalSettings").click(function (e) {
+      e.preventDefault();
+      var sequences = parseInt($('input[name="knownSeqCount"]:checked').val());
+      var seqType = $('input[name="sequenceType"]:checked').val();
+
+      $.ajax({
+        type: "POST",
+        url: "/api/comp/local",
+        data: JSON.stringify({
+          sequences: sequences,
+          sequenceType: seqType
+        }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data) {
+          if (data.result === "ok") {
+            M.toast({ html: 'Settings updated', classes: 'green', displayLength: 2000 });
+          } else {
+            M.toast({ html: 'Error: ' + data.message, classes: 'red' });
+          }
+        },
+        error: function () {
+          M.toast({ html: 'Error updating settings', classes: 'red' });
+        }
+      });
+    });
+
+    // Refresh Current Event Data
+    $("#refreshEvent").click(function (e) {
+      e.preventDefault();
+      var sequences = parseInt($('input[name="knownSeqCount"]:checked').val());
+      var seqType = $('input[name="sequenceType"]:checked').val();
+
+      $.ajax({
+        type: "POST",
+        url: "/api/comp?edit=true",
+        data: JSON.stringify({
+          score_mode: 'global',
+          sequences: sequences,
+          unknown_sequences: 1,
+          sequenceType: seqType
+        }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data) {
+          if (data.result === "ok") {
+            M.toast({ html: 'Event refreshed', classes: 'green', displayLength: 2000 });
+            setTimeout(function() {
+              window.location = '/validate-sequences';
+            }, 2000);
+          } else {
+            M.toast({ html: 'Error: ' + data.message, classes: 'red' });
+          }
+        },
+        error: function (errObj) {
+          if (typeof errObj.responseJSON != "undefined") {
+            M.toast({ html: 'Error: ' + errObj.responseJSON.message, classes: 'red' });
+          } else {
+            M.toast({ html: 'Error refreshing event', classes: 'red' });
+          }
+        }
+      });
+    });
+
+    // Load NEW Event - show confirmation modal
+    $("#loadNewEvent").click(function (e) {
+      e.preventDefault();
+      var modal = M.Modal.getInstance(document.getElementById('confirmNewEventModal'));
+      modal.open();
+    });
+
+    // Confirm new event load
+    $("#confirmNewEventBtn").click(function (e) {
+      e.preventDefault();
+      var modal = M.Modal.getInstance(document.getElementById('confirmNewEventModal'));
+      modal.close();
+
+      var sequences = parseInt($('input[name="knownSeqCount"]:checked').val());
+      var seqType = $('input[name="sequenceType"]:checked').val();
+
+      $.ajax({
+        type: "POST",
+        url: "/api/comp?edit=false",
+        data: JSON.stringify({
+          score_mode: 'global',
+          sequences: sequences,
+          unknown_sequences: 1,
+          sequenceType: seqType
+        }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data) {
+          if (data.result === "ok") {
+            M.toast({ html: 'New event loaded', classes: 'green', displayLength: 2000 });
+            setTimeout(function() {
+              window.location = '/validate-sequences';
+            }, 2000);
+          } else {
+            M.toast({ html: 'Error: ' + data.message, classes: 'red' });
+          }
+        },
+        error: function (errObj) {
+          if (typeof errObj.responseJSON != "undefined") {
+            M.toast({ html: 'Error: ' + errObj.responseJSON.message, classes: 'red' });
+          } else {
+            M.toast({ html: 'Error loading new event', classes: 'red' });
+          }
+        }
+      });
+    });
+
+    /*]]>*/
+  </script>
+
+</body>
+
+</html>
