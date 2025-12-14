@@ -33,6 +33,11 @@ All notable changes to the AeroJudge App will be documented in this file.
   - "Update applied successfully - restarting..." on completion
   - Clear error messages for network failures
 
+### Fixed
+- **Freestyle Mismatch Duplicates**: Score mismatch page no longer shows duplicate entries for freestyle errors
+  - Previously showed one identical mismatch card per class (4 classes = 4 duplicates)
+  - FREESTYLE now checked once separately after per-class KNOWN/UNKNOWN checks
+
 ### Technical Notes
 - API: `GET /api/system/check-update` - Returns version comparison JSON
 - API: `POST /api/system/update` - Now calls local `fetch_update.sh` script

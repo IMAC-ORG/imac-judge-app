@@ -475,96 +475,23 @@ public class APIController {
             pilotsByClass.computeIfAbsent(className.toUpperCase(), k -> new ArrayList<>()).add(pilot);
         }
 
-        // Check each class for each round type
-        String[] roundTypes = {"KNOWN", "UNKNOWN", "FREESTYLE"};
+        // Check each class for KNOWN and UNKNOWN round types
+        String[] classRoundTypes = {"KNOWN", "UNKNOWN"};
 
         for (String className : pilotsByClass.keySet()) {
             List<Pilot> classPilots = pilotsByClass.get(className);
 
-            for (String roundType : roundTypes) {
-                // Skip FREESTYLE unless it applies to this class (handled differently)
-                if ("FREESTYLE".equals(roundType)) {
-                    // Only check pilots with freestyle=true
-                    classPilots = pilots.stream()
-                            .filter(p -> Boolean.TRUE.equals(p.getFreestyle()))
-                            .toList();
-                    if (classPilots.isEmpty()) continue;
-                }
-
-                // Get round counts for each pilot
-                Map<Pilot, Integer> roundCounts = new HashMap<>();
-                for (Pilot pilot : classPilots) {
-                    PilotScores scores = pilotService.getPilotScores(pilot);
-                    int count = countRoundsForType(scores, roundType);
-                    roundCounts.put(pilot, count);
-                }
-
-                if (roundCounts.isEmpty()) continue;
-
-                // Find expected count using mode (most common value), or median if no clear mode
-                Map<Integer, Long> countFrequency = roundCounts.values().stream()
-                        .collect(java.util.stream.Collectors.groupingBy(c -> c, java.util.stream.Collectors.counting()));
-
-                // Find max frequency
-                long maxFreq = countFrequency.values().stream().max(Long::compare).orElse(0L);
-
-                // Count how many values have the max frequency
-                long countWithMaxFreq = countFrequency.values().stream().filter(f -> f == maxFreq).count();
-
-                int expectedCount;
-                if (countWithMaxFreq == 1) {
-                    // Clear mode - one value appears more than others
-                    expectedCount = countFrequency.entrySet().stream()
-                            .filter(e -> e.getValue() == maxFreq)
-                            .map(Map.Entry::getKey)
-                            .findFirst()
-                            .orElse(0);
-                } else {
-                    // No clear mode - use median
-                    List<Integer> sortedCounts = roundCounts.values().stream()
-                            .sorted()
-                            .toList();
-                    int mid = sortedCounts.size() / 2;
-                    expectedCount = sortedCounts.get(mid);
-                }
-
-                // Find pilots that deviate
-                List<Map<String, Object>> tooMany = new ArrayList<>();
-                List<Map<String, Object>> tooFew = new ArrayList<>();
-
-                for (Map.Entry<Pilot, Integer> entry : roundCounts.entrySet()) {
-                    Pilot pilot = entry.getKey();
-                    int count = entry.getValue();
-
-                    if (count > expectedCount) {
-                        Map<String, Object> pilotInfo = new HashMap<>();
-                        pilotInfo.put("pilotId", pilot.getPrimary_id());
-                        pilotInfo.put("name", pilot.getName());
-                        pilotInfo.put("roundCount", count);
-                        tooMany.add(pilotInfo);
-                    } else if (count < expectedCount) {
-                        Map<String, Object> pilotInfo = new HashMap<>();
-                        pilotInfo.put("pilotId", pilot.getPrimary_id());
-                        pilotInfo.put("name", pilot.getName());
-                        pilotInfo.put("roundCount", count);
-                        tooFew.add(pilotInfo);
-                    }
-                }
-
-                // Only report if there are resolvable mismatches (both source AND destination exist)
-                if (!tooMany.isEmpty() && !tooFew.isEmpty()) {
-                    Map<String, Object> mismatch = new HashMap<>();
-                    mismatch.put("className", "FREESTYLE".equals(roundType) ? "FREESTYLE" : className);
-                    mismatch.put("roundType", roundType);
-                    mismatch.put("expectedRounds", expectedCount);
-                    mismatch.put("tooMany", tooMany);
-                    mismatch.put("tooFew", tooFew);
-                    mismatches.add(mismatch);
-                }
-
-                // Break out of round type loop if we just did FREESTYLE
-                if ("FREESTYLE".equals(roundType)) break;
+            for (String roundType : classRoundTypes) {
+                checkAndAddMismatches(classPilots, roundType, className, mismatches);
             }
+        }
+
+        // Check FREESTYLE separately (cross-class, only runs once)
+        List<Pilot> freestylePilots = pilots.stream()
+                .filter(p -> Boolean.TRUE.equals(p.getFreestyle()))
+                .toList();
+        if (!freestylePilots.isEmpty()) {
+            checkAndAddMismatches(freestylePilots, "FREESTYLE", "FREESTYLE", mismatches);
         }
 
         result.put("mismatches", mismatches);
@@ -581,6 +508,83 @@ public class APIController {
             }
         }
         return rounds.size();
+    }
+
+    /**
+     * Helper method to check for round count mismatches and add to the list if found.
+     */
+    private void checkAndAddMismatches(List<Pilot> pilots, String roundType, String className,
+                                       List<Map<String, Object>> mismatches) throws IOException {
+        // Get round counts for each pilot
+        Map<Pilot, Integer> roundCounts = new HashMap<>();
+        for (Pilot pilot : pilots) {
+            PilotScores scores = pilotService.getPilotScores(pilot);
+            int count = countRoundsForType(scores, roundType);
+            roundCounts.put(pilot, count);
+        }
+
+        if (roundCounts.isEmpty()) return;
+
+        // Find expected count using mode (most common value), or median if no clear mode
+        Map<Integer, Long> countFrequency = roundCounts.values().stream()
+                .collect(java.util.stream.Collectors.groupingBy(c -> c, java.util.stream.Collectors.counting()));
+
+        // Find max frequency
+        long maxFreq = countFrequency.values().stream().max(Long::compare).orElse(0L);
+
+        // Count how many values have the max frequency
+        long countWithMaxFreq = countFrequency.values().stream().filter(f -> f == maxFreq).count();
+
+        int expectedCount;
+        if (countWithMaxFreq == 1) {
+            // Clear mode - one value appears more than others
+            expectedCount = countFrequency.entrySet().stream()
+                    .filter(e -> e.getValue() == maxFreq)
+                    .map(Map.Entry::getKey)
+                    .findFirst()
+                    .orElse(0);
+        } else {
+            // No clear mode - use median
+            List<Integer> sortedCounts = roundCounts.values().stream()
+                    .sorted()
+                    .toList();
+            int mid = sortedCounts.size() / 2;
+            expectedCount = sortedCounts.get(mid);
+        }
+
+        // Find pilots that deviate
+        List<Map<String, Object>> tooMany = new ArrayList<>();
+        List<Map<String, Object>> tooFew = new ArrayList<>();
+
+        for (Map.Entry<Pilot, Integer> entry : roundCounts.entrySet()) {
+            Pilot pilot = entry.getKey();
+            int count = entry.getValue();
+
+            if (count > expectedCount) {
+                Map<String, Object> pilotInfo = new HashMap<>();
+                pilotInfo.put("pilotId", pilot.getPrimary_id());
+                pilotInfo.put("name", pilot.getName());
+                pilotInfo.put("roundCount", count);
+                tooMany.add(pilotInfo);
+            } else if (count < expectedCount) {
+                Map<String, Object> pilotInfo = new HashMap<>();
+                pilotInfo.put("pilotId", pilot.getPrimary_id());
+                pilotInfo.put("name", pilot.getName());
+                pilotInfo.put("roundCount", count);
+                tooFew.add(pilotInfo);
+            }
+        }
+
+        // Only report if there are resolvable mismatches (both source AND destination exist)
+        if (!tooMany.isEmpty() && !tooFew.isEmpty()) {
+            Map<String, Object> mismatch = new HashMap<>();
+            mismatch.put("className", className);
+            mismatch.put("roundType", roundType);
+            mismatch.put("expectedRounds", expectedCount);
+            mismatch.put("tooMany", tooMany);
+            mismatch.put("tooFew", tooFew);
+            mismatches.add(mismatch);
+        }
     }
 
     @PostMapping("/api/scores/move-round")
