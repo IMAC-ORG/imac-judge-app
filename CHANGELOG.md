@@ -4,6 +4,36 @@ All notable changes to the AeroJudge App will be documented in this file.
 
 ---
 
+## [Unreleased]
+
+### Added
+- **System Update Revamp**: Complete overhaul of the judge update system
+  - New `/api/system/check-update` endpoint: Queries GitHub releases API to check for available updates
+  - Version comparison: Shows current vs available version before updating
+  - Confirmation modal: Requires user confirmation with internet connectivity warning before updating
+  - Distinct exit codes: Update script now returns 0 (no update), 1 (error), or 2 (update applied)
+  - `fetch_update.sh`: New lightweight fetcher script installed on devices that fetches and runs the main update script from GitHub
+
+### Changed
+- **Update Architecture**: Single entry point for both Admin menu and SSH updates
+  - Admin menu and SSH now both use `/home/judge/fetch_update.sh`
+  - Main update logic (`judge_update.sh`) stays on GitHub and can be updated remotely
+  - Removed fallback mirror URL (now uses GitHub exclusively)
+  - `judge_setup.sh` updated to install `fetch_update.sh` instead of full update script
+- **Update Feedback**: Improved user messaging throughout update process
+  - "Checking for updates..." → "Already up to date (v2.0)" or shows update modal
+  - "Downloading and installing update..." during installation
+  - "Update applied successfully - restarting..." on completion
+  - Clear error messages for network failures
+
+### Technical Notes
+- API: `GET /api/system/check-update` - Returns version comparison JSON
+- API: `POST /api/system/update` - Now calls local `fetch_update.sh` script
+- Script exit codes: 0=no update needed, 1=error, 2=update applied
+- SSH usage: `ssh judge@device "/home/judge/fetch_update.sh"`
+
+---
+
 ## [2.0] - 2025-11-27
 
 ### Added

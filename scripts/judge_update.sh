@@ -1,4 +1,15 @@
 #!/bin/bash
+# =============================================================================
+# judge_update.sh - AeroJudge Update Script
+# =============================================================================
+# This script checks for and installs updates from GitHub releases.
+# It is fetched and executed by fetch_update.sh on the device.
+#
+# Exit Codes:
+#   0 = No update needed (already running latest version)
+#   1 = Error occurred during update
+#   2 = Update successfully applied
+# =============================================================================
 
 if [ ! -d /var/opt/judge ]; then
    echo Creating judge folder...
@@ -79,8 +90,12 @@ if [ "$latest_tag" != "$last_release" ]; then
     echo Starting services....
     sudo systemctl start judge.service
     sudo systemctl start kiosk.service
+
+    echo "Update complete!"
+    UPDATE_APPLIED=true
 else
     echo "Latest version already installed"
+    UPDATE_APPLIED=false
 fi
 
 #now checking for volume service and install if not found
@@ -113,4 +128,11 @@ if ! grep -q "xset r off" /home/judge/.bashrc; then
     #now implement the change
     export DISPLAY=:0
     xset r off
+fi
+
+# Exit with appropriate code
+if [ "$UPDATE_APPLIED" = true ]; then
+    exit 2  # Update successfully applied
+else
+    exit 0  # No update needed (already running latest version)
 fi

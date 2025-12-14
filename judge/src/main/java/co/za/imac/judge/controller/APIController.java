@@ -6,6 +6,10 @@ import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,6 +39,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.xml.sax.SAXException;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import co.za.imac.judge.utils.SettingUtils;
 
@@ -656,34 +662,90 @@ public class APIController {
         return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
     }
 
+    /**
+     * Check for available updates by querying GitHub releases API.
+     * Compares current version with latest release tag.
+     */
+    @GetMapping("/api/system/check-update")
+    public ResponseEntity<String> checkForUpdate() {
+        Map<String, Object> result = new HashMap<>();
+
+        String currentVersion = co.za.imac.judge.JudgeApplication.getAppVersion();
+        result.put("currentVersion", currentVersion);
+
+        try {
+            HttpClient client = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(10))
+                    .build();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.github.com/repos/IMAC-ORG/imac-judge-app/releases/latest"))
+                    .header("Accept", "application/vnd.github.v3+json")
+                    .timeout(Duration.ofSeconds(15))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
+                String latestTag = json.get("tag_name").getAsString();
+                // Remove 'v' prefix if present for comparison
+                String latestVersion = latestTag.replaceFirst("^v", "");
+
+                result.put("latestVersion", latestVersion);
+                result.put("latestTag", latestTag);
+                result.put("updateAvailable", !currentVersion.equals(latestVersion));
+                result.put("result", "ok");
+
+                logger.info("Version check: current={}, latest={}, updateAvailable={}",
+                        currentVersion, latestVersion, !currentVersion.equals(latestVersion));
+
+                return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+            } else {
+                result.put("result", "fail");
+                result.put("message", "GitHub API returned status: " + response.statusCode());
+                logger.warn("GitHub API check failed with status: {}", response.statusCode());
+                return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.SERVICE_UNAVAILABLE);
+            }
+
+        } catch (Exception e) {
+            logger.error("Failed to check for updates: {}", e.getMessage());
+            result.put("result", "fail");
+            result.put("message", "Could not connect to update server. Check internet connection.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
+     * Run system update by executing the local fetch_update.sh script.
+     * Exit codes: 0 = no update needed, 1 = error, 2 = update applied
+     */
     @PostMapping("/api/system/update")
     public ResponseEntity<String> runSystemUpdate() {
         Map<String, Object> result = new HashMap<>();
 
-        // Primary URL (GitHub)
-        String primaryUrl = "https://raw.githubusercontent.com/IMAC-ORG/imac-judge-updater/main/script/judge_update.sh";
-        // Fallback URL (mirror)
-        String fallbackUrl = "http://aero-judge.com/update_mirror/judge_update.sh";
-
         logger.info("System update requested");
 
         try {
-            // Try primary URL first
-            int exitCode = executeUpdateScript(primaryUrl);
-
-            if (exitCode != 0) {
-                // Try fallback URL
-                logger.warn("Primary update source failed, trying fallback...");
-                exitCode = executeUpdateScript(fallbackUrl);
-            }
+            int exitCode = executeUpdateScript();
 
             if (exitCode == 0) {
+                // No update was needed - already running latest
                 result.put("result", "ok");
-                result.put("message", "Update completed successfully");
+                result.put("message", "Already up to date");
+                result.put("restart", false);
+                logger.info("System already up to date");
+                return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+            } else if (exitCode == 2) {
+                // Update was successfully applied
+                result.put("result", "ok");
+                result.put("message", "Update applied successfully - restarting...");
                 result.put("restart", true);
-                logger.info("System update completed successfully");
+                logger.info("System update applied successfully");
                 return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
             } else {
+                // Error occurred (exit code 1 or other)
                 result.put("result", "fail");
                 result.put("message", "Update script returned error code: " + exitCode);
                 logger.error("System update failed with exit code: {}", exitCode);
@@ -698,10 +760,11 @@ public class APIController {
         }
     }
 
-    private int executeUpdateScript(String url) throws IOException, InterruptedException {
-        // Use curl to fetch and pipe to bash
-        ProcessBuilder pb = new ProcessBuilder("bash", "-c",
-                "curl -sfS " + url + " | bash");
+    /**
+     * Execute the local fetch_update.sh script which fetches and runs the update from GitHub.
+     */
+    private int executeUpdateScript() throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder("/home/judge/fetch_update.sh");
         pb.redirectErrorStream(true);
 
         Process process = pb.start();

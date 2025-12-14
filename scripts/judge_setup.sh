@@ -239,8 +239,8 @@ mkdir /var/opt/judge/bin 																													> /dev/null 2>&1
 
 sudo wget -O /lib/systemd/system/judge.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.service 		> /dev/null 2>&1
 wget -O /var/opt/judge/bin/judge.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.sh							> /dev/null 2>&1
-wget -O /home/judge/judge_update.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_update.sh					> /dev/null 2>&1
-chmod +x /home/judge/judge_update.sh																										> /dev/null 2>&1	
+wget -O /home/judge/fetch_update.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/fetch_update.sh				> /dev/null 2>&1
+chmod +x /home/judge/fetch_update.sh																									> /dev/null 2>&1	
 sudo wget -O /lib/systemd/system/kiosk.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.service			> /dev/null 2>&1
 wget -O /var/opt/judge/bin/kiosk.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.sh							> /dev/null 2>&1
 
@@ -257,6 +257,6 @@ echo -e "${Yellow}Creating Default Pilots for Testing..."
 wget -O /tmp/data.zip https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data.zip						    > /dev/null 2>&1
 unzip -o /tmp/data.zip -d /var/opt/judge/
 
-/home/judge/judge_update.sh
+/home/judge/fetch_update.sh
 
 echo -e "${Yellow}AeroJudge App installation complete!"
