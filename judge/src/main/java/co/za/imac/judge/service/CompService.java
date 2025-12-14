@@ -10,11 +10,6 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.time.Duration;
-// REVIEWED-UNUSED 2025-11 DPG: import java.net.URL;
-// REVIEWED-UNUSED 2025-11 DPG: import java.util.ArrayList;
-// REVIEWED-UNUSED 2025-11 DPG: import java.util.HashMap;
-// REVIEWED-UNUSED 2025-11 DPG: import java.util.List;
-// REVIEWED-UNUSED 2025-11 DPG: import java.util.Map;
 
 import co.za.imac.judge.dto.SettingDTO;
 import org.apache.commons.io.FileUtils;
@@ -30,7 +25,6 @@ import co.za.imac.judge.utils.SettingUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-// REVIEWED-UNUSED 2025-11 DPG: import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;

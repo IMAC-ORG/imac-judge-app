@@ -1,6 +1,5 @@
 package co.za.imac.judge.utils;
 
-// REVIEWED-UNUSED 2025-11 DPG: import co.za.imac.judge.JudgeApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -8,7 +7,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import java.util.Arrays;
-// REVIEWED-UNUSED 2025-11 DPG: import java.util.Properties;
 
 import co.za.imac.judge.service.SettingService;
 import co.za.imac.judge.dto.SettingDTO;

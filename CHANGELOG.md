@@ -19,6 +19,9 @@ All notable changes to the AeroJudge App will be documented in this file.
   - Used by judge modal battery warnings for responsive UI
 
 ### Changed
+- **Code Cleanup**: Removed all `REVIEWED-UNUSED` commented imports/fields (28 items across 11 files)
+  - Previously tagged as unused in 2025-11, now permanently deleted
+  - Git history preserves all removed code for reference
 - **Update Architecture**: Single entry point for both Admin menu and SSH updates
   - Admin menu and SSH now both use `/home/judge/fetch_update.sh`
   - Main update logic (`judge_update.sh`) stays on GitHub and can be updated remotely

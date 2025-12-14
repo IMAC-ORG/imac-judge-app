@@ -1,7 +1,6 @@
 package co.za.imac.judge.controller;
 
 import java.io.IOException;
-// REVIEWED-UNUSED 2025-11 DPG: import java.net.ConnectException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

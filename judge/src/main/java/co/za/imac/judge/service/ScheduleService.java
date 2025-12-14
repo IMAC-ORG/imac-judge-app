@@ -1,6 +1,5 @@
 package co.za.imac.judge.service;
 
-// REVIEWED-UNUSED 2025-11 DPG: import co.za.imac.judge.dto.CompDTO;
 import co.za.imac.judge.dto.FigureDTO;
 import co.za.imac.judge.dto.ScheduleDTO;
 import co.za.imac.judge.dto.SettingDTO;
@@ -26,7 +25,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.time.Duration;
-// REVIEWED-UNUSED 2025-11 DPG: import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
