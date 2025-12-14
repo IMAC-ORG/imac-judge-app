@@ -13,6 +13,10 @@ All notable changes to the AeroJudge App will be documented in this file.
   - Confirmation modal: Requires user confirmation with internet connectivity warning before updating
   - Distinct exit codes: Update script now returns 0 (no update), 1 (error), or 2 (update applied)
   - `fetch_update.sh`: New lightweight fetcher script installed on devices that fetches and runs the main update script from GitHub
+- **Lightweight Battery API**: New `/api/battery` endpoint for fast battery percentage checks
+  - Returns only `{"percent": 85}` - single I2C read operation
+  - ~100x faster than `/api/getinfo` which runs 4 expensive operations
+  - Used by judge modal battery warnings for responsive UI
 
 ### Changed
 - **Update Architecture**: Single entry point for both Admin menu and SSH updates

@@ -136,8 +136,25 @@ public class InfoCollectorService {
             logger.error("Error reading battery status: " + e.getMessage());
             return new InfoLine("Battery Status:", "Error", "0%");
         }
+    }
 
-        
+    /**
+     * Lightweight battery percentage check - only reads I2C sensor.
+     * Much faster than collectInfo() which runs 4 expensive operations.
+     * @return Battery percentage (0-100), or -1 if read fails
+     */
+    public int getBatteryPercent() {
+        try {
+            Context pi4j = Pi4J.newAutoContext();
+            INA226PowerUtils sensor = new INA226PowerUtils(pi4j);
+            LiPoBatteryEstimator est = new LiPoBatteryEstimator();
+
+            double packV = sensor.getBusVoltage();
+            return est.estimatePercentage(packV);
+        } catch (Exception e) {
+            logger.warn("Battery read failed: {}", e.getMessage());
+            return -1;
+        }
     }
 
     private InfoLine getScoreStatus () {

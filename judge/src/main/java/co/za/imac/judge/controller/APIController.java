@@ -304,6 +304,17 @@ public class APIController {
         return info;
     }
 
+    /**
+     * Lightweight battery percentage endpoint.
+     * Much faster than /api/getinfo - only reads I2C sensor.
+     */
+    @GetMapping("/api/battery")
+    public Map<String, Integer> getBatteryPercent() {
+        Map<String, Integer> result = new HashMap<>();
+        result.put("percent", infoCollectorService.getBatteryPercent());
+        return result;
+    }
+
     @PostMapping("/api/pilot/{pilotId}/advance-round")
     public ResponseEntity<PilotScores> advanceRound(
             @PathVariable String pilotId,

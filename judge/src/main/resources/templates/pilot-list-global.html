@@ -157,41 +157,33 @@
       if (!statusDiv) return;
 
       $.ajax({
-        url: "/api/getinfo",
+        url: "/api/battery",
         timeout: 3000,
         cache: false,
         success: function(data) {
-          if (data && data.info_lines) {
-            var batteryLine = data.info_lines.find(function(line) {
-              return line.label === "Battery Status:";
-            });
-            if (batteryLine && batteryLine.value) {
-              var match = batteryLine.value.match(/(\d+)%/);
-              if (match) {
-                var percent = parseInt(match[1]);
-                var icon, text, cssClass;
+          var percent = data.percent;
+          if (percent >= 0) {
+            var icon, text, cssClass;
 
-                if (percent < 20) {
-                  icon = 'battery_alert';
-                  text = 'LOW BATTERY: ' + percent + '% - Charge soon!';
-                  cssClass = 'battery-low';
-                } else if (percent < 30) {
-                  icon = 'battery_3_bar';
-                  text = 'Warning: Battery at ' + percent + '%';
-                  cssClass = 'battery-mid';
-                } else {
-                  statusDiv.style.display = 'none';
-                  return;
-                }
-
-                statusDiv.className = 'battery-status ' + cssClass;
-                statusDiv.innerHTML = '<i class="material-icons">' + icon + '</i><span class="bat-text">' + text + '</span>';
-                statusDiv.style.display = 'flex';
-                return;
-              }
+            if (percent < 20) {
+              icon = 'battery_alert';
+              text = 'LOW BATTERY: ' + percent + '% - Charge soon!';
+              cssClass = 'battery-low';
+            } else if (percent < 30) {
+              icon = 'battery_3_bar';
+              text = 'Warning: Battery at ' + percent + '%';
+              cssClass = 'battery-mid';
+            } else {
+              statusDiv.style.display = 'none';
+              return;
             }
+
+            statusDiv.className = 'battery-status ' + cssClass;
+            statusDiv.innerHTML = '<i class="material-icons">' + icon + '</i><span class="bat-text">' + text + '</span>';
+            statusDiv.style.display = 'flex';
+          } else {
+            statusDiv.style.display = 'none';
           }
-          statusDiv.style.display = 'none';
         },
         error: function() {
           statusDiv.style.display = 'none';
