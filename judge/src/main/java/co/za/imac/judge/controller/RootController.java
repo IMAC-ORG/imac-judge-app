@@ -298,6 +298,10 @@ public class RootController {
         List<FigureDTO> sequences = new ArrayList<>(schedule.getFigures().values());
         sequences.sort((a, b) -> Integer.compare(a.getFigNum(), b.getFigNum()));
         
+        // Get settings for language
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+        
         model.addAttribute("maneuvers", sequences);
         model.addAttribute("numOfManeuvers", sequences.size());
         model.addAttribute("pilot", pilot);
@@ -312,6 +316,7 @@ public class RootController {
         model.addAttribute("dirletter", (dirflip == true ? "C" : "B"));
         logger.debug("Sequence data:");
         logger.debug(new Gson().toJson(sequences));
+        
         return "judge";
     }
 

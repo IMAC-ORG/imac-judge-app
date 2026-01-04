@@ -138,6 +138,7 @@
 <!--  Scripts-->
 <script src="materialize/js/materialize.js"></script>
 <script>
+    var language = '[[${settings.language}]]';
     var windowHeight = window.innerHeight - 35; // reduce some for banner
 
     // Battery check function - called when modal opens
@@ -259,7 +260,7 @@
             instructionsAudio.pause();
             instructionsAudio.currentTime = 0;
         } else {
-            instructionsAudio = new Audio('/man/en/audio/instructions.mp3');
+            instructionsAudio = new Audio('/man/' + language + '/audio/instructions.mp3');
             instructionsAudio.play();
         }
     }

@@ -88,8 +88,8 @@
                     <div class="col s8">
                     <br>
                     <img id="my-svg" style="width:60vw; height:70vh;" class="figure-wrapper" alt="Figure Image"
-                    th:src="@{/man/en/{sequenceFolderPath}/{index}{dirletter}.svg(sequenceFolderPath=${sequenceFolderPath}, index=${iterStat.index + 1}, dirletter=${dirletter})}"
-                    onerror="this.onerror=null; this.src='/man/en/default/FAIL/fig_missing.svg';">
+                    th:src="@{/man/{language}/{sequenceFolderPath}/{index}{dirletter}.svg(language=${settings.language}, sequenceFolderPath=${sequenceFolderPath}, index=${iterStat.index + 1}, dirletter=${dirletter})}"
+                    th:attr="onerror=this.onerror=null; this.src='/man/' + '[[${settings.language}]]' + '/default/FAIL/fig_missing.svg';">
                     </div>
                 </div>
             </div>
@@ -145,8 +145,7 @@
         const sequenceJson = JSON.parse( /*[[${sequencesjson}]]*/);
         var audio = new Audio();
 
-        //TODO: read language from settings
-        const sequencesBasePath = "/man/en";
+        const sequencesBasePath = "/man/" + /*[[${settings.language}]]*/ ;
         const sequenceFolderPath = /*[[${sequenceFolderPath}]]*/ ;
         const audioBasePath = sequencesBasePath + "/audio";  // Score audio, Now Judging audio
         const sequenceType = /*[[${sequenceType}]]*/ ;  // Kept for backward compatibility
