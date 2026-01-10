@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
@@ -42,6 +43,9 @@ public class SequenceFolderResolver {
 
     @Autowired
     private ScheduleService scheduleService;
+
+    @Autowired
+    private SettingService settingService;
 
     /**
      * Resolves the folder path for figures using 5-case logic.
@@ -247,7 +251,7 @@ public class SequenceFolderResolver {
 
     /**
      * Derive folder name for KNOWN sequences using config year.
-     * Example: SPORTSMAN + std -> SPK_26S (where 26 comes from season.cfg)
+     * Example: SPORTSMAN + std -> SPK_26S (where 26 comes from settings)
      *
      * @param pilotClass e.g., "SPORTSMAN"
      * @param variantOrSeqType "S", "A", "std", or "alt"
@@ -260,9 +264,15 @@ public class SequenceFolderResolver {
             return null;
         }
 
-        String year = loadSeasonYear();
+        String year;
+        try {
+            year = String.valueOf(settingService.getSettings().getSeasonYear());
+        } catch (IOException e) {
+            logger.warn("Could not load season year from settings", e);
+            return null;
+        }
         if (year == null) {
-            logger.warn("Could not load season year from config");
+            logger.warn("Season year not a proper value in settings");
             return null;
         }
 
@@ -292,29 +302,6 @@ public class SequenceFolderResolver {
         }
         // Fallback to sequenceType
         return "alt".equalsIgnoreCase(sequenceType) ? "A" : "S";
-    }
-
-    /**
-     * Load season year from config file.
-     * @return year string e.g., "26" or null if not found
-     */
-    public String loadSeasonYear() {
-        try {
-            File configFile = new File(FIGURES_PATH + "/default/season.cfg");
-            if (!configFile.exists()) {
-                logger.debug("Season config file not found: {}", configFile.getAbsolutePath());
-                return null;
-            }
-
-            Properties props = new Properties();
-            try (FileInputStream fis = new FileInputStream(configFile)) {
-                props.load(fis);
-            }
-            return props.getProperty("season.year");
-        } catch (Exception e) {
-            logger.error("Error loading season config", e);
-            return null;
-        }
     }
 
     /**
