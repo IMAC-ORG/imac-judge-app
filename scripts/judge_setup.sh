@@ -214,6 +214,9 @@ echo -e "${Blue}Score IP:${NC}"
 read scoreip
 echo -e "${Blue}Score Port${NC}"
 read scoreport
+echo -e "${Blue}Enter two digit year${NC}"
+read seasonyear
+
 
 echo -e "${Yellow}Creating settings.json file..."
 
@@ -225,7 +228,7 @@ echo '	"score_http_port":'$scoreport','	| sudo tee -a /boot/settings.json	> /dev
 echo '	"language":"en",'					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 echo '	"score_poll_timeout":2,'			| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 echo '	"score_timeout":10,'				| sudo tee -a /boot/settings.json	> /dev/null 2>&1
-echo '	"seasonYear":26'					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"seasonYear":'$seasonyear''			| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 echo '}'									| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 
 echo -e "${Yellow}Configuring various settings..."
