@@ -222,7 +222,10 @@ echo '	"judge_id":'$judgeid','				| sudo tee -a /boot/settings.json	> /dev/null 
 echo '	"line_number":'$flightline','		| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 echo '	"score_host":"'$scoreip'",'			| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 echo '	"score_http_port":'$scoreport','	| sudo tee -a /boot/settings.json	> /dev/null 2>&1
-echo '	"language":"en"'					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"language":"en",'					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"score_poll_timeout":2,'			| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"score_timeout":10,'				| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"seasonYear":26'					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 echo '}'									| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 
 echo -e "${Yellow}Configuring various settings..."
