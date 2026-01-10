@@ -152,18 +152,6 @@
 							</target>
 						</configuration>
 					</execution>
-					<execution>
-						<id>copy-target-jar-to-dockercompose-build</id>
-						<phase>package</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<target>
-								<copy file="target/${project.build.finalName}.jar" tofile="test/docker/build/app.jar"/>
-							</target>
-						</configuration>
-					</execution>
 				</executions>
 			</plugin>
 		</plugins>
