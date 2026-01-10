@@ -74,7 +74,7 @@ public class SequenceValidationService {
      */
     private void checkPilotClassCoverage(ValidationResult result) {
         try {
-            List<Pilot> pilots = pilotService.getPilots();
+            List<Pilot> pilots = pilotService.getPilots(true);
             if (pilots == null || pilots.isEmpty()) {
                 logger.debug("No pilots loaded - skipping pilot class coverage check");
                 return;

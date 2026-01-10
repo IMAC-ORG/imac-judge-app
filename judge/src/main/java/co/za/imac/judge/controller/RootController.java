@@ -113,7 +113,7 @@ public class RootController {
             return "redirect:/newcomp";
         }
 
-        List<Pilot> pilots = pilotService.getPilots();
+        List<Pilot> pilots = pilotService.getPilots(true);
 
         //now get ordered list of classes for the filter dialog
         Set<String> pilot_classes = new LinkedHashSet<>();
@@ -172,7 +172,7 @@ public class RootController {
          */
         // Check first if we have a valid comp
         logger.info("Is there a comp? : " + compService.isCurrentComp());
-        List<Pilot> pilots = pilotService.getPilots();
+        List<Pilot> pilots = pilotService.getPilots(true);
 
         if(classFilter != null && !classFilter.isEmpty() && !classFilter.equals("global")){
             if (classFilter.equalsIgnoreCase("FREESTYLE")) {
@@ -301,7 +301,7 @@ public class RootController {
         // Get settings for language
         SettingDTO settings = settingService.getSettings();
         model.addAttribute("settings", settings);
-        
+
         model.addAttribute("maneuvers", sequences);
         model.addAttribute("numOfManeuvers", sequences.size());
         model.addAttribute("pilot", pilot);

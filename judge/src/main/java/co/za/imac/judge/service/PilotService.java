@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -76,6 +77,10 @@ public class PilotService {
     }
 
     public List<Pilot> getPilots() throws ParserConfigurationException, SAXException, IOException {
+        return getPilots(false);
+    }
+
+    public List<Pilot> getPilots(boolean activeOnly) throws ParserConfigurationException, SAXException, IOException {
         if(!isPilots()){
             getPilotsFileFromScore();
         }
@@ -140,6 +145,14 @@ public class PilotService {
                 logger.debug(new Gson().toJson(pilot));
             }
         }
+        
+        // Filter to active pilots if requested
+        if (activeOnly) {
+            pilots = pilots.stream()
+                    .filter(p -> Boolean.TRUE.equals(p.getActive()))
+                    .collect(java.util.stream.Collectors.toList());
+        }
+        
         return pilots;
     }
 
