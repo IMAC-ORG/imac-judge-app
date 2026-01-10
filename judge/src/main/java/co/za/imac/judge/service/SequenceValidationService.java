@@ -51,10 +51,7 @@ public class SequenceValidationService {
             // Check 3: Round range conflicts
             checkRoundRangeConflicts(result);
 
-            // Check 4: Unknown sequences without short_desc
-            checkUnknownSequences(result);
-
-            // Check 5: Round coverage gaps
+            // Check 4: Round coverage gaps
             checkRoundCoverageGaps(result);
 
         } catch (Exception e) {
@@ -161,7 +158,8 @@ public class SequenceValidationService {
                     result.addError(
                             context,
                             "No short_desc defined - cannot resolve folder",
-                            "Rounds " + schedule.getMin_round() + "-" + schedule.getMax_round()
+                            "Rounds " + schedule.getMin_round() + "-" + schedule.getMax_round()+
+                                    " will use FAIL folder if not fixed"
                     );
                 } else {
                     result.addError(
@@ -239,33 +237,7 @@ public class SequenceValidationService {
     }
 
     /**
-     * Check 4: Unknown sequences without short_desc.
-     * UNKNOWN sequences cannot be derived and must have short_desc.
-     */
-    private void checkUnknownSequences(ValidationResult result) {
-        Map<Integer, ScheduleDTO> schedules = scheduleService.getSchedules();
-        if (schedules == null || schedules.isEmpty()) {
-            return;
-        }
-
-        for (ScheduleDTO schedule : schedules.values()) {
-            if ("UNKNOWN".equalsIgnoreCase(schedule.getType())) {
-                String shortDesc = schedule.getShort_desc();
-                if (shortDesc == null || shortDesc.trim().isEmpty()) {
-                    result.addError(
-                            schedule.getComp_class() + " UNKNOWN",
-                            "No short_desc - cannot resolve folder",
-                            "Rounds " + schedule.getMin_round() + "-" + schedule.getMax_round() +
-                                    " will use FAIL folder if not fixed"
-                    );
-                }
-            }
-        }
-    }
-
-
-    /**
-     * Check 5: Round coverage gaps.
+     * Check 4: Round coverage gaps.
      * Warns when there are gaps in round coverage (e.g., 1-3 and 5-6 defined, round 4 uncovered).
      */
     private void checkRoundCoverageGaps(ValidationResult result) {
