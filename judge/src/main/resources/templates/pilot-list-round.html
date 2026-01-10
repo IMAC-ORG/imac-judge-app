@@ -50,8 +50,8 @@
         <h1 th:text="${pilot.name}" class="pilot_name">First Panel</h1>
         <h2 th:text="${pilot.getClassString()}" class="pilot_class">First Panel</h2>
 
-        <!-- Active pilot: show rounds and judge button -->
-        <div th:if="${pilotScores[pilot.primary_id].isActive}" style="margin-top: 20px;">
+        <!-- Show rounds and judge button -->
+        <div style="margin-top: 20px;">
             <h5 style="font-weight: 600; margin-bottom: 15px; text-align: center;">Next Round Number:</h5>
 
             <!-- Three cards for round types -->
@@ -91,15 +91,8 @@
             </div>
         </div>
 
-        <!-- Completed pilot -->
-        <div th:unless="${pilotScores[pilot.primary_id].isActive}" style="margin-top: 20px;">
-            <h2 class="pilot_round">All Rounds Completed!</h2>
-            <a class="pilot_round"><i class="material-icons center black-text">done</i></a>
-        </div>
         <!-- Modal Structure -->
-        <div
-        th:if="${pilotScores[pilot.primary_id].isActive}"
-        th:id="'modal'+ ${pilot.index}" class="modal">
+        <div th:id="'modal'+ ${pilot.index}" class="modal">
         <div th:replace="~{judge_start_select::modal_select}"></div>
 
         </div>
