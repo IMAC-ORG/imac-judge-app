@@ -49,13 +49,21 @@ public class SettingService {
         String compdtoJson = new Gson().toJson(settingDTO);
         byte[] strToBytes = compdtoJson.getBytes();
 
-        //need to use temporary file since target file is owned by root (in boot folder)
-        FileOutputStream outputStream = new FileOutputStream(SETTINGS_FILE_NAME.replace(".json", "_tmp.json"));
-        outputStream.write(strToBytes);
-        outputStream.close();
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("windows")) {
+            // On Windows (development), write directly to the settings file
+            FileOutputStream outputStream = new FileOutputStream(SETTINGS_FILE_NAME);
+            outputStream.write(strToBytes);
+            outputStream.close();
+        } else {
+            // On Linux (Pi device), use temporary file since target file is owned by root
+            FileOutputStream outputStream = new FileOutputStream(SETTINGS_FILE_NAME.replace(".json", "_tmp.json"));
+            outputStream.write(strToBytes);
+            outputStream.close();
 
-        //now replace the original file with the temporary file
-        moveTemporarySettingsFile();
+            // Now replace the original file with the temporary file
+            moveTemporarySettingsFile();
+        }
 
         // get settings file
         return settingDTO;

@@ -15,6 +15,7 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
+      margin-top: 20px;
       margin-bottom: 8px;
     }
     .heading {
@@ -102,7 +103,6 @@
 </head>
 
 <body class="orange lighten-4">
-  <div th:replace="~{banner::line_judge}"></div>
   <div th:replace="~{banner::status}"></div>
 
   <div class="section no-pad-bot orange lighten-4" id="index-banner">
@@ -388,8 +388,8 @@
         dataType: "json",
         success: function (currentSettings) {
           // Step 2: Merge new values into current settings
-          currentSettings.line_number = currentLineNumber;
-          currentSettings.judge_id = currentJudgeId;
+          currentSettings.line_number = $('#lineNumber').text();
+          currentSettings.judge_id = $('#judgeNumber').text();
 
           // Step 3: Save merged settings
           $.ajax({
