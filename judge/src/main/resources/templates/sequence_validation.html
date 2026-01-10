@@ -128,8 +128,6 @@
 </head>
 
 <body class="yellow">
-  <div th:replace="~{banner::line_judge}"></div>
-
   <div class="section no-pad-bot yellow" id="index-banner">
     <div class="container yellow black-text">
 
@@ -210,8 +208,6 @@
             <ul>
               <li>ERRORS indicate missing AeroJudge sequence folders or invalid configurations in Score</li>
               <li>WARNINGS indicate non-critical issues that will use fallback behavior</li>
-              <li></li>
-              <li>"Continue Anyway" will use the GENERIC FIGURES AND AUDIO</li>
             </ul>
           </div>
         </div>
@@ -252,7 +248,7 @@
           </button>
         </form>
         <form action="/validate-sequences/continue" method="post">
-          <button type="submit" class="waves-effect waves-light btn-large orange darken-2">
+          <button type="submit" class="waves-effect waves-light btn-large orange darken-2" style="width: 250px;">
             <i class="material-icons left">arrow_forward</i>
             Continue Anyway
           </button>
