@@ -120,16 +120,9 @@ public class CompService {
 
         if (compDTO.getComp_id() == 0)
             enrichCompWithCompInfoFromScore(compDTO);  // Get the comp name and event ID from score! if we can...
-        File newFile = new File(COMP_FILE_NAME);
-        newFile.createNewFile();
-        String compdtoJson = new Gson().toJson(compDTO);
-        byte[] strToBytes = compdtoJson.getBytes();
-        FileOutputStream outputStream = new FileOutputStream(COMP_FILE_NAME);
-        outputStream.write(strToBytes);
-        outputStream.close();
 
+        writeCompToFile(compDTO);
         return true;
-
     }
 
     /**
@@ -142,6 +135,15 @@ public class CompService {
             return false;
         }
 
+        writeCompToFile(compDTO);
+        logger.info("Saved local comp settings to file");
+        return true;
+    }
+
+    /**
+     * Private method to write CompDTO to file.
+     */
+    private void writeCompToFile(CompDTO compDTO) throws IOException {
         File newFile = new File(COMP_FILE_NAME);
         newFile.createNewFile();
         String compdtoJson = new Gson().toJson(compDTO);
@@ -149,9 +151,6 @@ public class CompService {
         FileOutputStream outputStream = new FileOutputStream(COMP_FILE_NAME);
         outputStream.write(strToBytes);
         outputStream.close();
-
-        logger.info("Saved local comp settings to file");
-        return true;
     }
 
     public CompDTO getComp() {
