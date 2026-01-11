@@ -69,8 +69,11 @@ public class SequenceValidationService {
                 .add("Validation failed: " + e.getMessage());
         }
 
-        // Build grouped validation result
-        ValidationResult result = buildGroupedResult(errorsByContext, warningsByContext);
+        // Get classes with pilots to filter out irrelevant issues
+        Set<String> classesWithPilots = getClassesWithPilots();
+
+        // Build grouped validation result, filtering out issues for empty classes
+        ValidationResult result = buildGroupedResult(errorsByContext, warningsByContext, classesWithPilots);
 
         logger.info("Validation complete: {} errors, {} warnings across {} contexts",
                 result.getTotalErrorCount(), result.getTotalWarningCount(), result.getIssueCount());
@@ -341,12 +344,34 @@ public class SequenceValidationService {
     }
 
     /**
+     * Get set of competition classes that have pilots registered.
+     * Reuses logic from checkPilotClassCoverage.
+     */
+    private Set<String> getClassesWithPilots() {
+        try {
+            List<Pilot> pilots = pilotService.getPilots(true);
+            if (pilots == null || pilots.isEmpty()) {
+                return new HashSet<>();
+            }
+            return pilots.stream()
+                    .filter(p -> p.getClassString() != null)
+                    .map(p -> p.getClassString().toUpperCase())
+                    .collect(Collectors.toSet());
+        } catch (Exception e) {
+            logger.error("Could not get pilot classes", e);
+            return new HashSet<>();
+        }
+    }
+
+    /**
      * Build grouped validation result from collected issues.
      * Creates one ValidationIssue per context, combining all errors and warnings.
+     * Filters out issues for classes with no pilots.
      * Sorts by competition class order.
      */
     private ValidationResult buildGroupedResult(Map<String, List<String>> errorsByContext,
-                                                 Map<String, List<String>> warningsByContext) {
+                                                 Map<String, List<String>> warningsByContext,
+                                                 Set<String> classesWithPilots) {
         ValidationResult result = new ValidationResult();
 
         // Combine all contexts
@@ -387,6 +412,18 @@ public class SequenceValidationService {
 
         // Create one ValidationIssue per context with all messages combined
         for (String context : sortedContexts) {
+            // Extract class from context to check if it has pilots
+            String contextClass = extractClass(context);
+
+            // Skip issues for classes with no pilots (except system-level issues)
+            if (!classesWithPilots.contains(contextClass) &&
+                !"FREESTYLE".equals(contextClass) &&  // Always show FREESTYLE issues
+                !"SYSTEM".equals(context) &&
+                !"SEQUENCES".equals(context)) {
+                // Silently skip - no pilots in this class
+                continue;
+            }
+
             ValidationIssue issue = new ValidationIssue(context);
 
             List<String> errors = errorsByContext.get(context);
