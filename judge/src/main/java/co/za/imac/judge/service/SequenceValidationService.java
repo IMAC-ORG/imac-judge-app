@@ -3,6 +3,7 @@ package co.za.imac.judge.service;
 import co.za.imac.judge.dto.Pilot;
 import co.za.imac.judge.dto.ScheduleDTO;
 import co.za.imac.judge.dto.ValidationResult;
+import co.za.imac.judge.dto.ValidationIssue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,35 +34,46 @@ public class SequenceValidationService {
     @Autowired
     private CompService compService;
 
+    // Competition class ordering (from RootController)
+    private static final List<String> CLASS_ORDER = Arrays.asList(
+        "BASIC", "SPORTSMAN", "INTERMEDIATE", "ADVANCED", "UNLIMITED", "INVITATIONAL"
+    );
+
     /**
      * Validates all sequence configurations after sync.
      * @return ValidationResult with errors and warnings
      */
     public ValidationResult validateAll() {
         logger.info("Starting sequence validation...");
-        ValidationResult result = new ValidationResult();
+
+        // Collect issues in temporary maps for grouping
+        Map<String, List<String>> errorsByContext = new HashMap<>();
+        Map<String, List<String>> warningsByContext = new HashMap<>();
 
         try {
             // Check 1: Pilot classes without sequences
-            checkPilotClassCoverage(result);
+            checkPilotClassCoverage(errorsByContext, warningsByContext);
 
             // Check 2: Folder resolution for each sequence
-            checkFolderResolution(result);
+            checkFolderResolution(errorsByContext, warningsByContext);
 
             // Check 3: Round range conflicts
-            checkRoundRangeConflicts(result);
+            checkRoundRangeConflicts(errorsByContext, warningsByContext);
 
             // Check 4: Round coverage gaps
-            checkRoundCoverageGaps(result);
+            checkRoundCoverageGaps(errorsByContext, warningsByContext);
 
         } catch (Exception e) {
             logger.error("Error during validation", e);
-            result.addError("SYSTEM", "Validation failed: " + e.getMessage(),
-                    "Please check logs for details");
+            errorsByContext.computeIfAbsent("SYSTEM", k -> new ArrayList<>())
+                .add("Validation failed: " + e.getMessage());
         }
 
-        logger.info("Validation complete: {} errors, {} warnings",
-                result.getErrors().size(), result.getWarnings().size());
+        // Build grouped validation result
+        ValidationResult result = buildGroupedResult(errorsByContext, warningsByContext);
+
+        logger.info("Validation complete: {} errors, {} warnings across {} contexts",
+                result.getTotalErrorCount(), result.getTotalWarningCount(), result.getIssueCount());
         return result;
     }
 
@@ -69,54 +81,56 @@ public class SequenceValidationService {
      * Check 1: Pilot classes without sequences.
      * Ensures every pilot class has at least one sequence defined.
      */
-    private void checkPilotClassCoverage(ValidationResult result) {
+    private void checkPilotClassCoverage(Map<String, List<String>> errorsByContext,
+                                          Map<String, List<String>> warningsByContext) {
+        List<Pilot> pilots;
         try {
-            List<Pilot> pilots = pilotService.getPilots(true);
-            if (pilots == null || pilots.isEmpty()) {
-                logger.debug("No pilots loaded - skipping pilot class coverage check");
-                return;
-            }
-
-            // Get unique pilot classes
-            Set<String> pilotClasses = pilots.stream()
-                    .filter(p -> p.getClassString() != null)
-                    .map(p -> p.getClassString().toUpperCase())
-                    .collect(Collectors.toSet());
-
-            // Get classes from schedules
-            Map<Integer, ScheduleDTO> schedules = scheduleService.getSchedules();
-            if (schedules == null || schedules.isEmpty()) {
-                result.addError("SEQUENCES", "No sequences loaded",
-                        "The sequences.dat file may be missing or empty");
-                return;
-            }
-
-            Set<String> sequenceClasses = schedules.values().stream()
-                    .filter(s -> s.getComp_class() != null)
-                    .map(s -> s.getComp_class().toUpperCase())
-                    .collect(Collectors.toSet());
-
-            // Check each pilot class has sequences
-            for (String pilotClass : pilotClasses) {
-                if (!sequenceClasses.contains(pilotClass) &&
-                    !"FREESTYLE".equalsIgnoreCase(pilotClass)) {
-
-                    List<String> affectedPilots = pilots.stream()
-                            .filter(p -> p.getClassString() != null &&
-                                    p.getClassString().equalsIgnoreCase(pilotClass))
-                            .map(Pilot::getName)
-                            .collect(Collectors.toList());
-
-                    result.addError(
-                            pilotClass + " class",
-                            affectedPilots.size() + " pilot(s) registered but NO SEQUENCES defined",
-                            "Affected pilots: " + String.join(", ", affectedPilots)
-                    );
-                }
-            }
+            pilots = pilotService.getPilots(true);
         } catch (Exception e) {
-            logger.error("Error checking pilot class coverage", e);
-            result.addWarning("SYSTEM", "Could not check pilot class coverage", e.getMessage());
+            // If we can't read pilots, skip this check silently - the error will be apparent elsewhere
+            logger.error("Could not read pilots for validation check", e);
+            return;
+        }
+
+        if (pilots == null || pilots.isEmpty()) {
+            logger.debug("No pilots loaded - skipping pilot class coverage check");
+            return;
+        }
+
+        // Get unique pilot classes
+        Set<String> pilotClasses = pilots.stream()
+                .filter(p -> p.getClassString() != null)
+                .map(p -> p.getClassString().toUpperCase())
+                .collect(Collectors.toSet());
+
+        // Get classes from schedules
+        Map<Integer, ScheduleDTO> schedules = scheduleService.getSchedules();
+        if (schedules == null || schedules.isEmpty()) {
+            errorsByContext.computeIfAbsent("SEQUENCES", k -> new ArrayList<>())
+                .add("No sequences loaded - The sequences.dat file may be missing or empty");
+            return;
+        }
+
+        Set<String> sequenceClasses = schedules.values().stream()
+                .filter(s -> s.getComp_class() != null)
+                .map(s -> s.getComp_class().toUpperCase())
+                .collect(Collectors.toSet());
+
+        // Check each pilot class has sequences
+        for (String pilotClass : pilotClasses) {
+            if (!sequenceClasses.contains(pilotClass) &&
+                !"FREESTYLE".equalsIgnoreCase(pilotClass)) {
+
+                // Count affected pilots (but don't list names)
+                long affectedCount = pilots.stream()
+                        .filter(p -> p.getClassString() != null &&
+                                p.getClassString().equalsIgnoreCase(pilotClass))
+                        .count();
+
+                // Use normalized context (just class name for class-level issues)
+                errorsByContext.computeIfAbsent(pilotClass, k -> new ArrayList<>())
+                    .add(affectedCount + " pilot(s) registered but NO SEQUENCES defined");
+            }
         }
     }
 
@@ -124,7 +138,8 @@ public class SequenceValidationService {
      * Check 2: Folder resolution for each sequence.
      * Ensures each sequence's folder can be resolved.
      */
-    private void checkFolderResolution(ValidationResult result) {
+    private void checkFolderResolution(Map<String, List<String>> errorsByContext,
+                                        Map<String, List<String>> warningsByContext) {
         Map<Integer, ScheduleDTO> schedules = scheduleService.getSchedules();
         if (schedules == null || schedules.isEmpty()) {
             return;
@@ -152,21 +167,17 @@ public class SequenceValidationService {
 
             if (SequenceFolderResolver.FAIL_FOLDER.equals(resolved)) {
                 String shortDesc = schedule.getShort_desc();
-                String context = schedule.getComp_class() + " " + schedule.getType();
+                // Normalize context - use space separator
+                String context = normalizeContext(schedule.getComp_class(), schedule.getType());
+
+                String roundInfo = " - Rounds " + schedule.getMin_round() + "-" + schedule.getMax_round();
 
                 if (shortDesc == null || shortDesc.trim().isEmpty()) {
-                    result.addError(
-                            context,
-                            "No short_desc defined - cannot resolve folder",
-                            "Rounds " + schedule.getMin_round() + "-" + schedule.getMax_round()+
-                                    " will use FAIL folder if not fixed"
-                    );
+                    errorsByContext.computeIfAbsent(context, k -> new ArrayList<>())
+                        .add("No short_desc defined" + roundInfo + " - Will use defaults, No audio");
                 } else {
-                    result.addError(
-                            context,
-                            "Folder not found: " + shortDesc,
-                            "Rounds " + schedule.getMin_round() + "-" + schedule.getMax_round()
-                    );
+                    errorsByContext.computeIfAbsent(context, k -> new ArrayList<>())
+                        .add("Folder not found: " + shortDesc + roundInfo);
                 }
             }
         }
@@ -178,7 +189,8 @@ public class SequenceValidationService {
      * - Same short_desc = WARNING (redundant but harmless)
      * - Different/no short_desc = ERROR (ambiguous, will use FAIL folder)
      */
-    private void checkRoundRangeConflicts(ValidationResult result) {
+    private void checkRoundRangeConflicts(Map<String, List<String>> errorsByContext,
+                                           Map<String, List<String>> warningsByContext) {
         Map<String, List<ScheduleDTO>> byClassType = groupByClassType();
 
         for (Map.Entry<String, List<ScheduleDTO>> entry : byClassType.entrySet()) {
@@ -188,6 +200,9 @@ public class SequenceValidationService {
             if (schedules.size() < 2) {
                 continue; // No conflicts possible with single entry
             }
+
+            // Normalize the context key (convert colon to space)
+            String normalizedKey = key.replace(":", " ");
 
             for (int i = 0; i < schedules.size(); i++) {
                 for (int j = i + 1; j < schedules.size(); j++) {
@@ -215,20 +230,12 @@ public class SequenceValidationService {
 
                         if (sameShortDesc) {
                             // Same short_desc = WARNING (redundant but works)
-                            result.addWarning(
-                                    key,
-                                    conflictType + " sequences identified (" + roundInfo + ")",
-                                    "Both use: " + aDesc
-                            );
+                            warningsByContext.computeIfAbsent(normalizedKey, k -> new ArrayList<>())
+                                .add(conflictType + " sequences (" + roundInfo + ")");
                         } else {
                             // Different or missing short_desc = ERROR (ambiguous)
-                            String foundDesc = (aDesc != null ? aDesc : "(blank)") +
-                                    " and " + (bDesc != null ? bDesc : "(blank)");
-                            result.addError(
-                                    key,
-                                    conflictType + " sequences - unable to resolve (" + roundInfo + ")",
-                                    "Found: " + foundDesc + " - Using FAIL folder"
-                            );
+                            errorsByContext.computeIfAbsent(normalizedKey, k -> new ArrayList<>())
+                                .add(conflictType + " sequences (" + roundInfo + ") - Will use defaults, No audio");
                         }
                     }
                 }
@@ -240,7 +247,8 @@ public class SequenceValidationService {
      * Check 4: Round coverage gaps.
      * Warns when there are gaps in round coverage (e.g., 1-3 and 5-6 defined, round 4 uncovered).
      */
-    private void checkRoundCoverageGaps(ValidationResult result) {
+    private void checkRoundCoverageGaps(Map<String, List<String>> errorsByContext,
+                                         Map<String, List<String>> warningsByContext) {
         Map<String, List<ScheduleDTO>> byClassType = groupByClassType();
 
         for (Map.Entry<String, List<ScheduleDTO>> entry : byClassType.entrySet()) {
@@ -248,6 +256,9 @@ public class SequenceValidationService {
             List<ScheduleDTO> schedules = entry.getValue();
 
             if (schedules.isEmpty()) continue;
+
+            // Normalize the context key (convert colon to space)
+            String normalizedKey = key.replace(":", " ");
 
             // Sort by min_round
             schedules.sort((a, b) -> {
@@ -269,11 +280,8 @@ public class SequenceValidationService {
                     int gapStart = currentMax + 1;
                     int gapEnd = nextMin - 1;
                     String gapRange = gapStart == gapEnd ? "round " + gapStart : "rounds " + gapStart + "-" + gapEnd;
-                    result.addWarning(
-                            key,
-                            "Round coverage gap: " + gapRange + " undefined",
-                            "Will use FAIL folder for undefined rounds"
-                    );
+                    warningsByContext.computeIfAbsent(normalizedKey, k -> new ArrayList<>())
+                        .add("Round coverage gap: " + gapRange + " undefined");
                 }
             }
         }
@@ -315,5 +323,107 @@ public class SequenceValidationService {
         Integer bMax = b.getMax_round() != null ? b.getMax_round() : Integer.MAX_VALUE;
 
         return aMin <= bMax && bMin <= aMax;
+    }
+
+    /**
+     * Normalize context string to use consistent format.
+     * @param compClass the competition class (may be null for FREESTYLE)
+     * @param type the sequence type
+     * @return normalized context string using space separator
+     */
+    private String normalizeContext(String compClass, String type) {
+        if ("FREESTYLE".equalsIgnoreCase(type)) {
+            return "FREESTYLE";
+        }
+        String classStr = compClass != null ? compClass.toUpperCase() : "UNKNOWN";
+        String typeStr = type != null ? type.toUpperCase() : "UNKNOWN";
+        return classStr + " " + typeStr;
+    }
+
+    /**
+     * Build grouped validation result from collected issues.
+     * Creates one ValidationIssue per context, combining all errors and warnings.
+     * Sorts by competition class order.
+     */
+    private ValidationResult buildGroupedResult(Map<String, List<String>> errorsByContext,
+                                                 Map<String, List<String>> warningsByContext) {
+        ValidationResult result = new ValidationResult();
+
+        // Combine all contexts
+        Set<String> allContexts = new HashSet<>();
+        allContexts.addAll(errorsByContext.keySet());
+        allContexts.addAll(warningsByContext.keySet());
+
+        // Sort contexts by competition class order
+        List<String> sortedContexts = new ArrayList<>(allContexts);
+        sortedContexts.sort((a, b) -> {
+            // Extract class from context
+            String classA = extractClass(a);
+            String classB = extractClass(b);
+
+            // Special handling for FREESTYLE - always last
+            if ("FREESTYLE".equals(a)) return 1;
+            if ("FREESTYLE".equals(b)) return -1;
+
+            // Special handling for SYSTEM and SEQUENCES - always first
+            if ("SYSTEM".equals(a) || "SEQUENCES".equals(a)) return -1;
+            if ("SYSTEM".equals(b) || "SEQUENCES".equals(b)) return 1;
+
+            // Get order indices
+            int orderA = CLASS_ORDER.indexOf(classA);
+            int orderB = CLASS_ORDER.indexOf(classB);
+
+            // If not in order list, put at end (before FREESTYLE)
+            if (orderA == -1) orderA = CLASS_ORDER.size();
+            if (orderB == -1) orderB = CLASS_ORDER.size();
+
+            // Compare by order
+            int classCompare = Integer.compare(orderA, orderB);
+            if (classCompare != 0) return classCompare;
+
+            // Within same class, sort by type (KNOWN before UNKNOWN)
+            return a.compareTo(b);
+        });
+
+        // Create one ValidationIssue per context with all messages combined
+        for (String context : sortedContexts) {
+            ValidationIssue issue = new ValidationIssue(context);
+
+            List<String> errors = errorsByContext.get(context);
+            List<String> warnings = warningsByContext.get(context);
+
+            // Add all error messages to this issue
+            if (errors != null) {
+                for (String error : errors) {
+                    issue.addError(error);
+                }
+            }
+
+            // Add all warning messages to this issue
+            if (warnings != null) {
+                for (String warning : warnings) {
+                    issue.addWarning(warning);
+                }
+            }
+
+            // Add the combined issue to the result
+            result.addIssue(issue);
+        }
+
+        return result;
+    }
+
+    /**
+     * Extract competition class from context string.
+     */
+    private String extractClass(String context) {
+        if (context == null) return "";
+        if ("FREESTYLE".equals(context)) return "FREESTYLE";
+        if ("SYSTEM".equals(context)) return "SYSTEM";
+        if ("SEQUENCES".equals(context)) return "SEQUENCES";
+
+        // Context is either "CLASS" or "CLASS TYPE"
+        String[] parts = context.split(" ");
+        return parts[0];
     }
 }

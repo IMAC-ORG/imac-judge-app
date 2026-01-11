@@ -54,11 +54,11 @@ public class ValidationController {
         ValidationResult result = validationService.validateAll();
 
         model.addAttribute("settings", settingService.getSettings());
-        model.addAttribute("errors", result.getErrors());
-        model.addAttribute("warnings", result.getWarnings());
+        model.addAttribute("issues", result.getIssues());
         model.addAttribute("hasErrors", result.hasErrors());
         model.addAttribute("hasWarnings", result.hasWarnings());
-        model.addAttribute("totalIssues", result.getTotalIssueCount());
+        model.addAttribute("errorCount", result.getTotalErrorCount());
+        model.addAttribute("warningCount", result.getTotalWarningCount());
         model.addAttribute("isSuccess", !result.hasErrors() && !result.hasWarnings());
 
         if (!result.hasErrors() && !result.hasWarnings()) {

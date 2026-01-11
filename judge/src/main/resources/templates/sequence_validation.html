@@ -169,34 +169,32 @@
         </div>
       </div>
 
-      <!-- Errors Section -->
-      <div th:if="${hasErrors}" class="row">
+      <!-- Combined Issues Section -->
+      <div th:unless="${isSuccess}" class="row">
         <div class="col s12">
-          <div class="section-header error-header">
-            <i class="material-icons">error</i>
-            ERRORS (must fix)
+          <!-- Single header showing counts -->
+          <div class="section-header"
+               th:classappend="${hasErrors ? 'error-header' : 'warning-header'}">
+            <i class="material-icons" th:text="${hasErrors ? 'error' : 'warning'}">error</i>
+            <span th:if="${hasErrors and hasWarnings}"
+                  th:text="'Found ' + ${errorCount} + ' error(s) and ' + ${warningCount} + ' warning(s)'">
+            </span>
+            <span th:if="${hasErrors and !hasWarnings}"
+                  th:text="'Found ' + ${errorCount} + ' error(s)'">
+            </span>
+            <span th:if="${!hasErrors and hasWarnings}"
+                  th:text="'Found ' + ${warningCount} + ' warning(s)'">
+            </span>
           </div>
-          <div th:each="error : ${errors}" class="issue-card error-card">
-            <div class="issue-context" th:text="${error.context}">SPORTSMAN KNOWN</div>
-            <div class="issue-message" th:text="${error.message}">Folder not found: SPK_99X</div>
-            <div th:if="${error.detail != null and !error.detail.isEmpty()}"
-                 class="issue-detail" th:text="${error.detail}">Details here</div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Warnings Section -->
-      <div th:if="${hasWarnings}" class="row">
-        <div class="col s12">
-          <div class="section-header warning-header">
-            <i class="material-icons">warning</i>
-            WARNINGS (review recommended)
-          </div>
-          <div th:each="warning : ${warnings}" class="issue-card warning-card">
-            <div class="issue-context" th:text="${warning.context}">SPORTSMAN KNOWN</div>
-            <div class="issue-message" th:text="${warning.message}">Overlapping round ranges</div>
-            <div th:if="${warning.detail != null and !warning.detail.isEmpty()}"
-                 class="issue-detail" th:text="${warning.detail}">Details here</div>
+          <!-- ONE tile per context, color determined by severity -->
+          <div th:each="issue : ${issues}"
+               class="issue-card"
+               th:classappend="${issue.cssClass}">
+            <div class="issue-context" th:text="${issue.context}">SPORTSMAN KNOWN</div>
+            <div class="issue-message"
+                 style="white-space: pre-line;"
+                 th:text="${issue.combinedMessage}">Messages here</div>
           </div>
         </div>
       </div>

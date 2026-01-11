@@ -5,30 +5,42 @@ import java.util.List;
 
 /**
  * Contains the results of sequence configuration validation.
- * Holds separate lists for errors (must fix) and warnings (review recommended).
+ * Holds a single list of ValidationIssues, where each issue represents all problems
+ * (both errors and warnings) for a specific context.
  */
 public class ValidationResult {
 
-    private List<ValidationIssue> errors = new ArrayList<>();
-    private List<ValidationIssue> warnings = new ArrayList<>();
+    private List<ValidationIssue> issues = new ArrayList<>();
+    private int totalErrorCount = 0;
+    private int totalWarningCount = 0;
 
     public ValidationResult() {
     }
 
     /**
-     * Check if there are any errors.
-     * @return true if errors exist
+     * Add a ValidationIssue to the result.
+     * Updates total counts based on the issue's content.
      */
-    public boolean hasErrors() {
-        return !errors.isEmpty();
+    public void addIssue(ValidationIssue issue) {
+        issues.add(issue);
+        totalErrorCount += issue.getErrorMessages().size();
+        totalWarningCount += issue.getWarningMessages().size();
     }
 
     /**
-     * Check if there are any warnings.
-     * @return true if warnings exist
+     * Check if there are any errors across all issues.
+     * @return true if any issue has errors
+     */
+    public boolean hasErrors() {
+        return totalErrorCount > 0;
+    }
+
+    /**
+     * Check if there are any warnings across all issues.
+     * @return true if any issue has warnings
      */
     public boolean hasWarnings() {
-        return !warnings.isEmpty();
+        return totalWarningCount > 0;
     }
 
     /**
@@ -36,58 +48,89 @@ public class ValidationResult {
      * @return true if no errors and no warnings
      */
     public boolean isClean() {
-        return errors.isEmpty() && warnings.isEmpty();
+        return totalErrorCount == 0 && totalWarningCount == 0;
     }
 
     /**
-     * Add an error to the result.
-     * @param context The context (e.g., "SPORTSMAN KNOWN")
-     * @param message The error message
-     * @param detail Additional details
+     * Get all validation issues.
+     * Each issue represents all problems for a specific context.
      */
-    public void addError(String context, String message, String detail) {
-        errors.add(new ValidationIssue(context, message, detail));
+    public List<ValidationIssue> getIssues() {
+        return issues;
+    }
+
+    public void setIssues(List<ValidationIssue> issues) {
+        this.issues = issues;
+        // Recalculate counts
+        totalErrorCount = 0;
+        totalWarningCount = 0;
+        for (ValidationIssue issue : issues) {
+            totalErrorCount += issue.getErrorMessages().size();
+            totalWarningCount += issue.getWarningMessages().size();
+        }
     }
 
     /**
-     * Add a warning to the result.
-     * @param context The context (e.g., "SPORTSMAN KNOWN")
-     * @param message The warning message
-     * @param detail Additional details
+     * Get the total number of error messages across all issues.
      */
-    public void addWarning(String context, String message, String detail) {
-        warnings.add(new ValidationIssue(context, message, detail));
+    public int getTotalErrorCount() {
+        return totalErrorCount;
     }
 
+    /**
+     * Get the total number of warning messages across all issues.
+     */
+    public int getTotalWarningCount() {
+        return totalWarningCount;
+    }
+
+    /**
+     * Get total count of all messages (errors + warnings).
+     * @return total message count
+     */
+    public int getTotalMessageCount() {
+        return totalErrorCount + totalWarningCount;
+    }
+
+    /**
+     * Get the number of contexts that have issues.
+     * @return number of unique contexts with problems
+     */
+    public int getIssueCount() {
+        return issues.size();
+    }
+
+    // Legacy methods for backwards compatibility - will be removed
+    @Deprecated
     public List<ValidationIssue> getErrors() {
-        return errors;
+        // Return issues that have errors for backwards compatibility
+        List<ValidationIssue> errorIssues = new ArrayList<>();
+        for (ValidationIssue issue : issues) {
+            if (issue.hasErrors()) {
+                errorIssues.add(issue);
+            }
+        }
+        return errorIssues;
     }
 
-    public void setErrors(List<ValidationIssue> errors) {
-        this.errors = errors;
-    }
-
+    @Deprecated
     public List<ValidationIssue> getWarnings() {
-        return warnings;
-    }
-
-    public void setWarnings(List<ValidationIssue> warnings) {
-        this.warnings = warnings;
-    }
-
-    /**
-     * Get total count of all issues (errors + warnings).
-     * @return total issue count
-     */
-    public int getTotalIssueCount() {
-        return errors.size() + warnings.size();
+        // Return issues that have warnings for backwards compatibility
+        List<ValidationIssue> warningIssues = new ArrayList<>();
+        for (ValidationIssue issue : issues) {
+            if (issue.hasWarnings() && !issue.hasErrors()) {
+                warningIssues.add(issue);
+            }
+        }
+        return warningIssues;
     }
 
     @Override
     public String toString() {
         return "ValidationResult{" +
-                "errors=" + errors.size() +
-                ", warnings=" + warnings.size() +
+                "issues=" + issues.size() +
+                ", totalErrors=" + totalErrorCount +
+                ", totalWarnings=" + totalWarningCount +
                 '}';
     }
 }
