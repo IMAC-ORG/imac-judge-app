@@ -89,7 +89,7 @@
                     <br>
                     <img id="my-svg" style="width:60vw; height:70vh;" class="figure-wrapper" alt="Figure Image"
                     th:src="@{/man/{language}/{sequenceFolderPath}/{index}{dirletter}.svg(language=${settings.language}, sequenceFolderPath=${sequenceFolderPath}, index=${iterStat.index + 1}, dirletter=${dirletter})}"
-                    th:attr="onerror=this.onerror=null; this.src='/man/' + '[[${settings.language}]]' + '/default/FAIL/fig_missing.svg';">
+                    onerror="this.onerror=null; this.src= sequencesBasePath + '/default/FAIL/fig_missing.svg';">
                     </div>
                 </div>
             </div>
