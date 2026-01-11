@@ -139,7 +139,7 @@ public class APIController {
 
         // fetch seqs
         sequenceService.getSequenceFileFromScore();
-  
+        
         CompDTO newComp = compService.createCompFromRequest(comp);
         if (newComp == null) {
             result.put("result", "fail");
@@ -160,6 +160,18 @@ public class APIController {
             }
 
             result.put("comp", new Gson().toJson(newComp));
+
+            //now try to fetch unknown figures if there are UNKNOWN sequences
+            try {
+                if (sequenceService.hasUnknownSequences()) {
+                    sequenceService.getUnknownFiguresZip();
+                } else {
+                    logger.info("No UNKNOWN sequences found, skipping unknown figures download");
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to download unknown figures: {}", e.getMessage());
+                // Continue with comp creation even if unknown figures download fails
+            }
 
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("Location", "/api/comp");
@@ -343,120 +355,6 @@ public class APIController {
                     pilotId, pilotScores.getActiveRound(roundType), roundType);
 
         return ResponseEntity.ok(pilotScores);
-    }
-
-    @PostMapping("/api/sequence/upload")
-    public ResponseEntity<String> uploadSequenceZip(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(name = "expectedFolders", required = false) List<String> expectedFolders) {
-
-        Map<String, Object> result = new HashMap<>();
-
-        if (file.isEmpty()) {
-            result.put("result", "fail");
-            result.put("message", "No file provided.");
-            result.put("retry", true);
-            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
-        }
-
-        String originalFilename = file.getOriginalFilename();
-        if (originalFilename == null || !originalFilename.toLowerCase().endsWith(".zip")) {
-            result.put("result", "fail");
-            result.put("message", "File must be a ZIP archive.");
-            result.put("retry", true);
-            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
-        }
-
-        // Target directory: {configPath}/figures/en/event/
-        Path eventDir = Paths.get(SettingUtils.getApplicationConfigPath(), "figures", "en", "event");
-
-        try {
-            // Ensure event directory exists
-            Files.createDirectories(eventDir);
-
-            Set<String> extractedFolders = new HashSet<>();
-
-            try (ZipInputStream zis = new ZipInputStream(file.getInputStream())) {
-                ZipEntry entry;
-                while ((entry = zis.getNextEntry()) != null) {
-                    String entryName = entry.getName();
-
-                    // Security: prevent path traversal attacks
-                    if (entryName.contains("..")) {
-                        logger.warn("Skipping suspicious entry: {}", entryName);
-                        continue;
-                    }
-
-                    // Parse the entry path
-                    String[] parts = entryName.replace('\\', '/').split("/");
-
-                    // Skip files at root level (only process folders and their contents)
-                    if (parts.length < 1 || (parts.length == 1 && !entry.isDirectory())) {
-                        continue;
-                    }
-
-                    String topLevelFolder = parts[0];
-                    if (topLevelFolder.isEmpty()) {
-                        continue;
-                    }
-
-                    extractedFolders.add(topLevelFolder);
-
-                    // Build target path
-                    Path targetPath = eventDir.resolve(entryName);
-
-                    if (entry.isDirectory()) {
-                        Files.createDirectories(targetPath);
-                    } else {
-                        // Ensure parent directories exist
-                        Files.createDirectories(targetPath.getParent());
-                        Files.copy(zis, targetPath, StandardCopyOption.REPLACE_EXISTING);
-                    }
-
-                    zis.closeEntry();
-                }
-            }
-
-            if (extractedFolders.isEmpty()) {
-                result.put("result", "fail");
-                result.put("message", "No folders found in ZIP file.");
-                result.put("retry", true);
-                return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
-            }
-
-            // Verify expected folders if provided
-            if (expectedFolders != null && !expectedFolders.isEmpty()) {
-                List<String> missingFolders = new ArrayList<>();
-                for (String expected : expectedFolders) {
-                    if (!extractedFolders.contains(expected)) {
-                        missingFolders.add(expected);
-                    }
-                }
-
-                if (!missingFolders.isEmpty()) {
-                    result.put("result", "fail");
-                    result.put("message", "Missing expected folders: " + String.join(", ", missingFolders));
-                    result.put("extractedFolders", extractedFolders);
-                    result.put("retry", true);
-                    return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
-                }
-            }
-
-            result.put("result", "ok");
-            result.put("message", "Upload complete. Extracted " + extractedFolders.size() + " folder(s).");
-            result.put("extractedFolders", extractedFolders);
-            result.put("retry", false);
-
-            logger.info("Sequence upload complete. Extracted folders: {}", extractedFolders);
-            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
-
-        } catch (IOException e) {
-            logger.error("Failed to extract ZIP file: {}", e.getMessage());
-            result.put("result", "fail");
-            result.put("message", "Failed to extract ZIP: " + e.getMessage());
-            result.put("retry", true);
-            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 
     @GetMapping("/api/scores/mismatches")

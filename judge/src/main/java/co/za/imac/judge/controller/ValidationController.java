@@ -96,6 +96,17 @@ public class ValidationController {
             // Without this, validation would use stale cached data
             scheduleService.populateSequences();
 
+            //now try to fetch unknown figures if there are UNKNOWN sequences
+            try {
+                if (sequenceService.hasUnknownSequences()) {
+                    sequenceService.getUnknownFiguresZip();
+                } else {
+                    logger.info("No UNKNOWN sequences found, skipping unknown figures download");
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to download unknown figures: {}", e.getMessage());
+            }       
+            
             logger.info("Re-sync completed successfully - schedules reloaded");
         } catch (Exception e) {
             logger.error("Re-sync failed: {}", e.getMessage());
