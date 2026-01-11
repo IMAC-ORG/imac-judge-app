@@ -27,7 +27,7 @@ public class SequenceFolderResolver {
 
     private static final Logger logger = LoggerFactory.getLogger(SequenceFolderResolver.class);
 
-    private static final String FIGURES_PATH = SettingUtils.getApplicationConfigPath() + "/figures/en";
+    private static final String FIGURES_PATH_BASE = SettingUtils.getApplicationConfigPath() + "/figures";
     public static final String FAIL_FOLDER = "default/FAIL";
     public static final String FREESTYLE_FOLDER = "default/FS";
 
@@ -310,7 +310,7 @@ public class SequenceFolderResolver {
      * @return true if folder exists
      */
     public boolean folderExists(String relativePath) {
-        File folder = new File(FIGURES_PATH + "/" + relativePath);
+        File folder = new File(getFiguresPath() + "/" + relativePath);
         boolean exists = folder.exists() && folder.isDirectory();
         logger.trace("Checking folder {}: exists={}", relativePath, exists);
         return exists;
@@ -321,6 +321,12 @@ public class SequenceFolderResolver {
      * @return figures path
      */
     public String getFiguresPath() {
-        return FIGURES_PATH;
+        try {
+            String language = settingService.getSettings().getLanguage();
+            return FIGURES_PATH_BASE + "/" + language;
+        } catch (IOException e) {
+            logger.error("Failed to load settings for language, defaulting to 'en'", e);
+            return FIGURES_PATH_BASE + "/en";
+        }
     }
 }
