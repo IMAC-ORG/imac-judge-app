@@ -124,7 +124,7 @@ public class SettingService {
         String commandString = String.format("sudo cp %s %s", SETTINGS_FILE_NAME.replace(".json", "_tmp.json"), SETTINGS_FILE_NAME);
 
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("bash", "-c", commandString);
+        processBuilder.command("sh", "-c", commandString);
     
         try {
             Process process = processBuilder.start();
