@@ -343,7 +343,7 @@ public class RootController {
         } else {
             model.addAttribute("compName", "Untitled Comp");
             model.addAttribute("compId", 0);
-            model.addAttribute("scoreMode", "byRound");
+            model.addAttribute("scoreMode", "global");
             model.addAttribute("maxSeqPerRound", 2);
             model.addAttribute("maxUnknownSeqPerRound", 1);
             model.addAttribute("sequenceType", "std");
