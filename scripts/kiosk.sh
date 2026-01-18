@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 xset s noblank
 xset s off

@@ -396,6 +396,41 @@ public class APIController {
         return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
     }
 
+    /**
+     * Compare semantic versions in format #.# or #.#.#
+     * @param version1 First version to compare
+     * @param version2 Second version to compare
+     * @return true if version1 > version2, false otherwise
+     */
+    private boolean isVersionGreater(String version1, String version2) {
+        if (version1 == null || version2 == null) {
+            return false;
+        }
+
+        // Remove 'v' prefix if present
+        version1 = version1.replaceFirst("^v", "");
+        version2 = version2.replaceFirst("^v", "");
+
+        // Split versions into parts
+        String[] v1Parts = version1.split("\\.");
+        String[] v2Parts = version2.split("\\.");
+
+        // Compare each part numerically
+        for (int i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
+            int v1Num = i < v1Parts.length ? Integer.parseInt(v1Parts[i]) : 0;
+            int v2Num = i < v2Parts.length ? Integer.parseInt(v2Parts[i]) : 0;
+
+            if (v1Num > v2Num) {
+                return true;
+            } else if (v1Num < v2Num) {
+                return false;
+            }
+        }
+
+        // Versions are equal
+        return false;
+    }
+
     private int countRoundsForType(PilotScores scores, String roundType) {
         if (scores == null || scores.getScores() == null) return 0;
 
@@ -605,14 +640,15 @@ public class APIController {
                 String latestTag = json.get("tag_name").getAsString();
                 // Remove 'v' prefix if present for comparison
                 String latestVersion = latestTag.replaceFirst("^v", "");
+                boolean updateAvailable = isVersionGreater(latestVersion, currentVersion);
 
                 result.put("latestVersion", latestVersion);
                 result.put("latestTag", latestTag);
-                result.put("updateAvailable", !currentVersion.equals(latestVersion));
+                result.put("updateAvailable", updateAvailable);
                 result.put("result", "ok");
 
                 logger.info("Version check: current={}, latest={}, updateAvailable={}",
-                        currentVersion, latestVersion, !currentVersion.equals(latestVersion));
+                        currentVersion, latestVersion, updateAvailable);
 
                 return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
             } else {

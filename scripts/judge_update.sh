@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # =============================================================================
 # judge_update.sh - AeroJudge Update Script
 # =============================================================================
@@ -10,6 +10,33 @@
 #   1 = Error occurred during update
 #   2 = Update successfully applied
 # =============================================================================
+
+# Function to compare semantic versions in format v#.# or v#.#.#
+# Returns: 0 if version1 > version2, 1 otherwise
+compare_versions() {
+    local version1=$1
+    local version2=$2
+    
+    # Remove 'v' prefix if present
+    version1=$(echo "$version1" | sed 's/^v//')
+    version2=$(echo "$version2" | sed 's/^v//')
+    
+    # Compare versions numerically using awk
+    # awk handles version comparison by splitting on '.' and comparing numerically
+    result=$(awk -v v1="$version1" -v v2="$version2" 'BEGIN {
+        split(v1, a, ".")
+        split(v2, b, ".")
+        for (i = 1; i <= 3; i++) {
+            if (a[i] == "") a[i] = 0
+            if (b[i] == "") b[i] = 0
+            if (a[i]+0 > b[i]+0) { print 0; exit }
+            if (a[i]+0 < b[i]+0) { print 1; exit }
+        }
+        print 1
+    }')
+    
+    return "$result"
+}
 
 if [ ! -d /var/opt/judge ]; then
    echo Creating judge folder...
@@ -42,9 +69,12 @@ if [ $? -ne 0 ]; then
    exit 1
 fi
 
-if [ "$latest_tag" != "$last_release" ]; then
+echo "Current version: $last_release"
+echo "Latest version: $latest_tag"
+
+# Check if new version is greater than last release
+if [ -z "$last_release" ] || compare_versions "$latest_tag" "$last_release"; then
     echo "New release found: $latest_tag"
-    echo "Previous release: $last_release"
 
     echo $latest_tag > .judge_last_release
 
