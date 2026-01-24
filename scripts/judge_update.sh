@@ -1,4 +1,42 @@
-#!/bin/bash
+#!/bin/sh
+# =============================================================================
+# judge_update.sh - AeroJudge Update Script
+# =============================================================================
+# This script checks for and installs updates from GitHub releases.
+# It is fetched and executed by fetch_update.sh on the device.
+#
+# Exit Codes:
+#   0 = No update needed (already running latest version)
+#   1 = Error occurred during update
+#   2 = Update successfully applied
+# =============================================================================
+
+# Function to compare semantic versions in format v#.# or v#.#.#
+# Returns: 0 if version1 > version2, 1 otherwise
+compare_versions() {
+    local version1=$1
+    local version2=$2
+    
+    # Remove 'v' prefix if present
+    version1=$(echo "$version1" | sed 's/^v//')
+    version2=$(echo "$version2" | sed 's/^v//')
+    
+    # Compare versions numerically using awk
+    # awk handles version comparison by splitting on '.' and comparing numerically
+    result=$(awk -v v1="$version1" -v v2="$version2" 'BEGIN {
+        split(v1, a, ".")
+        split(v2, b, ".")
+        for (i = 1; i <= 3; i++) {
+            if (a[i] == "") a[i] = 0
+            if (b[i] == "") b[i] = 0
+            if (a[i]+0 > b[i]+0) { print 0; exit }
+            if (a[i]+0 < b[i]+0) { print 1; exit }
+        }
+        print 1
+    }')
+    
+    return "$result"
+}
 
 if [ ! -d /var/opt/judge ]; then
    echo Creating judge folder...
@@ -31,9 +69,12 @@ if [ $? -ne 0 ]; then
    exit 1
 fi
 
-if [ "$latest_tag" != "$last_release" ]; then
+echo "Current version: $last_release"
+echo "Latest version: $latest_tag"
+
+# Check if new version is greater than last release
+if [ -z "$last_release" ] || compare_versions "$latest_tag" "$last_release"; then
     echo "New release found: $latest_tag"
-    echo "Previous release: $last_release"
 
     echo $latest_tag > .judge_last_release
 
@@ -70,7 +111,8 @@ if [ "$latest_tag" != "$last_release" ]; then
     fi
 
     if [ -f figures.zip ]; then
-        unzip -quo figures.zip -d /var/opt/judge
+        rm -rf /var/opt/judge/figures
+        unzip -qo figures.zip -d /var/opt/judge
         rm figures.zip
         echo Installed/Upgraded judge figures to version $latest_tag
     fi
@@ -78,8 +120,12 @@ if [ "$latest_tag" != "$last_release" ]; then
     echo Starting services....
     sudo systemctl start judge.service
     sudo systemctl start kiosk.service
+
+    echo "Update complete!"
+    UPDATE_APPLIED=true
 else
     echo "Latest version already installed"
+    UPDATE_APPLIED=false
 fi
 
 #now checking for volume service and install if not found
@@ -112,4 +158,11 @@ if ! grep -q "xset r off" /home/judge/.bashrc; then
     #now implement the change
     export DISPLAY=:0
     xset r off
+fi
+
+# Exit with appropriate code
+if [ "$UPDATE_APPLIED" = true ]; then
+    exit 2  # Update successfully applied
+else
+    exit 0  # No update needed (already running latest version)
 fi

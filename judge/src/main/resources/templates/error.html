@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
+  <title>Error</title>
+  <link href="materialize/css/material_lcons.css" rel="stylesheet">
+  <link href="materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .error-icon {
+      font-size: 8rem !important;
+    }
+    .error-title {
+      font-size: calc(4vw + 2vh);
+      font-weight: 700;
+      margin: 20px 0;
+    }
+    .error-message {
+      font-size: calc(2vw + 1.5vh);
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    .admin-section {
+      margin-top: 40px;
+      padding-top: 25px;
+      border-top: 4px solid #999;
+      text-align: center;
+    }
+    .admin-btn {
+      font-size: 1.5rem !important;
+      padding: 0 40px !important;
+      height: 60px !important;
+      line-height: 58px !important;
+      background: transparent !important;
+      border: 2px solid #c62828 !important;
+      color: #c62828 !important;
+      font-weight: 700 !important;
+      box-shadow: none !important;
+    }
+    .admin-btn i {
+      color: #c62828 !important;
+      font-weight: 700 !important;
+    }
+    .admin-btn:hover {
+      background: rgba(198, 40, 40, 0.1) !important;
+    }
+  </style>
+</head>
+
+<body class="red lighten-4">
+  <div class="center-align">
+    <i class="material-icons error-icon red-text text-darken-3">error</i>
+    <h1 class="error-title red-text text-darken-4">ERROR</h1>
+    <p class="error-message">
+      <strong>Please give this device to the Contest Director or Scorekeeper.</strong>
+    </p>
+  </div>
+
+  <div class="admin-section">
+    <a href="#adminModal" class="waves-effect btn-large admin-btn modal-trigger">
+      <i class="material-icons left">settings</i>ADMIN PAGE
+    </a>
+  </div>
+
+  <!-- Admin Access Confirmation Modal -->
+  <div id="adminModal" class="modal">
+    <div class="modal-content">
+      <h5>Admin Access</h5>
+      <p style="font-size: 1.2rem;">This is an admin page that should only be used by the <strong>Contest Director</strong> or <strong>Scorekeeper</strong>.</p>
+      <p style="font-size: 1rem; color: #666;">Changes made here may affect the competition setup.</p>
+    </div>
+    <div class="modal-footer" style="text-align: center;">
+      <a href="/admin/comp" class="waves-effect waves-green btn green" style="text-align: center; width: 120px; margin-right: 60px;">Continue</a>
+      <a href="#!" class="modal-close waves-effect waves-red btn red" style="text-align: center; width: 120px;">Exit</a>
+    </div>
+  </div>
+
+  <script src="materialize/js/materialize.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      M.Modal.init(document.querySelectorAll('.modal'));
+    });
+  </script>
+</body>
+</html>

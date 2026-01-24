@@ -13,7 +13,7 @@ public class LiPoBatteryEstimator {
         voltagePointsPerCell = new double[] {
             4.20, 4.00, 3.90, 3.85, 3.80,
             3.75, 3.70, 3.65, 3.60, 3.50,
-            3.40, 3.30, 3.00
+            3.40, 3.30, 3.20
         };
         percentPoints = new double[] {
             100, 95, 85, 75, 65,

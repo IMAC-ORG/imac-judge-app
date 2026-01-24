@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
+  <title>Admin - Scores</title>
+
+  <!-- CSS  -->
+  <link href="/materialize/css/material_lcons.css" rel="stylesheet">
+  <link href="/materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+  <style>
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+    .heading {
+      font-size: calc(1.5vw + 2.5vh) !important;
+      margin: 0;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .admin-nav-btn {
+      margin: 2px;
+      padding: 0 12px;
+    }
+    .admin-box {
+      border: 2px solid #90a4ae;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      background: #fafafa;
+      text-align: center;
+    }
+    .tool-box {
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .tool-icon {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+    }
+    .tool-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .tool-text {
+      font-size: 0.85rem;
+      color: #555;
+      max-width: 250px;
+    }
+    .disabled-tool {
+      opacity: 0.6;
+    }
+  </style>
+</head>
+
+<body class="orange lighten-4">
+  <div th:replace="~{banner::line_judge}"></div>
+  <div th:replace="~{banner::status}"></div>
+
+  <div class="section no-pad-bot orange lighten-4" id="index-banner">
+    <div class="container orange lighten-4 black-text">
+
+      <!-- Header + Navigation -->
+      <div class="header-row">
+        <h2 class="heading">Score Admin</h2>
+        <div class="nav-buttons">
+          <a href="/admin/comp" class="waves-effect waves-light btn blue-grey admin-nav-btn">
+            <i class="material-icons left">settings</i>Scorekeeper
+          </a>
+          <a href="/admin/device" class="waves-effect waves-light btn blue admin-nav-btn">
+            <i class="material-icons left">devices</i>Device
+          </a>
+          <a href="/" class="waves-effect waves-light btn teal admin-nav-btn">
+            <i class="material-icons left">home</i>Home
+          </a>
+        </div>
+      </div>
+
+      <!-- Score Tools -->
+      <div class="row">
+        <div class="col s12 m6">
+          <div class="admin-box tool-box">
+            <i class="material-icons tool-icon green-text">swap_horiz</i>
+            <div class="tool-title">Resolve Mismatches</div>
+            <div class="tool-text">
+              Move rounds between pilots when scores were recorded to the wrong pilot.
+            </div>
+            <a href="/admin/scores/resolve" class="waves-effect waves-light btn green darken-1" style="margin-top: 10px;">
+              <i class="material-icons left">build</i>Open Tool
+            </a>
+          </div>
+        </div>
+
+        <div class="col s12 m6">
+          <div class="admin-box tool-box disabled-tool">
+            <i class="material-icons tool-icon grey-text">exposure_zero</i>
+            <div class="tool-title">Zero Unflown Rounds</div>
+            <div class="tool-text">
+              Mark rounds as zeros for pilots who didn't fly.
+            </div>
+            <span class="btn grey lighten-1" style="margin-top: 10px;">
+              <i class="material-icons left">schedule</i>Coming Soon
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col s12 m6">
+          <div class="admin-box tool-box disabled-tool">
+            <i class="material-icons tool-icon grey-text">edit</i>
+            <div class="tool-title">Edit Scores</div>
+            <div class="tool-text">
+              Manually edit individual figure scores.
+            </div>
+            <span class="btn grey lighten-1" style="margin-top: 10px;">
+              <i class="material-icons left">schedule</i>Coming Soon
+            </span>
+          </div>
+        </div>
+
+        <div class="col s12 m6">
+          <div class="admin-box tool-box disabled-tool">
+            <i class="material-icons tool-icon grey-text">history</i>
+            <div class="tool-title">Audit Log</div>
+            <div class="tool-text">
+              View history of score changes and corrections.
+            </div>
+            <span class="btn grey lighten-1" style="margin-top: 10px;">
+              <i class="material-icons left">schedule</i>Coming Soon
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="fixed-action-btn">
+    <a class="btn-floating btn-large red">
+      <i class="large material-icons">menu</i>
+    </a>
+    <ul>
+      <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">home</i></a></li>
+      <li><a class="btn-floating btn-large blue-grey" href="/admin/comp"><i class="material-icons">settings</i></a></li>
+    </ul>
+  </div>
+
+  <!--  Scripts-->
+  <script src="/jquery-3.6.4.min.js"></script>
+  <script src="/materialize/js/materialize.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var elems = document.querySelectorAll('.fixed-action-btn');
+      M.FloatingActionButton.init(elems, { hoverEnabled: false });
+    });
+  </script>
+
+</body>
+
+</html>

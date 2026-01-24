@@ -2,7 +2,6 @@ package co.za.imac.judge.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class RoundsDTO {
 

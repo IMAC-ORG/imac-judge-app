@@ -6,13 +6,10 @@ import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SettingUtils {
-    private static final Logger logger = LoggerFactory.getLogger(SettingUtils.class);
 
     public static final String DEFAULT_APPLICATION_CONFIG_PATH = "/var/opt/judge/";
     // cannot be same as config path

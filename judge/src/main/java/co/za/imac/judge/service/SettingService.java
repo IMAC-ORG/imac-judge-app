@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import java.io.IOException;
 import org.slf4j.Logger;
@@ -50,13 +49,21 @@ public class SettingService {
         String compdtoJson = new Gson().toJson(settingDTO);
         byte[] strToBytes = compdtoJson.getBytes();
 
-        //need to use temporary file since target file is owned by root (in boot folder)
-        FileOutputStream outputStream = new FileOutputStream(SETTINGS_FILE_NAME.replace(".json", "_tmp.json"));
-        outputStream.write(strToBytes);
-        outputStream.close();
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("windows")) {
+            // On Windows (development), write directly to the settings file
+            FileOutputStream outputStream = new FileOutputStream(SETTINGS_FILE_NAME);
+            outputStream.write(strToBytes);
+            outputStream.close();
+        } else {
+            // On Linux (Pi device), use temporary file since target file is owned by root
+            FileOutputStream outputStream = new FileOutputStream(SETTINGS_FILE_NAME.replace(".json", "_tmp.json"));
+            outputStream.write(strToBytes);
+            outputStream.close();
 
-        //now replace the original file with the temporary file
-        moveTemporarySettingsFile();
+            // Now replace the original file with the temporary file
+            moveTemporarySettingsFile();
+        }
 
         // get settings file
         return settingDTO;
@@ -117,7 +124,7 @@ public class SettingService {
         String commandString = String.format("sudo cp %s %s", SETTINGS_FILE_NAME.replace(".json", "_tmp.json"), SETTINGS_FILE_NAME);
 
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("bash", "-c", commandString);
+        processBuilder.command("sh", "-c", commandString);
     
         try {
             Process process = processBuilder.start();

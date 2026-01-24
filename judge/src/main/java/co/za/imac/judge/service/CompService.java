@@ -8,12 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import co.za.imac.judge.dto.SettingDTO;
 import org.apache.commons.io.FileUtils;
@@ -29,7 +25,6 @@ import co.za.imac.judge.utils.SettingUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
@@ -62,7 +57,8 @@ public class CompService {
         COMP_INFO_DAT_URL = COMP_INFO_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
         try {
             int timeout = (int)Duration.ofSeconds(settingDTO.getScore_timeout()).toMillis();
-            FileUtils.copyURLToFile(new URL(COMP_INFO_DAT_URL), new File(COMP_INFO_DAT_PATH),timeout,timeout);
+            // Updated deprecated URL, changed new URL(x) to URI.create(x).toURL() 2025-11 DPG
+            FileUtils.copyURLToFile(URI.create(COMP_INFO_DAT_URL).toURL(), new File(COMP_INFO_DAT_PATH),timeout,timeout);
         } catch (Exception e) {
             try {
                 // Score is probably turned off.
@@ -78,7 +74,8 @@ public class CompService {
         COMP_PREFS_DAT_URL = COMP_PREFS_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
         try {
             int timeout = (int)Duration.ofSeconds(settingDTO.getScore_timeout()).toMillis();
-            FileUtils.copyURLToFile(new URL(COMP_PREFS_DAT_URL), new File(COMP_PREFS_DAT_PATH),timeout,timeout);
+            // Updated deprecated URL, changed new URL(x) to URI.create(x).toURL() 2025-11 DPG
+            FileUtils.copyURLToFile(URI.create(COMP_PREFS_DAT_URL).toURL(), new File(COMP_PREFS_DAT_PATH),timeout,timeout);
         } catch (Exception e) {
             try {
                 // Score is probably turned off.
@@ -123,6 +120,30 @@ public class CompService {
 
         if (compDTO.getComp_id() == 0)
             enrichCompWithCompInfoFromScore(compDTO);  // Get the comp name and event ID from score! if we can...
+
+        writeCompToFile(compDTO);
+        return true;
+    }
+
+    /**
+     * Save comp settings locally without any Score server contact.
+     * Updates both in-memory compDTO and the comp.json file.
+     */
+    public boolean saveCompToFileLocal() throws IOException {
+        if (compDTO == null) {
+            logger.warn("Cannot save local comp settings - no comp loaded");
+            return false;
+        }
+
+        writeCompToFile(compDTO);
+        logger.info("Saved local comp settings to file");
+        return true;
+    }
+
+    /**
+     * Private method to write CompDTO to file.
+     */
+    private void writeCompToFile(CompDTO compDTO) throws IOException {
         File newFile = new File(COMP_FILE_NAME);
         newFile.createNewFile();
         String compdtoJson = new Gson().toJson(compDTO);
@@ -130,9 +151,6 @@ public class CompService {
         FileOutputStream outputStream = new FileOutputStream(COMP_FILE_NAME);
         outputStream.write(strToBytes);
         outputStream.close();
-
-        return true;
-
     }
 
     public CompDTO getComp() {

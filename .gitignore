@@ -25,6 +25,7 @@ hs_err_pid*
 
 ### VS Code ###
 .vscode/
+*.code-workspace
 
 ### Judge Files not needing to be tracked ###
 dockerbuild/settings.json

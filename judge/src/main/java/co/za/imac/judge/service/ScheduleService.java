@@ -1,6 +1,5 @@
 package co.za.imac.judge.service;
 
-import co.za.imac.judge.dto.CompDTO;
 import co.za.imac.judge.dto.FigureDTO;
 import co.za.imac.judge.dto.ScheduleDTO;
 import co.za.imac.judge.dto.SettingDTO;
@@ -24,12 +23,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class ScheduleService {
@@ -68,6 +69,39 @@ public class ScheduleService {
         return this;
     }
 
+    /**
+     * Returns a Set of class names that have UNKNOWN sequences defined in sequences.dat.
+     */
+    public Set<String> getClassesWithUnknown() {
+        Set<String> classesWithUnknown = new HashSet<>();
+        Map<Integer, ScheduleDTO> scheds = getSchedules();
+        if (scheds == null) {
+            return classesWithUnknown;
+        }
+        for (ScheduleDTO sched : scheds.values()) {
+            if ("UNKNOWN".equalsIgnoreCase(sched.getType()) && sched.getComp_class() != null) {
+                classesWithUnknown.add(sched.getComp_class().toUpperCase());
+            }
+        }
+        return classesWithUnknown;
+    }
+
+    /**
+     * Returns true if FREESTYLE sequences are defined in sequences.dat.
+     */
+    public boolean hasFreestyle() {
+        Map<Integer, ScheduleDTO> scheds = getSchedules();
+        if (scheds == null) {
+            return false;
+        }
+        for (ScheduleDTO sched : scheds.values()) {
+            if ("FREESTYLE".equalsIgnoreCase(sched.getType())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void populateSequences() {
         try {
             this.loadSequenceFileIntoSchedules();
@@ -87,7 +121,11 @@ public class ScheduleService {
         int timeout = (int)Duration.ofSeconds(settingDTO.getScore_timeout()).toMillis();
 
         SEQUENCES_DAT_URL = SEQUENCES_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
-        FileUtils.copyURLToFile(new URL(SEQUENCES_DAT_URL), new File(SEQUENCES_DAT_PATH),timeout,timeout);
+        // Updated deprecated URL, changed new URL(x) to URI.create(x).toURL() 2025-11 DPG
+        FileUtils.copyURLToFile(URI.create(SEQUENCES_DAT_URL).toURL(), new File(SEQUENCES_DAT_PATH),timeout,timeout);
+        // Clear cache only after successful download - forces reload with new data on next access
+        this.schedules = null;
+        logger.info("Sequence cache cleared - will reload on next access.");
     }
 
     /************
@@ -203,6 +241,105 @@ public class ScheduleService {
         return true;
     }
 
+
+    /**
+     * Get schedule matching class, type, and round number.
+     * Returns the most specific match (highest min_round that satisfies condition).
+     * Falls back to highest max_round if no exact match.
+     * 
+     * @param pilotClass e.g., "SPORTSMAN"
+     * @param roundType e.g., "KNOWN", "UNKNOWN", "FREESTYLE"
+     * @param roundNumber the current round number
+     * @return matching ScheduleDTO or null if none found
+     */
+    public ScheduleDTO getScheduleForRound(String pilotClass, String roundType, int roundNumber) {
+        logger.info("getScheduleForRound called: class={}, type={}, round={}", pilotClass, roundType, roundNumber);
+
+        if (schedules == null) {
+            this.populateSequences();
+        }
+        if (schedules == null || schedules.isEmpty()) {
+            logger.warn("No schedules loaded!");
+            return null;
+        }
+
+        // Log all loaded schedules for debugging
+        logger.info("=== All loaded schedules ({} total) ===", schedules.size());
+        for (Map.Entry<Integer, ScheduleDTO> entry : schedules.entrySet()) {
+            ScheduleDTO s = entry.getValue();
+            logger.info("  Schedule[{}]: class={}, type={}, min={}, max={}, short_desc={}",
+                    entry.getKey(), s.getComp_class(), s.getType(),
+                    s.getMin_round(), s.getMax_round(), s.getShort_desc());
+        }
+
+        ScheduleDTO bestMatch = null;
+        int bestMinRound = -1;
+
+        // First pass: Find exact match (round in range)
+        for (ScheduleDTO sched : schedules.values()) {
+            boolean classMatches = "FREESTYLE".equalsIgnoreCase(roundType)
+                || (sched.getComp_class() != null && sched.getComp_class().equalsIgnoreCase(pilotClass));
+            boolean typeMatches = sched.getType() != null && sched.getType().equalsIgnoreCase(roundType);
+
+            logger.debug("Checking schedule: class={}, type={}, min={}, max={} -> classMatches={}, typeMatches={}",
+                    sched.getComp_class(), sched.getType(), sched.getMin_round(), sched.getMax_round(),
+                    classMatches, typeMatches);
+
+            if (classMatches && typeMatches &&
+                sched.getMin_round() != null && sched.getMax_round() != null &&
+                sched.getMin_round() <= roundNumber &&
+                sched.getMax_round() >= roundNumber) {
+
+                logger.info("Found matching schedule: min={}, max={}, short_desc={}, currentBestMin={}",
+                        sched.getMin_round(), sched.getMax_round(), sched.getShort_desc(), bestMinRound);
+
+                // Prefer schedule with highest min_round (most specific)
+                if (sched.getMin_round() > bestMinRound) {
+                    bestMinRound = sched.getMin_round();
+                    bestMatch = sched;
+                    logger.info("New best match: min_round={}, short_desc={}", bestMinRound, sched.getShort_desc());
+                }
+            }
+        }
+
+        // Second pass: No exact match - find nearest (highest max_round)
+        if (bestMatch == null) {
+            logger.warn("No exact match found, trying fallback...");
+            int highestMaxRound = -1;
+            for (ScheduleDTO sched : schedules.values()) {
+                boolean classMatches = "FREESTYLE".equalsIgnoreCase(roundType)
+                    || (sched.getComp_class() != null && sched.getComp_class().equalsIgnoreCase(pilotClass));
+                boolean typeMatches = sched.getType() != null && sched.getType().equalsIgnoreCase(roundType);
+
+                if (classMatches && typeMatches && sched.getMax_round() != null) {
+                    if (sched.getMax_round() > highestMaxRound) {
+                        highestMaxRound = sched.getMax_round();
+                        bestMatch = sched;
+                    }
+                }
+            }
+            if (bestMatch != null) {
+                logger.info("Fallback match: using schedule with max_round={}, short_desc={}",
+                        highestMaxRound, bestMatch.getShort_desc());
+            }
+        }
+
+        if (bestMatch != null) {
+            logger.info("FINAL RESULT: For round {} returning schedule with short_desc={}",
+                    roundNumber, bestMatch.getShort_desc());
+        } else {
+            logger.warn("FINAL RESULT: No matching schedule found for class={}, type={}, round={}",
+                    pilotClass, roundType, roundNumber);
+        }
+
+        return bestMatch;
+    }
+
+    /**
+     * @deprecated Use getScheduleForRound() for round-aware lookups.
+     * This method ignores round numbers and returns the first match.
+     */
+    @Deprecated
     public  Map<String,List<FigureDTO>> getAllSequences_old()
             throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
 

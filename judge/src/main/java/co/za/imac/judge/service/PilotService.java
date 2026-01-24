@@ -5,13 +5,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -66,7 +67,8 @@ public class PilotService {
         SettingDTO settingDTO = settingService.getSettings();
         int timeout = (int)Duration.ofSeconds(settingDTO.getScore_timeout()).toMillis();
         PILOT_DAT_URL = PILOT_DAT_URL.replace("SCORE_HOST", settingDTO.getScore_host()).replace("SCORE_HTTP_PORT", String.valueOf(settingDTO.getScore_http_port()));
-        FileUtils.copyURLToFile(new URL(PILOT_DAT_URL), new File(PILOT_DAT_PATH),timeout,timeout);
+        // Updated deprecated URL, changed new URL(x) to URI.create(x).toURL() 2025-11 DPG
+        FileUtils.copyURLToFile(URI.create(PILOT_DAT_URL).toURL(), new File(PILOT_DAT_PATH),timeout,timeout);
     }
 
     public boolean isPilots(){
@@ -75,6 +77,10 @@ public class PilotService {
     }
 
     public List<Pilot> getPilots() throws ParserConfigurationException, SAXException, IOException {
+        return getPilots(false);
+    }
+
+    public List<Pilot> getPilots(boolean activeOnly) throws ParserConfigurationException, SAXException, IOException {
         if(!isPilots()){
             getPilotsFileFromScore();
         }
@@ -139,6 +145,14 @@ public class PilotService {
                 logger.debug(new Gson().toJson(pilot));
             }
         }
+        
+        // Filter to active pilots if requested
+        if (activeOnly) {
+            pilots = pilots.stream()
+                    .filter(p -> Boolean.TRUE.equals(p.getActive()))
+                    .collect(java.util.stream.Collectors.toList());
+        }
+        
         return pilots;
     }
 
@@ -222,14 +236,18 @@ public class PilotService {
             // save to file
             pilotScores = savePilotScoresToFile(pilotScores);
         } else {
-            // TODO update existing score
+            // BACKLOG 2025-11 DPG: update existing score
         }
         return pilotScores;
     }
 
     public boolean isNewScore(PilotScores pilotScores, PScore score) {
         for (PScore savedScore : pilotScores.getScores()) {
-            if (savedScore.getRound() == score.getRound() && savedScore.getSequence() == score.getSequence()) {
+            // Must match round, sequence, AND type (so KNOWN R1 and FREESTYLE R1 are different)
+            if (savedScore.getRound() == score.getRound()
+                    && savedScore.getSequence() == score.getSequence()
+                    && savedScore.getType() != null
+                    && savedScore.getType().equalsIgnoreCase(score.getType())) {
                 return false;
             }
         }
@@ -247,6 +265,9 @@ public class PilotService {
         if(roundType.equalsIgnoreCase("UNKNOWN")){
             compSequences = compDTO.getUnknown_sequences();
         }
+        if(roundType.equalsIgnoreCase("FREESTYLE")){
+            compSequences = 1;  // Freestyle always has 1 sequence per round
+        }
         // check if theres a next sequence
         if (pilotScore.getActiveSequence() < compSequences) {
             // there is a next sequence for round increment and return
@@ -255,8 +276,9 @@ public class PilotService {
         }
         if (pilotScore.getActiveSequence() == compSequences) {
 
-            // Just reset the seq back to 1 and increment the round counter.
-            pilotScore.setActiveRound((pilotScore.getActiveRound() + 1));
+            // Just reset the seq back to 1 and increment the round counter for THIS TYPE.
+            // Each type (KNOWN, UNKNOWN, FREESTYLE) has its own independent round counter.
+            pilotScore.incrementActiveRound(roundType);
             pilotScore.setActiveSequence(1);
             return pilotScore;
 

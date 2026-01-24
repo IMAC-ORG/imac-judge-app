@@ -11,7 +11,7 @@
         }
 
         .pilot_class {
-            font-size: calc(6vw + 3vh) !important;
+            font-size: calc(5.5vw + 2.5vh) !important;
         }
 
         .pilot_name {
@@ -30,6 +30,7 @@
             font-family: digitalFont;
             src: url(font/digital-7.ttf);
         }
+
     </style>
     <!-- CSS  -->
     <link href="materialize/css/material_lcons.css" rel="stylesheet">
@@ -48,20 +49,50 @@
          th:href="@{/judge(pilot_id=${pilot.primary_id})}">
         <h1 th:text="${pilot.name}" class="pilot_name">First Panel</h1>
         <h2 th:text="${pilot.getClassString()}" class="pilot_class">First Panel</h2>
-        <h2 th:if="${pilotScores[pilot.primary_id].isActive}" class="pilot_round">Round: <span
-                th:text="${pilotScores[pilot.primary_id].activeRound}" class="pilot_round">
-          <!--</span> Sequence: <span th:text="${pilotScores[pilot.primary_id].activeSequence}" class="pilot_round"></span> --></h2>
-        <h2 th:unless="${pilotScores[pilot.primary_id].isActive}" class="pilot_round"> All Rounds Completed!</h2>
-        <a class="pilot_round" th:unless="${pilotScores[pilot.primary_id].isActive}"> <i
-                class="material-icons center black-text">done</i> </a>
 
-        <a th:if="${pilotScores[pilot.primary_id].isActive}"
-           class="waves-effect waves-light btn modal-trigger orange darken-1 pulse" th:href="'#modal'+ ${pilot.index}"><i
-                class="material-icons right">flight_takeoff</i>Judge</a>
+        <!-- Show rounds and judge button -->
+        <div style="margin-top: 20px;">
+            <h5 style="font-weight: 600; margin-bottom: 15px; text-align: center;">Next Round Number:</h5>
+
+            <!-- Three cards for round types -->
+            <div style="display: flex; justify-content: center; gap: 15px;">
+
+                <!-- KNOWN Card -->
+                <div style="border-bottom: 1px solid #999; padding: 5px 15px; min-width: 140px;">
+                    <div style="text-align: center; font-weight: 500; font-size: 1.1rem; color: #666;">KNOWN</div>
+                    <div style="text-align: center; font-size: 1.1rem; color: #666;">
+                        Round <span style="font-weight: 700; font-size: 2rem; color: #1976d2;" th:text="${pilotScores[pilot.primary_id].getActiveRound('KNOWN')}"></span>
+                    </div>
+                </div>
+
+                <!-- UNKNOWN Card -->
+                <div style="border-bottom: 1px solid #999; padding: 5px 15px; min-width: 140px;">
+                    <div style="text-align: center; font-weight: 500; font-size: 1.1rem; color: #666;">UNKNOWN</div>
+                    <div style="text-align: center; font-size: 1.1rem; color: #666;">
+                        Round <span style="font-weight: 700; font-size: 2rem; color: #1976d2;" th:text="${pilotScores[pilot.primary_id].getActiveRound('UNKNOWN')}"></span>
+                    </div>
+                </div>
+
+                <!-- FREESTYLE Card -->
+                <div style="border-bottom: 1px solid #999; padding: 5px 15px; min-width: 140px;">
+                    <div style="text-align: center; font-weight: 500; font-size: 1.1rem; color: #666;">FREESTYLE</div>
+                    <div style="text-align: center; font-size: 1.1rem; color: #666;">
+                        Round <span style="font-weight: 700; font-size: 2rem; color: #1976d2;" th:text="${pilotScores[pilot.primary_id].getActiveRound('FREESTYLE')}"></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Centered Judge button -->
+            <div style="text-align: center; margin-top: 20px;">
+                <a class="waves-effect waves-light btn-large modal-trigger orange darken-1 pulse" th:href="'#modal'+ ${pilot.index}">
+                    <i class="material-icons right">flight_takeoff</i>Judge
+                </a>
+            </div>
+        </div>
+
         <!-- Modal Structure -->
-        <div
-        th:if="${pilotScores[pilot.primary_id].isActive}"
-        th:id="'modal'+ ${pilot.index}" class="modal">
+        <div th:id="'modal'+ ${pilot.index}" class="modal">
         <div th:replace="~{judge_start_select::modal_select}"></div>
 
         </div>
@@ -79,20 +110,77 @@
     <ul>
         <li><a class="btn-floating btn-large purple" onclick="syncPilots();"><i class="material-icons">sync</i></a></li>
         <li><a class="btn-floating btn-large light-blue darken-1" onclick="syncScores();"><i class="material-icons">publish</i></a></li>
-        <li><a class="btn-floating btn-large green" href="/newcomp"><i class="material-icons">edit</i></a></li>
+        <li><a class="btn-floating btn-large green modal-trigger" href="#admin_warning_modal"><i class="material-icons">edit</i></a></li>
     </ul>
 </div>
 
-
+<!-- Admin Warning Modal -->
+<div id="admin_warning_modal" class="modal">
+  <div class="modal-content center-align">
+    <h4><i class="material-icons medium orange-text">warning</i></h4>
+    <h5>Admin Access</h5>
+    <p style="font-size: 1.2rem;">This is an admin page that should only be used by the <strong>Contest Director</strong> or <strong>Scorekeeper</strong>.</p>
+    <p style="font-size: 1.2rem; color: #ff0000;">Changes made here may affect the competition setup.</p>
+  </div>
+    <div class="modal-footer" style="text-align: center;">
+      <a href="/admin/comp" class="waves-effect waves-green btn green" style="text-align: center; width: 120px; margin-right: 60px;">Continue</a>
+      <a href="#!" class="modal-close waves-effect waves-red btn red" style="text-align: center; width: 120px;">Exit</a>
+    </div>
+</div>
 
 <!--  Scripts-->
 <script src="materialize/js/materialize.js"></script>
 <script>
-    // Or with jQuery
+    var language = '[[${settings.language}]]';
     var windowHeight = window.innerHeight - 35; // reduce some for banner
+
+    // Battery check function - called when modal opens
+    function checkBatteryForModal(modal) {
+      var statusDiv = modal.querySelector('.battery-status');
+      if (!statusDiv) return;
+
+      $.ajax({
+        url: "/api/battery",
+        timeout: 3000,
+        cache: false,
+        success: function(data) {
+          var percent = data.percent;
+          if (percent >= 0) {
+            var icon, text, cssClass;
+
+            if (percent < 20) {
+              icon = 'battery_alert';
+              text = 'LOW BATTERY: ' + percent + '% - Charge soon!';
+              cssClass = 'battery-low';
+            } else if (percent < 30) {
+              icon = 'battery_3_bar';
+              text = 'Warning: Battery at ' + percent + '%';
+              cssClass = 'battery-mid';
+            } else {
+              statusDiv.style.display = 'none';
+              return;
+            }
+
+            statusDiv.className = 'battery-status ' + cssClass;
+            statusDiv.innerHTML = '<i class="material-icons">' + icon + '</i><span class="bat-text">' + text + '</span>';
+            statusDiv.style.display = 'flex';
+          } else {
+            statusDiv.style.display = 'none';
+          }
+        },
+        error: function() {
+          statusDiv.style.display = 'none';
+        }
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         var elems = document.querySelectorAll('.modal');
-        var instances = M.Modal.init(elems);
+        var instances = M.Modal.init(elems, {
+            onOpenStart: function(modal) {
+                checkBatteryForModal(modal);
+            }
+        });
     });
     document.addEventListener('DOMContentLoaded', function () {
         var elems = document.querySelectorAll('.fixed-action-btn');
@@ -106,7 +194,24 @@
         indicators: false
     }).height(windowHeight);
     
+    function closeAllModals() {
+        // Close all open modals before carousel navigation
+        var modals = document.querySelectorAll('.modal');
+        modals.forEach(function(modal) {
+            var instance = M.Modal.getInstance(modal);
+            if (instance && instance.isOpen) {
+                instance.close();
+            }
+        });
+        // Close status info popup if open
+        if (typeof stopStatusInfoUpdates === 'function') {
+            stopStatusInfoUpdates();
+            document.getElementById('statusInfo').classList.add('hidden');
+        }
+    }
+
     function carouselNext() {
+        closeAllModals();
         $('.carousel').carousel('next');
     }
 
@@ -119,10 +224,10 @@
           url: "/api/pilots/sync",
         });
 
-        M.toast({ html: 'Pilot Sync Success', classes: 'toastMessage', displayLength: 4000 });
+        M.toast({ html: 'Pilot/Sequence Sync Success', classes: 'toastMessage', displayLength: 4000 });
 
-        await delay(4000); // Wait for 4 seconds before refreshing the pilots list
-        window.location.replace("/");
+        await delay(4000); // Wait for 4 seconds before validating sequences
+        window.location.replace("/validate-sequences");
       } catch (errMsg) {
         M.toast({ html: 'Pilot Sync Error - Is Score Available?', classes: 'toastMessage', displayLength: 4000 });
       }
@@ -141,6 +246,18 @@
       }
     }
 
+    // Instructions audio for new users
+    var instructionsAudio = null;
+    function playInstructions() {
+        if (instructionsAudio && !instructionsAudio.paused) {
+            instructionsAudio.pause();
+            instructionsAudio.currentTime = 0;
+        } else {
+            instructionsAudio = new Audio('/man/' + language + '/audio/instructions.mp3');
+            instructionsAudio.play();
+        }
+    }
+
     //add button listeners
     $(document).on("keypress", function (e) {
         //numpad 6
@@ -149,16 +266,13 @@
         }
         //numpad 4
         if (e.which == 52) {
+            closeAllModals();
             $('.carousel').carousel('prev');
         }
-        // numpad 8
-        //if (e.which == 56) {
-        //    syncPilots();
-        //}
-        //numpad 9
-        //if (e.which == 57) {
-        //    syncScores();
-        //}
+        //numpad 0 - play instructions
+        if (e.which == 48) {
+            playInstructions();
+        }
     });
 </script>
 

@@ -9,7 +9,8 @@
 ## Requirements
 1. VSCode
 2. Docker Desktop
-3. Score =>v4.52 with services enabled and started
+3. Score =>v4.70 with services enabled and started
+4. Java 17 or later (Java 21 works fine)
 
 ## RUN imac-judge-app
 1. Open in a dev container
@@ -22,8 +23,8 @@ eg.
 {
   "judge_id":1,
   "line_number":1,
-  "score_host":"192.168.1.4",
-  "score_http_port":8181,
+  "score_host":"192.168.8.100",
+  "score_http_port":80,
   "language":"en"
 }
 ```

@@ -1,4 +1,4 @@
-FROM openjdk:17-alpine
+FROM eclipse-temurin:17-alpine
 RUN adduser judge;echo 'judge:P@ssword1234$' | chpasswd
 RUN mkdir -p /var/opt/judge; chown judge:judge /var/opt/judge
 VOLUME /tmp

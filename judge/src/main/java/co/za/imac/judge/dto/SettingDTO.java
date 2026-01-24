@@ -8,6 +8,8 @@ public class SettingDTO {
     private int line_number = 1;
     private int score_poll_timeout = 2; //seconds
     private int score_timeout = 10; //seconds
+    private String language = "en";
+    private int seasonYear = 26;
     
     public SettingDTO() {
     }
@@ -53,5 +55,19 @@ public class SettingDTO {
     public void setScore_timeout(int score_timeout) {
         this.score_timeout = score_timeout;
     }
-    
+
+    public String getLanguage() {
+        return language;
+    }
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public int getSeasonYear() {
+        return seasonYear;
+    }
+    public void setSeasonYear(int seasonYear) {
+        this.seasonYear = seasonYear;
+    }
+
 }

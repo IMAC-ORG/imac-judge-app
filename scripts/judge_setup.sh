@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 clear
 Green='\033[0;32m'        # Green
 Yellow='\033[0;33m'       # Yellow
@@ -214,6 +214,9 @@ echo -e "${Blue}Score IP:${NC}"
 read scoreip
 echo -e "${Blue}Score Port${NC}"
 read scoreport
+echo -e "${Blue}Enter two digit year${NC}"
+read seasonyear
+
 
 echo -e "${Yellow}Creating settings.json file..."
 
@@ -222,7 +225,10 @@ echo '	"judge_id":'$judgeid','				| sudo tee -a /boot/settings.json	> /dev/null 
 echo '	"line_number":'$flightline','		| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 echo '	"score_host":"'$scoreip'",'			| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 echo '	"score_http_port":'$scoreport','	| sudo tee -a /boot/settings.json	> /dev/null 2>&1
-echo '	"language":"en"'					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"language":"en",'					| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"score_poll_timeout":2,'			| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"score_timeout":10,'				| sudo tee -a /boot/settings.json	> /dev/null 2>&1
+echo '	"seasonYear":'$seasonyear''			| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 echo '}'									| sudo tee -a /boot/settings.json	> /dev/null 2>&1
 
 echo -e "${Yellow}Configuring various settings..."
@@ -239,8 +245,8 @@ mkdir /var/opt/judge/bin 																													> /dev/null 2>&1
 
 sudo wget -O /lib/systemd/system/judge.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.service 		> /dev/null 2>&1
 wget -O /var/opt/judge/bin/judge.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge.sh							> /dev/null 2>&1
-wget -O /home/judge/judge_update.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_update.sh					> /dev/null 2>&1
-chmod +x /home/judge/judge_update.sh																										> /dev/null 2>&1	
+wget -O /home/judge/fetch_update.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/fetch_update.sh				> /dev/null 2>&1
+chmod +x /home/judge/fetch_update.sh																									> /dev/null 2>&1	
 sudo wget -O /lib/systemd/system/kiosk.service https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.service			> /dev/null 2>&1
 wget -O /var/opt/judge/bin/kiosk.sh https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/kiosk.sh							> /dev/null 2>&1
 
@@ -257,6 +263,6 @@ echo -e "${Yellow}Creating Default Pilots for Testing..."
 wget -O /tmp/data.zip https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/data.zip						    > /dev/null 2>&1
 unzip -o /tmp/data.zip -d /var/opt/judge/
 
-/home/judge/judge_update.sh
+/home/judge/fetch_update.sh
 
 echo -e "${Yellow}AeroJudge App installation complete!"

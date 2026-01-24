@@ -84,7 +84,9 @@ public class InfoCollectorService {
                 return new InfoLine("WiFi:", "unknown", "0%");
             } //else assume linux/Pi
 
-            Process process = Runtime.getRuntime().exec("iwconfig");
+            // Updated deprecated Runtime.exec() to ProcessBuilder 2025-11 DPG
+            ProcessBuilder pb = new ProcessBuilder("iwconfig");
+            Process process = pb.start();
             java.io.BufferedReader reader = new java.io.BufferedReader(
                 new java.io.InputStreamReader(process.getInputStream()));
 
@@ -120,11 +122,8 @@ public class InfoCollectorService {
 
     private InfoLine getBatteryStatus() {
         try {
-            Context pi4j = Pi4J.newAutoContext();
-            INA226PowerUtils sensor = new INA226PowerUtils(pi4j);
+            double packV = readBusVoltage();
             LiPoBatteryEstimator est = new LiPoBatteryEstimator();
-
-            double packV = sensor.getBusVoltage();
             int percent = est.estimatePercentage(packV);
             int cells = est.getNumCells();
 
@@ -134,8 +133,31 @@ public class InfoCollectorService {
             logger.error("Error reading battery status: " + e.getMessage());
             return new InfoLine("Battery Status:", "Error", "0%");
         }
+    }
 
-        
+    /**
+     * Lightweight battery percentage check - only gets calculated battery percentage
+     * @return Battery percentage (0-100), or -1 if read fails
+     */
+    public int getBatteryPercent() {
+        try {
+            double packV = readBusVoltage();
+            LiPoBatteryEstimator est = new LiPoBatteryEstimator();
+            return est.estimatePercentage(packV);
+        } catch (Exception e) {
+            logger.warn("Battery read failed: {}", e.getMessage());
+            return -1;
+        }
+    }
+
+    /**
+     * Read bus voltage from the I2C sensor.
+     * @return Bus voltage in volts
+     */
+    private double readBusVoltage() throws Exception {
+        Context pi4j = Pi4J.newAutoContext();
+        INA226PowerUtils sensor = new INA226PowerUtils(pi4j);
+        return sensor.getBusVoltage();
     }
 
     private InfoLine getScoreStatus () {
