@@ -107,49 +107,77 @@
             .incomplete-overlay.active {
                 display: flex;
             }
+            .dir-toggle-wrap {
+                display: flex;
+                justify-content: center;
+                margin: 6px 0 4px;
+            }
+            .dir-toggle-btn {
+                min-width: 220px;
+                border: 2px solid #424242;
+                border-radius: 999px;
+                background: #fafafa;
+                color: #212121;
+                font-weight: 700;
+                font-size: 1.15rem;
+                letter-spacing: 0.02em;
+                padding: 10px 18px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+            .dir-toggle-btn:hover {
+                background: #fff9c4;
+                border-color: #ff9800;
+            }
+            .dir-toggle-btn.is-c {
+                background: #e3f2fd;
+                border-color: #1565c0;
+                color: #0d47a1;
+            }
+            .dir-toggle-arrow {
+                font-size: 1.2rem;
+                line-height: 1;
+            }
+            .dir-hint {
+                margin: 6px 0 0;
+                text-align: center;
+                color: #616161;
+                font-size: 0.9rem;
+            }
         </style>
 
         <!-- Battery Warning Indicator (updated via onOpenStart callback in pilot-list pages) -->
         <div class="battery-status"></div>
 
         <h5 th:text="${pilot.name}" style="font-size: 2.8rem; font-weight: 700; margin-bottom: 30px;">Judging Pilot</h5>
-        <h6 class="black-text">SELECT ROUND DIRECTION & TYPE</h6>
+        <h6 class="black-text">Select Direction (tap to change)</h6>
         <form th:id="'judgeknown'+${pilot.index}" action="/judge" method="get">
             <input type="hidden" name="pilot_id" th:value="${pilot.primary_id}"/>
             <input type="hidden" th:id="'roundType'+${pilot.index}" name="roundType" value="KNOWN"/>
             <input type="hidden" th:id="'dirflip'+${pilot.index}" name="dirflip" value="false" />
             <input type="hidden" th:id="'sequenceType'+${pilot.index}" name="sequenceType" th:value="${comp.sequenceType}" />
             <div class="row">
-                <div class="col s3"><a class="">
-                    <i class="small material-icons">east</i>
-                    <i class="small material-icons">east</i></a>
+                <div class="col s12 dir-toggle-wrap">
+                    <button type="button" class="dir-toggle-btn" th:id="'btn_dirflip'+${pilot.index}" aria-label="Toggle round direction">
+                        <span class="dir-label">B</span>
+                        <i class="material-icons dir-toggle-arrow">east</i>
+                        <i class="material-icons dir-toggle-arrow">east</i>
+                    </button>
                 </div>
-                
-                <div class="col s6 switch">
-                    <label class="black-text" style="font-size: 12pt" th:for="'cb_dirflip'+${pilot.index}">
-                    (B)
-                    <input type="checkbox" th:id="'cb_dirflip'+${pilot.index}" 
-                           th:onchange="'javascript:$(\'#dirflip'+${pilot.index}+'\').val(this.checked)'"/>
-                    <span class="lever"></span>
-                    (C)
-                    </label>
-                </div>
-            
-                <div class="col s3"><a class="">
-                    <i class="small material-icons">west</i>
-                    <i class="small material-icons">west</i></a>
-                </div>
-        
             </div>
 
-            <h6 class="black-text" style="margin-top: 30px;">Touch to start judging</h6>
+            <h6 class="black-text" style="margin-top: 30px;">Touch on TYPE button to start judging</h6>
 
             <div class="row">
                 <div class="col s4">
                     <a th:id="'act_known'+${pilot.index}" class="type-btn known-btn" href="#"
                        th:attr="data-pilot-idx=${pilot.index},data-pilot-id=${pilot.primary_id},data-max-sequences=${comp.sequences},data-active-sequence=${pilotScores[pilot.primary_id].activeSequence}">
                         <i class="material-icons type-btn-icon">visibility</i>
-                        <span class="type-btn-label">KN</span>
+                        <span class="type-btn-label">KNO</span>
                         <span class="type-btn-round" th:text="${pilotScores[pilot.primary_id].getActiveRound('KNOWN')}"></span>
                     </a>
                 </div>
@@ -159,7 +187,7 @@
                        th:class="${classesWithUnknown.contains(pilot.classString.toUpperCase())} ? 'type-btn' : 'type-btn disabled'"
                        th:onclick="${classesWithUnknown.contains(pilot.classString.toUpperCase())} ? 'javascript:$(\'#roundType'+${pilot.index}+'\').val(\'UNKNOWN\'); $(\'#judgeknown'+${pilot.index}+'\').submit();' : null">
                         <i class="material-icons type-btn-icon">visibility_off</i>
-                        <span class="type-btn-label">UK</span>
+                        <span class="type-btn-label">UNK</span>
                         <span class="type-btn-round" th:text="${pilotScores[pilot.primary_id].getActiveRound('UNKNOWN')}"></span>
                     </a>
                 </div>
@@ -169,7 +197,7 @@
                        th:class="${hasFreestyle} ? 'type-btn' : 'type-btn disabled'"
                        th:onclick="${hasFreestyle} ? 'javascript:$(\'#roundType'+${pilot.index}+'\').val(\'FREESTYLE\'); $(\'#judgeknown'+${pilot.index}+'\').submit();' : null">
                         <i class="material-icons type-btn-icon">diversity_2</i>
-                        <span class="type-btn-label">FS</span>
+                        <span class="type-btn-label">FREE</span>
                         <span class="type-btn-round" th:text="${pilotScores[pilot.primary_id].getActiveRound('FREESTYLE')}"></span>
                     </a>
                 </div>
@@ -214,6 +242,32 @@
                 var activeSequence = /*[[${pilotScores[pilot.primary_id].activeSequence}]]*/ 1;
 
                 var overlay = $('#incomplete_overlay_' + pilotIdx);
+                var dirflipInput = $('#dirflip' + pilotIdx);
+                var dirToggleBtn = $('#btn_dirflip' + pilotIdx);
+
+                function renderDirectionButton() {
+                    var isC = String(dirflipInput.val()) === 'true';
+                    if (isC) {
+                        dirToggleBtn
+                            .addClass('is-c')
+                            .attr('aria-pressed', 'true')
+                            .html('<i class="material-icons dir-toggle-arrow">west</i><i class="material-icons dir-toggle-arrow">west</i><span class="dir-label">C</span>');
+                    } else {
+                        dirToggleBtn
+                            .removeClass('is-c')
+                            .attr('aria-pressed', 'false')
+                            .html('<span class="dir-label">B</span><i class="material-icons dir-toggle-arrow">east</i><i class="material-icons dir-toggle-arrow">east</i>');
+                    }
+                }
+
+                dirToggleBtn.on('click', function(e) {
+                    e.preventDefault();
+                    var isCurrentlyC = String(dirflipInput.val()) === 'true';
+                    dirflipInput.val(isCurrentlyC ? 'false' : 'true');
+                    renderDirectionButton();
+                });
+
+                renderDirectionButton();
 
                 function showOverlay() {
                     overlay.addClass('active');
