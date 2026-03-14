@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>co.za.imac</groupId>
 	<artifactId>judge</artifactId>
-	<version>2.0</version>
+	<version>2.1</version>
 	<name>judge</name>
 	<description>AeroJudge</description>
 	<packaging>jar</packaging>
@@ -56,10 +56,6 @@
 			<artifactId>unirest-java</artifactId>
 			<version>1.4.9</version>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-		</dependency>
 
 		<!-- Pi4J Core used for the Powerboard-->
 		<dependency>
@@ -82,13 +78,6 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter-parent</artifactId>
 				<version>3.0.13</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>2022.0.3</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
