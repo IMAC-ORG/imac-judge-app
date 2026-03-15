@@ -48,6 +48,20 @@
             line-height: 10vh;
             line-height: 3vh; 
         }
+
+        .dir-toggle-row {
+            margin-top: -14px;
+            margin-bottom: 0;
+        }
+
+        .btn-change-dir {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            height: 36px;
+            line-height: 36px;
+            padding: 0 14px;
+        }
     </style>
     <!-- CSS  -->
     <link href="materialize/css/material_lcons.css" rel="stylesheet">
@@ -88,16 +102,22 @@
                     <div class="col s8">
                     <br>
                     <img id="my-svg" style="width:60vw; height:70vh;" class="figure-wrapper" alt="Figure Image"
+                    th:attr="data-figure-index=${iterStat.index + 1}"
                     th:src="@{/man/{language}/{sequenceFolderPath}/{index}{dirletter}.svg(language=${settings.language}, sequenceFolderPath=${sequenceFolderPath}, index=${iterStat.index + 1}, dirletter=${dirletter})}"
                     onerror="this.onerror=null; this.src= sequencesBasePath + '/default/FAIL/fig_missing.svg';">
                     </div>
+                </div>
+            </div>
+            <div class="row dir-toggle-row" th:if="${(roundType eq 'KNOWN' or roundType eq 'UNKNOWN') and iterStat.index == 0}">
+                <div class="col s4 center-align" style="margin-left: 10px;">
+                    <a class="waves-effect waves-light btn blue darken-1 btn-change-dir" id="btnChangeDir" href="#!">Change Dir</a>
                 </div>
             </div>
             <div class="row">
                 <div class="col s4 left" style="font-size: 4vh; font-weight: 500; margin-left: 10px;">
                     <span>Round <span th:text="${activeRound}"></span></span>
                     <span th:if="${roundType eq 'KNOWN'}"> Seq <span th:text="${pilotScores.activeSequence}"></span></span>
-                    <span th:if="${roundType eq 'KNOWN' or roundType eq 'UNKNOWN'}"> Dir <span th:text="${dirletter}"></span></span>
+                    <span th:if="${roundType eq 'KNOWN' or roundType eq 'UNKNOWN'}"> Dir <span class="dirletter-label" th:text="${dirletter}"></span></span>
                 </div>
                 
                 <h2 style="line-height: 1rem ; margin: 1rem ;" th:id="'description_'+ ${iterStat.index}">
@@ -149,6 +169,7 @@
         const sequenceFolderPath = /*[[${sequenceFolderPath}]]*/ ;
         const audioBasePath = sequencesBasePath + "/audio";  // Score audio, Now Judging audio
         const sequenceType = /*[[${sequenceType}]]*/ ;  // Kept for backward compatibility
+        let currentDirLetter = /*[[${dirletter}]]*/ 'B';
 
         const welcome_text = 'Now judging ' + pilot_name + ' ' + pilot_class + ' round ' + round + ' sequence ' + sequence + ' ' + roundType;
         const synth = window.speechSynthesis;
@@ -315,6 +336,20 @@
 
         function isNumber(n) {
             return Number(n) === n;
+        }
+
+        function updateDirectionUI() {
+            $('.dirletter-label').text(currentDirLetter);
+            $('.figure-wrapper').each(function () {
+                var figureIndex = $(this).attr('data-figure-index');
+                var imagePath = sequencesBasePath + '/' + sequenceFolderPath + '/' + figureIndex + currentDirLetter + '.svg';
+                $(this).attr('src', imagePath);
+            });
+        }
+
+        function toggleDir() {
+            currentDirLetter = currentDirLetter === 'B' ? 'C' : 'B';
+            updateDirectionUI();
         }
 
         function textToSpeechCustomMessage(text) {
@@ -622,6 +657,13 @@
                 longDescription();
             }
         });
+
+        $('#btnChangeDir').on('click', function(e) {
+            e.preventDefault();
+            toggleDir();
+        });
+
+        updateDirectionUI();
         /*]]>*/
     </script>
 
