@@ -7,15 +7,33 @@
 # updated remotely without needing to modify files on individual devices.
 #
 # Usage:
-#   /home/judge/fetch_update.sh
+#   /home/judge/fetch_update.sh                  # Legacy: full update (download + install)
+#   /home/judge/fetch_update.sh --download-only  # Phase 1: check + download assets
+#   /home/judge/fetch_update.sh --install        # Phase 2: backup, install, health check
 #
 # Exit Codes (passed through from judge_update.sh):
 #   0 = No update needed (already running latest version)
 #   1 = Error occurred during update
-#   2 = Update successfully applied
+#   2 = Update successfully applied / assets downloaded and ready
 # =============================================================================
 
 UPDATE_URL="https://raw.githubusercontent.com/IMAC-ORG/imac-judge-app/main/scripts/judge_update.sh"
 
-curl -sfS "$UPDATE_URL" | bash
-exit $?
+# Download the update script to a temp file so we can pass arguments to it.
+# The previous `curl | bash` pattern could not forward arguments.
+SCRIPT_FILE=$(mktemp /tmp/judge_update_XXXXXX.sh)
+curl -sfS "$UPDATE_URL" -o "$SCRIPT_FILE"
+CURL_EXIT=$?
+
+if [ $CURL_EXIT -ne 0 ]; then
+    echo "Error fetching update script (no internet?)" >&2
+    rm -f "$SCRIPT_FILE"
+    exit 1
+fi
+
+chmod +x "$SCRIPT_FILE"
+bash "$SCRIPT_FILE" "$@"
+EXIT_CODE=$?
+
+rm -f "$SCRIPT_FILE"
+exit $EXIT_CODE

@@ -4,6 +4,79 @@ All notable changes to the AeroJudge App will be documented in this file.
 
 ---
 
+## [Unreleased] - fix/update-exit-143-bug
+
+### Fixed
+
+- **System Update exit code 143 (SIGTERM)**: The "Install Update" flow on the admin Device Settings page
+  failed with error code 143. The update script (`judge_update.sh`) calls `systemctl stop judge.service`
+  as part of the update process, which kills the Spring Boot application that spawned it via
+  `ProcessBuilder.waitFor()`. The child shell process receives SIGTERM (exit 128+15=143) and the update
+  fails every time.
+
+  **Root cause:** The Java process blocked on `process.waitFor()` while the script stopped the very
+  service that owned that process. The script killed its own parent.
+
+  **Fix:** Split the update into two phases:
+  1. **Download phase** (synchronous): Java calls `fetch_update.sh --download-only`, which checks for a
+     newer version on GitHub and downloads assets to `/tmp/judge-update/`. Java waits for the exit code
+     and returns an accurate response to the browser (`restart: true/false`).
+  2. **Install phase** (fire-and-forget): If assets were downloaded, Java launches the install via
+     `sudo systemd-run --unit=judge-update --scope fetch_update.sh --install`. This runs the script
+     in its own systemd scope, independent of `judge.service`. When the script stops the service,
+     the install process continues running.
+
+  **Safety features added:**
+  - **Backup before install**: Current `judge.jar` is copied to `judge.jar.bak` before any files
+    are overwritten. If the new version fails, the backup is available for recovery.
+  - **Automatic health check**: After installing and restarting services, the script polls
+    `/actuator/health` (30 retries at 5-second intervals = 150-second window) to verify the new
+    version started successfully.
+  - **Automatic rollback**: If the health check fails, the script restores `judge.jar.bak`,
+    restarts both `judge.service` and `kiosk.service`, and verifies the rollback with the same
+    health check window. The device returns to the previous working version without manual
+    intervention.
+  - **Version marker moved to post-install**: `.judge_last_release` is now only written after the
+    health check passes. Previously it was written before downloading assets, which meant a failed
+    download would leave the device thinking it was already updated (pre-existing bug, now fixed).
+  - **Isolated staging directory**: Assets download to `/tmp/judge-update/` instead of the working
+    directory. A download failure leaves the installed binary completely untouched.
+  - **Absolute paths**: All file references now use absolute paths (e.g., `/home/judge/.judge_last_release`)
+    instead of relative paths, eliminating working directory ambiguity.
+
+  **Backwards compatibility:** `judge_update.sh` supports a legacy mode (no flags) that runs the
+  full download-then-install flow in one pass. Devices with the old `fetch_update.sh` (which cannot
+  pass flags) will use this mode and still receive the backup, health check, and rollback features.
+
+  **Frontend unchanged:** The API contract (`result`, `message`, `restart` fields) is preserved
+  exactly. The two-phase browser flow (check for updates → confirm → install) works as before with
+  no JavaScript changes.
+
+  **Files changed:**
+  - `APIController.java`: Replaced `executeUpdateScript()` (blocking) with `runDownloadPhase()`
+    (synchronous) + `launchInstallPhase()` (fire-and-forget via `systemd-run`)
+  - `fetch_update.sh`: Changed from `curl | bash` to download-then-execute pattern so arguments
+    (`--download-only`, `--install`) can be forwarded to `judge_update.sh`
+  - `judge_update.sh`: Full rewrite — split into `do_download()` and `do_install()` functions with
+    backup, health check, rollback, and legacy mode support
+
+---
+
+## [2.1] - 2025-12-20
+
+### Added
+
+- **Direction Toggle**: Added direction toggle functionality to the Judge page [#108, #112]
+
+### Changed
+
+- **Removed Eureka client**: Removed use of Eureka service discovery client
+- **Settings format**: Corrected settings format
+- **Docker**: Updated Dockerfile
+- **Scripts**: Added useful utility scripts
+
+---
+
 ## [2.0] - 2025-11-27
 
 ### Added
