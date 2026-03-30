@@ -696,12 +696,12 @@ public class APIController {
                 logger.info("System already up to date");
                 return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
             } else if (exitCode == 2) {
-                // Assets downloaded — launch install phase (fire-and-forget)
-                launchInstallPhase();
+                // Assets downloaded — notify UI first, then launch install phase
                 result.put("result", "ok");
                 result.put("message", "Update applied successfully - restarting...");
                 result.put("restart", true);
                 logger.info("Install phase launched in independent systemd scope");
+                launchInstallPhase();
                 return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
             } else {
                 // Error occurred (exit code 1 or other)
@@ -735,6 +735,7 @@ public class APIController {
 
         Process process = pb.start();
 
+        // Read output for logging
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {

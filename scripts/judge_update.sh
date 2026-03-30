@@ -28,13 +28,17 @@ MODE="$1"
 
 # ---- Shared functions -------------------------------------------------------
 
+# Function to compare semantic versions in format v#.# or v#.#.#
+# Returns: 0 if version1 > version2, 1 otherwise
 compare_versions() {
     local version1=$1
     local version2=$2
 
+    # Remove 'v' prefix if present
     version1=$(echo "$version1" | sed 's/^v//')
     version2=$(echo "$version2" | sed 's/^v//')
 
+    # Compare versions numerically using awk
     result=$(awk -v v1="$version1" -v v2="$version2" 'BEGIN {
         split(v1, a, ".")
         split(v2, b, ".")
@@ -173,6 +177,8 @@ do_download() {
 # Uses `return` (not `exit`) so post-install checks can run after it.
 
 do_install() {
+    ensure_judge_dir
+
     # Verify staging directory exists with assets
     if [ ! -d "$STAGING_DIR" ]; then
         echo "Error: staging directory $STAGING_DIR does not exist. Run --download-only first." >&2
@@ -201,6 +207,13 @@ do_install() {
     if [ -f "$STAGING_DIR/judge.jar" ]; then
         mv "$STAGING_DIR/judge.jar" "$BIN_DIR/judge.jar"
         echo "Installed judge.jar version $TARGET_VERSION"
+    fi
+
+    # Side-load: allow manually placing a judge.jar in /home/judge for ad-hoc
+    # upgrades or testing. Intentionally kept — do not remove.
+    if [ -f /home/judge/judge.jar ]; then
+        mv /home/judge/judge.jar "$BIN_DIR/judge.jar"
+        echo "Installed side-loaded judge.jar from /home/judge"
     fi
 
     if [ -f "$STAGING_DIR/figures.zip" ]; then
