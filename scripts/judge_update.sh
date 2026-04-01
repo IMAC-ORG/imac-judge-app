@@ -209,13 +209,6 @@ do_install() {
         echo "Installed judge.jar version $TARGET_VERSION"
     fi
 
-    # Side-load: allow manually placing a judge.jar in /home/judge for ad-hoc
-    # upgrades or testing. Intentionally kept — do not remove.
-    if [ -f /home/judge/judge.jar ]; then
-        mv /home/judge/judge.jar "$BIN_DIR/judge.jar"
-        echo "Installed side-loaded judge.jar from /home/judge"
-    fi
-
     if [ -f "$STAGING_DIR/figures.zip" ]; then
         rm -rf "$INSTALL_DIR/figures"
         unzip -qo "$STAGING_DIR/figures.zip" -d "$INSTALL_DIR"
