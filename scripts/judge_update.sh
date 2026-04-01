@@ -5,24 +5,40 @@
 # This script checks for and installs updates from GitHub releases.
 # It is fetched and executed by fetch_update.sh on the device.
 #
+# Modes:
+#   --download-only  Check for update + download assets to /tmp/judge-update/
+#   --install        Backup + install from /tmp/judge-update/ + health check
+#   (no flag)        Legacy: runs full download-then-install (original behavior)
+#
 # Exit Codes:
 #   0 = No update needed (already running latest version)
-#   1 = Error occurred during update
-#   2 = Update successfully applied
+#   1 = Error occurred
+#   2 = Update assets downloaded (--download-only) or update applied (--install/legacy)
 # =============================================================================
+
+INSTALL_DIR="/var/opt/judge"
+BIN_DIR="$INSTALL_DIR/bin"
+STAGING_DIR="/tmp/judge-update"
+LOG_FILE="/tmp/judge-update.log"
+HEALTH_URL="http://localhost:8080/actuator/health"
+HEALTH_RETRIES=30
+HEALTH_INTERVAL=5
+VERSION_FILE="/home/judge/.judge_last_release"
+MODE="$1"
+
+# ---- Shared functions -------------------------------------------------------
 
 # Function to compare semantic versions in format v#.# or v#.#.#
 # Returns: 0 if version1 > version2, 1 otherwise
 compare_versions() {
     local version1=$1
     local version2=$2
-    
+
     # Remove 'v' prefix if present
     version1=$(echo "$version1" | sed 's/^v//')
     version2=$(echo "$version2" | sed 's/^v//')
-    
+
     # Compare versions numerically using awk
-    # awk handles version comparison by splitting on '.' and comparing numerically
     result=$(awk -v v1="$version1" -v v2="$version2" 'BEGIN {
         split(v1, a, ".")
         split(v2, b, ".")
@@ -34,135 +50,270 @@ compare_versions() {
         }
         print 1
     }')
-    
+
     return "$result"
 }
 
-if [ ! -d /var/opt/judge ]; then
-   echo Creating judge folder...
-   sudo mkdir -p /var/opt/judge
-fi
-
-if [ "$(stat -c '%U' /var/opt/judge)" != "judge" ]; then
-   echo Changing owner of judge folder...
-   sudo chown -R judge.judge /var/opt/judge
-   echo Changing judge service to use judge owner...
-   sudo sed -i 's/User=root/User=judge/g' /lib/systemd/system/judge.service
-   sudo systemctl daemon-reload
-fi
-
-if [ ! -f ".judge_last_release" ]; then
-  touch ".judge_last_release"
-fi
-
-last_release=$(cat .judge_last_release)
-
-latest_release=$(curl --silent --fail -G https://api.github.com/repos/IMAC-ORG/imac-judge-app/releases/latest)
-if [ $? -ne 0 ]; then
-   echo "Error fetching latest release (no internet?)!" >&2
-   exit 1
-fi
-
-latest_tag=$(echo $latest_release | grep -oP '"tag_name": "(.*?)"' | cut -d' ' -f2 | tr -d [\"])
-if [ $? -ne 0 ]; then
-   echo "Error parsing feed!" >&2
-   exit 1
-fi
-
-echo "Current version: $last_release"
-echo "Latest version: $latest_tag"
-
-# Check if new version is greater than last release
-if [ -z "$last_release" ] || compare_versions "$latest_tag" "$last_release"; then
-    echo "New release found: $latest_tag"
-
-    echo $latest_tag > .judge_last_release
-
-    echo "Downloading assets..."
-    assets_url=$(echo $latest_release | grep -oP '"assets_url": "(.*?)"' | cut -d' ' -f2 | tr -d [\"])
-    if [ $? -ne 0 ]; then
-       echo "Error parsing for assets url!" >&2
-       exit 1
+ensure_judge_dir() {
+    if [ ! -d "$INSTALL_DIR" ]; then
+        echo "Creating judge folder..."
+        sudo mkdir -p "$INSTALL_DIR"
     fi
 
-    assets=$(curl --silent --fail -G $assets_url | grep download_url | tr -d [\"] | cut -d' ' -f6)
-    if [ $? -ne 0 ]; then
-       echo "Error fetching assets feed!" >&2
-       exit 1
+    if [ "$(stat -c '%U' "$INSTALL_DIR")" != "judge" ]; then
+        echo "Changing owner of judge folder..."
+        sudo chown -R judge.judge "$INSTALL_DIR"
+        echo "Changing judge service to use judge owner..."
+        sudo sed -i 's/User=root/User=judge/g' /lib/systemd/system/judge.service
+        sudo systemctl daemon-reload
     fi
+}
 
-    for asset_url in $assets
-    do
-        echo found asset=$asset_url
-        curl --silent --fail -OL $asset_url
-        if [ $? -ne 0 ]; then
-           echo "Error fetching asset!" >&2
-           exit 1
+# Install volume service if not already present.
+# Must be called BEFORE staging directory is cleaned up.
+check_volume_service() {
+    if [ ! -d /var/opt/volume_service ]; then
+        if [ -f "$STAGING_DIR/volume_service.zip" ] || [ -f volume_service.zip ]; then
+            VZIP="${STAGING_DIR}/volume_service.zip"
+            [ ! -f "$VZIP" ] && VZIP="volume_service.zip"
+
+            echo "Installing and starting volume service..."
+            sudo mkdir -p /var/opt/volume_service
+            sudo chown judge.judge /var/opt/volume_service
+            unzip -quoj "$VZIP" -d /var/opt/volume_service/
+            rm -f "$VZIP"
+
+            chmod +x /var/opt/volume_service/volume.service
+            sudo mv /var/opt/volume_service/volume.service /etc/systemd/system
+            sudo systemctl enable volume
+            sudo systemctl start volume
+        else
+            echo "Latest release does not include the volume service"
         fi
-    done
+    fi
+}
 
-    echo Stopping services....
+# Check for xset in .bashrc (disables key repeat after reboot)
+check_xset() {
+    if ! grep -q "xset r off" /home/judge/.bashrc; then
+        echo "export DISPLAY=:0" >> /home/judge/.bashrc
+        echo "xset r off" >> /home/judge/.bashrc
+        export DISPLAY=:0
+        xset r off
+    fi
+}
+
+# ---- Download phase ---------------------------------------------------------
+# Uses `return` (not `exit`) so the caller can act on the result.
+# Only the main block at the bottom calls `exit`.
+
+do_download() {
+    ensure_judge_dir
+
+    if [ ! -f "$VERSION_FILE" ]; then
+        touch "$VERSION_FILE"
+    fi
+
+    last_release=$(cat "$VERSION_FILE")
+
+    latest_release=$(curl --silent --fail -G https://api.github.com/repos/IMAC-ORG/imac-judge-app/releases/latest)
+    if [ $? -ne 0 ]; then
+        echo "Error fetching latest release (no internet?)!" >&2
+        return 1
+    fi
+
+    latest_tag=$(echo $latest_release | grep -oP '"tag_name": "(.*?)"' | cut -d' ' -f2 | tr -d [\"])
+    if [ $? -ne 0 ]; then
+        echo "Error parsing feed!" >&2
+        return 1
+    fi
+
+    echo "Current version: $last_release"
+    echo "Latest version: $latest_tag"
+
+    if [ -z "$last_release" ] || compare_versions "$latest_tag" "$last_release"; then
+        echo "New release found: $latest_tag"
+
+        # Clean staging directory — fresh download every time
+        rm -rf "$STAGING_DIR"
+        mkdir -p "$STAGING_DIR"
+
+        echo "Downloading assets to $STAGING_DIR..."
+        assets_url=$(echo $latest_release | grep -oP '"assets_url": "(.*?)"' | cut -d' ' -f2 | tr -d [\"])
+        if [ $? -ne 0 ]; then
+            echo "Error parsing for assets url!" >&2
+            return 1
+        fi
+
+        assets=$(curl --silent --fail -G $assets_url | grep download_url | tr -d [\"] | cut -d' ' -f6)
+        if [ $? -ne 0 ]; then
+            echo "Error fetching assets feed!" >&2
+            return 1
+        fi
+
+        for asset_url in $assets
+        do
+            echo "Downloading asset: $asset_url"
+            curl --silent --fail -L -o "$STAGING_DIR/$(basename $asset_url)" "$asset_url"
+            if [ $? -ne 0 ]; then
+                echo "Error fetching asset: $asset_url" >&2
+                rm -rf "$STAGING_DIR"
+                return 1
+            fi
+        done
+
+        # Write the target version to staging so the install phase knows it
+        echo "$latest_tag" > "$STAGING_DIR/.target_version"
+
+        echo "Download complete. Assets staged in $STAGING_DIR"
+        return 2  # Assets ready for install
+    else
+        echo "Latest version already installed"
+        return 0
+    fi
+}
+
+# ---- Install phase ----------------------------------------------------------
+# Uses `return` (not `exit`) so post-install checks can run after it.
+
+do_install() {
+    ensure_judge_dir
+
+    # Verify staging directory exists with assets
+    if [ ! -d "$STAGING_DIR" ]; then
+        echo "Error: staging directory $STAGING_DIR does not exist. Run --download-only first." >&2
+        return 1
+    fi
+
+    TARGET_VERSION=""
+    if [ -f "$STAGING_DIR/.target_version" ]; then
+        TARGET_VERSION=$(cat "$STAGING_DIR/.target_version")
+    fi
+    echo "Installing update: $TARGET_VERSION"
+
+    # Backup current JAR before touching anything
+    BACKUP_CREATED=false
+    if [ -f "$BIN_DIR/judge.jar" ]; then
+        cp "$BIN_DIR/judge.jar" "$BIN_DIR/judge.jar.bak"
+        echo "Backup created: $BIN_DIR/judge.jar.bak"
+        BACKUP_CREATED=true
+    fi
+
+    echo "Stopping services..."
     sudo systemctl stop judge.service
     sudo systemctl stop kiosk.service
 
-    if [ -f judge.jar ]; then
-        mv judge.jar /var/opt/judge/bin/judge.jar
-        echo Installed/Upgraded judge to version $latest_tag
+    # Install assets from staging
+    if [ -f "$STAGING_DIR/judge.jar" ]; then
+        mv "$STAGING_DIR/judge.jar" "$BIN_DIR/judge.jar"
+        echo "Installed judge.jar version $TARGET_VERSION"
     fi
 
-    if [ -f figures.zip ]; then
-        rm -rf /var/opt/judge/figures
-        unzip -qo figures.zip -d /var/opt/judge
-        rm figures.zip
-        echo Installed/Upgraded judge figures to version $latest_tag
+    if [ -f "$STAGING_DIR/figures.zip" ]; then
+        rm -rf "$INSTALL_DIR/figures"
+        unzip -qo "$STAGING_DIR/figures.zip" -d "$INSTALL_DIR"
+        echo "Installed figures version $TARGET_VERSION"
     fi
 
-    echo Starting services....
+    # Install volume service BEFORE cleaning up staging — it reads
+    # volume_service.zip from the staging directory
+    check_volume_service
+
+    echo "Starting services..."
     sudo systemctl start judge.service
     sudo systemctl start kiosk.service
 
-    echo "Update complete!"
-    UPDATE_APPLIED=true
-else
-    echo "Latest version already installed"
-    UPDATE_APPLIED=false
-fi
+    # Health check — wait for Spring Boot to respond
+    echo "Waiting for service to become healthy..."
+    HEALTHY=false
+    for i in $(seq 1 $HEALTH_RETRIES); do
+        sleep $HEALTH_INTERVAL
+        HTTP_STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" "$HEALTH_URL" 2>/dev/null)
+        if [ "$HTTP_STATUS" = "200" ]; then
+            echo "Health check passed (attempt $i/$HEALTH_RETRIES)"
+            HEALTHY=true
+            break
+        fi
+        echo "Health check attempt $i/$HEALTH_RETRIES — status: $HTTP_STATUS"
+    done
 
-#now checking for volume service and install if not found
-if [ ! -d /var/opt/volume_service ]; then
-    if [ -f volume_service.zip ]; then
-      echo "Installing and starting volume service..."
+    if [ "$HEALTHY" = true ]; then
+        # Write version marker only AFTER confirmed healthy. Previously this was
+        # written before downloading assets — if the download failed, the device
+        # would think it was already updated and never retry.
+        echo "$TARGET_VERSION" > "$VERSION_FILE"
+        echo "Version marker updated to $TARGET_VERSION"
 
-      echo Creating volume_service folder and extracting files...
-      sudo mkdir -p /var/opt/volume_service
-      sudo chown judge.judge /var/opt/volume_service
-      unzip -quoj volume_service.zip -d /var/opt/volume_service/
-      rm volume_service.zip
+        # Clean up staging
+        rm -rf "$STAGING_DIR"
 
-      echo Starting volume service...
-      chmod +x /var/opt/volume_service/volume.service
-      sudo mv /var/opt/volume_service/volume.service /etc/systemd/system
-      sudo systemctl enable volume
-      sudo systemctl start volume
+        echo "Update complete and verified healthy!"
+        return 2
 
     else
-      echo Latest release does not include the volume service
+        # ROLLBACK — new version failed to start
+        echo "HEALTH CHECK FAILED — rolling back!" >&2
+
+        if [ "$BACKUP_CREATED" = true ]; then
+            echo "Restoring backup..."
+            sudo systemctl stop judge.service
+            cp "$BIN_DIR/judge.jar.bak" "$BIN_DIR/judge.jar"
+            sudo systemctl start judge.service
+            sudo systemctl start kiosk.service
+
+            # Verify rollback health — same retry window as the main health check
+            echo "Verifying rollback..."
+            ROLLBACK_OK=false
+            for i in $(seq 1 $HEALTH_RETRIES); do
+                sleep $HEALTH_INTERVAL
+                ROLLBACK_STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" "$HEALTH_URL" 2>/dev/null)
+                if [ "$ROLLBACK_STATUS" = "200" ]; then
+                    echo "Rollback successful — service restored to previous version (attempt $i/$HEALTH_RETRIES)"
+                    ROLLBACK_OK=true
+                    break
+                fi
+                echo "Rollback health check attempt $i/$HEALTH_RETRIES — status: $ROLLBACK_STATUS"
+            done
+            if [ "$ROLLBACK_OK" = false ]; then
+                echo "WARNING: Rollback health check did not pass within 150s — manual check recommended" >&2
+            fi
+        else
+            echo "WARNING: No backup available to restore!" >&2
+        fi
+
+        # Do NOT update version marker — next attempt will retry
+        rm -rf "$STAGING_DIR"
+        return 1
     fi
+}
 
-fi
+# ---- Main -------------------------------------------------------------------
+# All `exit` calls are here — functions use `return` so they compose correctly.
 
-#check for xset added to .bashrc that disables key repeat (after reboot)
-if ! grep -q "xset r off" /home/judge/.bashrc; then
-    echo "export DISPLAY=:0" >> /home/judge/.bashrc
-    echo "xset r off" >> /home/judge/.bashrc
-    #now implement the change
-    export DISPLAY=:0
-    xset r off
-fi
-
-# Exit with appropriate code
-if [ "$UPDATE_APPLIED" = true ]; then
-    exit 2  # Update successfully applied
-else
-    exit 0  # No update needed (already running latest version)
-fi
+case "$MODE" in
+    --download-only)
+        do_download
+        exit $?
+        ;;
+    --install)
+        do_install
+        INSTALL_EXIT=$?
+        check_xset
+        exit $INSTALL_EXIT
+        ;;
+    *)
+        # Legacy mode: download + install in one pass.
+        # Backwards compatible with devices that have old fetch_update.sh.
+        do_download
+        DOWNLOAD_EXIT=$?
+        if [ "$DOWNLOAD_EXIT" -eq 2 ]; then
+            do_install
+            INSTALL_EXIT=$?
+            # check_volume_service already called inside do_install
+            check_xset
+            exit $INSTALL_EXIT
+        else
+            exit $DOWNLOAD_EXIT
+        fi
+        ;;
+esac

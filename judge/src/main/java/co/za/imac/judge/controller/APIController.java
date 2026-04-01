@@ -1,6 +1,7 @@
 package co.za.imac.judge.controller;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
@@ -667,8 +668,15 @@ public class APIController {
     }
 
     /**
-     * Run system update by executing the local fetch_update.sh script.
-     * Exit codes: 0 = no update needed, 1 = error, 2 = update applied
+     * Run system update using a two-phase approach:
+     *
+     * 1. Download phase: runs synchronously so we can report the outcome.
+     *    The script checks for a newer version and downloads assets to
+     *    /tmp/judge-update/. Exit codes: 0 = no update, 1 = error, 2 = ready.
+     *
+     * 2. Install phase: launched via systemd-run in its own scope so it
+     *    survives the judge.service restart. Backs up the current JAR,
+     *    installs the update, health-checks, and rolls back on failure.
      */
     @PostMapping("/api/system/update")
     public ResponseEntity<String> runSystemUpdate() {
@@ -677,7 +685,8 @@ public class APIController {
         logger.info("System update requested");
 
         try {
-            int exitCode = executeUpdateScript();
+            // Phase 1: Download (synchronous — we need the exit code)
+            int exitCode = runDownloadPhase();
 
             if (exitCode == 0) {
                 // No update was needed - already running latest
@@ -687,17 +696,18 @@ public class APIController {
                 logger.info("System already up to date");
                 return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
             } else if (exitCode == 2) {
-                // Update was successfully applied
+                // Assets downloaded — notify UI first, then launch install phase
                 result.put("result", "ok");
                 result.put("message", "Update applied successfully - restarting...");
                 result.put("restart", true);
-                logger.info("System update applied successfully");
+                logger.info("Install phase launched in independent systemd scope");
+                launchInstallPhase();
                 return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
             } else {
                 // Error occurred (exit code 1 or other)
                 result.put("result", "fail");
                 result.put("message", "Update script returned error code: " + exitCode);
-                logger.error("System update failed with exit code: {}", exitCode);
+                logger.error("Download phase failed with exit code: {}", exitCode);
                 return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
@@ -710,10 +720,17 @@ public class APIController {
     }
 
     /**
-     * Execute the local fetch_update.sh script which fetches and runs the update from GitHub.
+     * Download phase: check for a newer version and download assets to
+     * /tmp/judge-update/. Does NOT stop services or modify installed files.
+     *
+     * Exit codes (from fetch_update.sh --download-only):
+     *   0 = No update needed (already running latest version)
+     *   1 = Error occurred during download
+     *   2 = Assets downloaded to /tmp/judge-update/ and ready to install
      */
-    private int executeUpdateScript() throws IOException, InterruptedException {
-        ProcessBuilder pb = new ProcessBuilder("/home/judge/fetch_update.sh");
+    private int runDownloadPhase() throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder("/home/judge/fetch_update.sh", "--download-only");
+        pb.directory(new File("/home/judge"));
         pb.redirectErrorStream(true);
 
         Process process = pb.start();
@@ -722,10 +739,40 @@ public class APIController {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                logger.info("Update: {}", line);
+                logger.info("Update [download]: {}", line);
             }
         }
 
         return process.waitFor();
+    }
+
+    /**
+     * Install phase: launched via systemd-run so it runs in its own systemd
+     * scope, independent of judge.service. When the script calls
+     * "systemctl stop judge.service", only the Spring Boot process stops —
+     * the install script continues running under its own scope.
+     *
+     * The script will:
+     *   1. Backup current JAR to judge.jar.bak
+     *   2. Stop judge.service and kiosk.service
+     *   3. Install downloaded assets from /tmp/judge-update/
+     *   4. Start services
+     *   5. Health check via /actuator/health
+     *   6. If healthy: update .judge_last_release, clean up, done
+     *   7. If NOT healthy: restore backup, restart services
+     *
+     * Output is logged to /tmp/judge-update.log for post-mortem debugging.
+     */
+    private void launchInstallPhase() throws IOException {
+        ProcessBuilder pb = new ProcessBuilder(
+            "sudo", "systemd-run",
+            "--unit=judge-update",
+            "--scope",
+            "/home/judge/fetch_update.sh", "--install"
+        );
+        pb.directory(new File("/home/judge"));
+        pb.redirectErrorStream(true);
+        pb.redirectOutput(new File("/tmp/judge-update.log"));
+        pb.start();
     }
 }
