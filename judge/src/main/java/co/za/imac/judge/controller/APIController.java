@@ -766,7 +766,7 @@ public class APIController {
     private void launchInstallPhase() throws IOException {
         ProcessBuilder pb = new ProcessBuilder(
             "sudo", "systemd-run",
-            "--unit=judge-update",
+            "--uid=judge",
             "--scope",
             "/home/judge/fetch_update.sh", "--install"
         );
