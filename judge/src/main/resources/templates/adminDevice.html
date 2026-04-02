@@ -528,7 +528,7 @@
             if (data.restart) {
               // Update was applied and device is restarting
               $('#updateMessage').html('<span class="green-text">' + (data.message || 'Update applied successfully - restarting...') + '</span>');
-              M.toast({ html: 'Update successful - restarting...', classes: 'green', displayLength: 5000 });
+              M.toast({ html: 'Update successful - Please wait while restarting...', classes: 'green', displayLength: 20000 });
               setTimeout(function() {
                 window.location.reload();
               }, 15000);
