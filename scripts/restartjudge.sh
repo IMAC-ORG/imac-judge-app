@@ -5,7 +5,7 @@ sudo systemctl restart judge.service
 
 echo "Waiting for service to become healthy..."
 HEALTH_URL="http://localhost:8080/actuator/health"
-HEALTH_RETRIES=300
+HEALTH_RETRIES=30
 HEALTH_INTERVAL=5
 HEALTHY=false
 for i in $(seq 1 $HEALTH_RETRIES); do
