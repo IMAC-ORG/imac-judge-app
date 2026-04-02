@@ -761,18 +761,18 @@ public class APIController {
      *   6. If healthy: update .judge_last_release, clean up, done
      *   7. If NOT healthy: restore backup, restart services
      *
-     * Output is logged to /tmp/judge-update.log for post-mortem debugging.
+     * Output is logged to /var/opt/judge/judge-update.log for post-mortem debugging.
      */
     private void launchInstallPhase() throws IOException {
         ProcessBuilder pb = new ProcessBuilder(
             "sudo", "systemd-run",
-            "--unit=judge-update",
+            "--uid=judge",
             "--scope",
             "/home/judge/fetch_update.sh", "--install"
         );
         pb.directory(new File("/home/judge"));
         pb.redirectErrorStream(true);
-        pb.redirectOutput(new File("/tmp/judge-update.log"));
+        pb.redirectOutput(new File("/var/opt/judge/judge-update.log"));
         pb.start();
     }
 }

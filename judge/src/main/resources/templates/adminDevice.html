@@ -526,12 +526,42 @@
           $('#updateProgress').hide();
           if (data.result === "ok") {
             if (data.restart) {
-              // Update was applied and device is restarting
-              $('#updateMessage').html('<span class="green-text">' + (data.message || 'Update applied successfully - restarting...') + '</span>');
-              M.toast({ html: 'Update successful - restarting...', classes: 'green', displayLength: 5000 });
-              setTimeout(function() {
-                window.location.reload();
-              }, 15000);
+              // Install phase launched — poll until service restarts, then verify version
+              $('#updateMessage').html('<span class="blue-text">Installing update — waiting for restart...</span>');
+              $('#updateProgress').show();
+              var pollAttempts = 0;
+              var maxAttempts = 40; // 40 x 5s = 200s max wait
+              var pollInterval = setInterval(function() {
+                pollAttempts++;
+                $.ajax({
+                  url: "/api/version",
+                  type: "GET",
+                  timeout: 3000,
+                  success: function(vData) {
+                    clearInterval(pollInterval);
+                    $('#updateProgress').hide();
+                    var newVersion = vData.appVersion || '';
+                    if (pendingUpdateVersion && newVersion === pendingUpdateVersion) {
+                      $('#updateMessage').html('<span class="green-text">Update successful — now running v' + newVersion + '</span>');
+                      M.toast({ html: 'Update successful — v' + newVersion, classes: 'green', displayLength: 5000 });
+                    } else {
+                      $('#updateMessage').html('<span class="red-text">Update failed — rolled back to v' + newVersion + '</span>');
+                      M.toast({ html: 'Update failed — rolled back to v' + newVersion, classes: 'red', displayLength: 5000 });
+                    }
+                    $('#runUpdate').removeClass('disabled');
+                    setTimeout(function() { window.location.reload(); }, 5000);
+                  },
+                  error: function() {
+                    if (pollAttempts >= maxAttempts) {
+                      clearInterval(pollInterval);
+                      $('#updateProgress').hide();
+                      $('#updateMessage').html('<span class="orange-text">Service has not responded — check device manually</span>');
+                      M.toast({ html: 'Service not responding — check device', classes: 'orange', displayLength: 5000 });
+                      $('#runUpdate').removeClass('disabled');
+                    }
+                  }
+                });
+              }, 5000);
             } else {
               // No update needed (script returned exit 0)
               $('#updateMessage').html('<span class="green-text">' + (data.message || 'Already up to date') + '</span>');

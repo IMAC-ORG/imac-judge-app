@@ -201,7 +201,6 @@ do_install() {
 
     echo "Stopping services..."
     sudo systemctl stop judge.service
-    sudo systemctl stop kiosk.service
 
     # Install assets from staging
     if [ -f "$STAGING_DIR/judge.jar" ]; then
@@ -221,7 +220,6 @@ do_install() {
 
     echo "Starting services..."
     sudo systemctl start judge.service
-    sudo systemctl start kiosk.service
 
     # Health check — wait for Spring Boot to respond
     echo "Waiting for service to become healthy..."
@@ -247,6 +245,9 @@ do_install() {
         # Clean up staging
         rm -rf "$STAGING_DIR"
 
+        # Refresh the kiosk browser to show the updated app
+        DISPLAY=:0 xdotool search --onlyvisible --class chromium key F5
+
         echo "Update complete and verified healthy!"
         return 2
 
@@ -259,7 +260,6 @@ do_install() {
             sudo systemctl stop judge.service
             cp "$BIN_DIR/judge.jar.bak" "$BIN_DIR/judge.jar"
             sudo systemctl start judge.service
-            sudo systemctl start kiosk.service
 
             # Verify rollback health — same retry window as the main health check
             echo "Verifying rollback..."
@@ -270,6 +270,8 @@ do_install() {
                 if [ "$ROLLBACK_STATUS" = "200" ]; then
                     echo "Rollback successful — service restored to previous version (attempt $i/$HEALTH_RETRIES)"
                     ROLLBACK_OK=true
+                    # Refresh the kiosk browser to show the restored app
+                    DISPLAY=:0 xdotool search --onlyvisible --class chromium key F5
                     break
                 fi
                 echo "Rollback health check attempt $i/$HEALTH_RETRIES — status: $ROLLBACK_STATUS"
