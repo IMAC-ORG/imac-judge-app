@@ -62,7 +62,7 @@ ensure_judge_dir() {
 
     if [ "$(stat -c '%U' "$INSTALL_DIR")" != "judge" ]; then
         echo "Changing owner of judge folder..."
-        sudo chown -R judge.judge "$INSTALL_DIR"
+        sudo chown -R judge:judge "$INSTALL_DIR"
         echo "Changing judge service to use judge owner..."
         sudo sed -i 's/User=root/User=judge/g' /lib/systemd/system/judge.service
         sudo systemctl daemon-reload
@@ -79,7 +79,7 @@ check_volume_service() {
 
             echo "Installing and starting volume service..."
             sudo mkdir -p /var/opt/volume_service
-            sudo chown judge.judge /var/opt/volume_service
+            sudo chown judge:judge /var/opt/volume_service
             unzip -quoj "$VZIP" -d /var/opt/volume_service/
             rm -f "$VZIP"
 
