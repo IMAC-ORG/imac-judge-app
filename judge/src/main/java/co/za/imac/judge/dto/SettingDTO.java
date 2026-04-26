@@ -1,10 +1,10 @@
 package co.za.imac.judge.dto;
 
 public class SettingDTO {
-    
+    //Leave these as defaults for AeroJudge devices
     private int judge_id = 1;
-    private String score_host = "192.168.1.4";
-    private int score_http_port = 8181;
+    private String score_host = "192.168.8.100";
+    private int score_http_port = 80;
     private int line_number = 1;
     private int score_poll_timeout = 2; //seconds
     private int score_timeout = 10; //seconds
