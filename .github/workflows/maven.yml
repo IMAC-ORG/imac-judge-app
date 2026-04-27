@@ -20,9 +20,47 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - name: Detect releasable changes
+      id: detect-changes
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        git fetch --tags
+
+        changed_files=""
+        if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+          changed_files="$(git diff --name-only "${{ github.event.before }}..${{ github.sha }}")"
+          echo "Comparing push range: ${{ github.event.before }}..${{ github.sha }}"
+        else
+          latest_stable_tag="$(git tag --list 'v*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+(\.[0-9]+)?$' | head -n 1 || true)"
+          if [ -n "$latest_stable_tag" ]; then
+            changed_files="$(git diff --name-only "$latest_stable_tag..HEAD")"
+            echo "Comparing manual range: $latest_stable_tag..HEAD"
+          else
+            changed_files="$(git ls-tree -r --name-only HEAD)"
+            echo "No stable tags found; checking repository contents at HEAD"
+          fi
+        fi
+
+        if echo "$changed_files" | grep -E '^(judge/|figures/|volume_service/)' >/dev/null; then
+          echo "should_tag=true" >> "$GITHUB_OUTPUT"
+          echo "Releasable changes detected"
+        else
+          echo "should_tag=false" >> "$GITHUB_OUTPUT"
+          echo "No releasable changes detected; skipping tag creation"
+        fi
+
+    - name: Skip summary
+      if: steps.detect-changes.outputs.should_tag != 'true'
+      run: echo "Skipping tag creation because no changes were found in judge/, figures/, or volume_service/"
 
     - name: Get Latest Tag
       id: latest-tag
+      if: steps.detect-changes.outputs.should_tag == 'true'
       run: |
         git fetch --tags
         latest_tag=$(git tag --list 'v*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+(\.[0-9]+)?$' | head -n 1)
@@ -33,6 +71,7 @@ jobs:
 
     - name: Increment Tag
       id: increment-tag
+      if: steps.detect-changes.outputs.should_tag == 'true'
       run: |
         latest_tag="${{ steps.latest-tag.outputs.latest_tag }}"
         prefix=${latest_tag%.*}
@@ -43,6 +82,7 @@ jobs:
         echo "Incremented tag: $new_tag"
 
     - name: Create Tag
+      if: steps.detect-changes.outputs.should_tag == 'true'
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
