@@ -30,14 +30,14 @@ jobs:
         set -euo pipefail
 
         tag="${{ github.ref_name }}"
-        previous_tag="$(git tag --sort=-v:refname | grep -v "^${tag}$" | head -n 1 || true)"
+        previous_stable_tag="$(git tag --merged "$tag" --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+(\.[0-9]+)?$' | grep -v "^${tag}$" | head -n 1 || true)"
 
-        if [ -n "$previous_tag" ]; then
-          changed_files="$(git diff --name-only "$previous_tag..$tag")"
-          echo "Comparing changes from $previous_tag to $tag"
+        if [ -n "$previous_stable_tag" ]; then
+          changed_files="$(git diff --name-only "$previous_stable_tag..$tag")"
+          echo "Comparing changes from $previous_stable_tag to $tag"
         else
           changed_files="$(git diff-tree --no-commit-id --name-only -r "$tag" || true)"
-          echo "No previous tag found; checking files in tagged commit $tag"
+          echo "No previous stable tag found; checking files in tagged commit $tag"
         fi
 
         if echo "$changed_files" | grep -E '^(judge/|figures/|volume_service/)' >/dev/null; then
@@ -48,7 +48,7 @@ jobs:
           echo "No releasable changes detected; skipping build/release"
         fi
 
-        echo "previous_tag=$previous_tag" >> "$GITHUB_OUTPUT"
+        echo "previous_stable_tag=$previous_stable_tag" >> "$GITHUB_OUTPUT"
 
     - name: Skip summary
       if: steps.detect-changes.outputs.should_release != 'true'
@@ -82,36 +82,77 @@ jobs:
       if: steps.detect-changes.outputs.should_release == 'true'
       run: |
         tag="${{ github.ref_name }}"
-        previous_tag="${{ steps.detect-changes.outputs.previous_tag }}"
+        previous_stable_tag="${{ steps.detect-changes.outputs.previous_stable_tag }}"
+        repo="${{ github.repository }}"
         assets=(
           staging/judge.jar
           staging/figures.zip
           staging/volume_service.zip
         )
+        notes_file="release-notes.md"
 
-        if gh release view "$tag" --repo "${{ github.repository }}" >/dev/null 2>&1; then
-          echo "Release for $tag already exists; replacing assets only"
-          gh release upload "$tag" "${assets[@]}" --clobber --repo "${{ github.repository }}"
+        is_prerelease=false
+        if [[ "$tag" =~ ^v[0-9]+\.[0-9]+(\.[0-9]+)?- ]]; then
+          is_prerelease=true
+        fi
+
+        # Keep a single RC release per base version by deleting older prerelease tags/releases.
+        if [ "$is_prerelease" = true ]; then
+          base_tag="${tag%%-*}"
+          while IFS=$'\t' read -r release_id existing_tag; do
+            [ -z "$release_id" ] && continue
+            if [[ "$existing_tag" == "$base_tag"-* ]] && [[ "$existing_tag" != "$tag" ]]; then
+              echo "Deleting older prerelease release $existing_tag"
+              gh api -X DELETE "repos/$repo/releases/$release_id"
+              echo "Deleting older prerelease tag $existing_tag"
+              git push origin ":refs/tags/$existing_tag" || true
+            fi
+          done < <(gh api "repos/$repo/releases?per_page=100" --jq '.[] | select(.prerelease == true) | "\(.id)\t\(.tag_name)"')
+        fi
+
+        compare_text=""
+        commit_list=""
+        if [ -n "$previous_stable_tag" ]; then
+          compare_url="https://github.com/$repo/compare/$previous_stable_tag...$tag"
+          compare_text="[Full Changelog]($compare_url)"
+          commit_list="$(git log --pretty=format:'- %s (%h)' "$previous_stable_tag..$tag" || true)"
+          heading="## Changes Since $previous_stable_tag"
         else
-          prerelease_flag=""
-          if [[ "$tag" =~ ^v[0-9]+\.[0-9]+(\.[0-9]+)?- ]]; then
-            prerelease_flag="--prerelease"
-          fi
+          commit_list="$(git log -1 --pretty=format:'- %s (%h)' "$tag" || true)"
+          heading="## Changes"
+        fi
 
+        if [ -z "$commit_list" ]; then
+          commit_list="- No commit messages found in the release range."
+        fi
+
+        {
+          echo "$heading"
+          echo
+          echo "$commit_list"
+          if [ -n "$compare_text" ]; then
+            echo
+            echo "$compare_text"
+          fi
+        } > "$notes_file"
+
+        if gh release view "$tag" --repo "$repo" >/dev/null 2>&1; then
+          echo "Release for $tag already exists; replacing assets only"
+          gh release upload "$tag" "${assets[@]}" --clobber --repo "$repo"
+          if [ "$is_prerelease" = true ]; then
+            gh release edit "$tag" --title "Release: $tag" --notes-file "$notes_file" --prerelease --repo "$repo"
+          fi
+        else
           echo "Creating release for $tag"
           release_cmd=(
             gh release create "$tag" "${assets[@]}"
             --title "Release: $tag"
-            --generate-notes
-            --repo "${{ github.repository }}"
+            --notes-file "$notes_file"
+            --repo "$repo"
           )
 
-          if [ -n "$previous_tag" ]; then
-            release_cmd+=(--notes-start-tag "$previous_tag")
-          fi
-
-          if [ -n "$prerelease_flag" ]; then
-            release_cmd+=("$prerelease_flag")
+          if [ "$is_prerelease" = true ]; then
+            release_cmd+=(--prerelease)
           fi
 
           "${release_cmd[@]}"
