@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 clear
 Green='\033[0;32m'        # Green
 Yellow='\033[0;33m'       # Yellow
@@ -90,7 +90,6 @@ echo "Zero 			= 3"
 echo "Break 			= 2"
 echo ""
 
-function gpiokeys {
 echo -e "${Yellow}GPIO Mappings"
 echo -e "${Yellow}1 = Original Mappings"
 echo -e "${Yellow}2 = AeroJudge Red board (No v#) Mappings"
@@ -154,7 +153,7 @@ case $response in
 		echo "Enter the prefered gpio mappings"
 		echo -e "${Blue}Previous :${NC}" 
 		read previous
-		eecho -e "${Blue}+0.5 :${NC}"
+		echo -e "${Blue}+0.5 :${NC}"
 		read plus5
 		echo -e "${Blue}+1.0 :${NC}"
 		read plus1
@@ -201,8 +200,6 @@ case $response in
 
 		;;
 esac
-}
-gpiokeys
 
 echo -e "${Yellow}Configure settings.json file..."
 

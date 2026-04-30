@@ -4,8 +4,8 @@
 # The following fixes some ownership errors that some devices had, removes all old contest data, and performs a device upgrade
 #
 
-sudo chown judge.judge .judge_last_release
-sudo chown -R judge.judge /var/opt/judge
+sudo chown judge:judge .judge_last_release
+sudo chown -R judge:judge /var/opt/judge
 sudo chmod -R go-w /var/opt/judge/
 
 cd /var/opt/judge

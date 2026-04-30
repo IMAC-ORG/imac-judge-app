@@ -11,40 +11,110 @@ name: Create Release
 on:
   push:
     tags: 
-      - 'v[0-9]+.[0-9]+.[0-9]+'
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+      - 'v*.*'
+      - 'v*.*.*'
 jobs:
   build:
-    permissions: write-all
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-java@v4
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - name: Detect releasable changes
+      id: detect-changes
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        tag="${{ github.ref_name }}"
+        previous_tag="$(git tag --sort=-v:refname | grep -v "^${tag}$" | head -n 1 || true)"
+
+        if [ -n "$previous_tag" ]; then
+          changed_files="$(git diff --name-only "$previous_tag..$tag")"
+          echo "Comparing changes from $previous_tag to $tag"
+        else
+          changed_files="$(git diff-tree --no-commit-id --name-only -r "$tag" || true)"
+          echo "No previous tag found; checking files in tagged commit $tag"
+        fi
+
+        if echo "$changed_files" | grep -E '^(judge/|figures/|volume_service/)' >/dev/null; then
+          echo "should_release=true" >> "$GITHUB_OUTPUT"
+          echo "Releasable changes detected"
+        else
+          echo "should_release=false" >> "$GITHUB_OUTPUT"
+          echo "No releasable changes detected; skipping build/release"
+        fi
+
+        echo "previous_tag=$previous_tag" >> "$GITHUB_OUTPUT"
+
+    - name: Skip summary
+      if: steps.detect-changes.outputs.should_release != 'true'
+      run: echo "Skipping release because no changes were found in judge/, figures/, or volume_service/"
+
+    - uses: actions/setup-java@v5
+      if: steps.detect-changes.outputs.should_release == 'true'
       with:
         java-version: '17'
         distribution: 'temurin'
-    - run: |
+    - if: steps.detect-changes.outputs.should_release == 'true'
+      run: |
           cd judge
           mvn clean package
-    - run: ls judge/target/
-    - run: mkdir staging && cp judge/target/*.jar staging/judge.jar
-    - run: cp judge/target/*.zip staging/figures.zip
-    - run: zip -r volume_service.zip volume_service/* && cp volume_service.zip staging/
-    - run: ls staging/
-    - uses: actions/upload-artifact@v4
+    - if: steps.detect-changes.outputs.should_release == 'true'
+      run: ls judge/target/
+    - if: steps.detect-changes.outputs.should_release == 'true'
+      run: mkdir staging && cp judge/target/*.jar staging/judge.jar
+    - if: steps.detect-changes.outputs.should_release == 'true'
+      run: cp judge/target/*.zip staging/figures.zip
+    - if: steps.detect-changes.outputs.should_release == 'true'
+      run: zip -r volume_service.zip volume_service/* && cp volume_service.zip staging/
+    - if: steps.detect-changes.outputs.should_release == 'true'
+      run: ls staging/
+    - uses: actions/upload-artifact@v7
+      if: steps.detect-changes.outputs.should_release == 'true'
       with:
         name: Package
         path: staging
-    - name: Release
-      uses: docker://antonyurchenko/git-release:latest
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        CHANGELOG_FILE: none
-        ALLOW_EMPTY_CHANGELOG: true
-        RELEASE_NAME_PREFIX: "Release: "
-      with:
-        args: |
+    - name: Create or update release assets
+      if: steps.detect-changes.outputs.should_release == 'true'
+      run: |
+        tag="${{ github.ref_name }}"
+        previous_tag="${{ steps.detect-changes.outputs.previous_tag }}"
+        assets=(
           staging/judge.jar
           staging/figures.zip
           staging/volume_service.zip
+        )
+
+        if gh release view "$tag" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+          echo "Release for $tag already exists; replacing assets only"
+          gh release upload "$tag" "${assets[@]}" --clobber --repo "${{ github.repository }}"
+        else
+          prerelease_flag=""
+          if [[ "$tag" =~ ^v[0-9]+\.[0-9]+(\.[0-9]+)?- ]]; then
+            prerelease_flag="--prerelease"
+          fi
+
+          echo "Creating release for $tag"
+          release_cmd=(
+            gh release create "$tag" "${assets[@]}"
+            --title "Release: $tag"
+            --generate-notes
+            --repo "${{ github.repository }}"
+          )
+
+          if [ -n "$previous_tag" ]; then
+            release_cmd+=(--notes-start-tag "$previous_tag")
+          fi
+
+          if [ -n "$prerelease_flag" ]; then
+            release_cmd+=("$prerelease_flag")
+          fi
+
+          "${release_cmd[@]}"
+        fi
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
