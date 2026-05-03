@@ -490,6 +490,94 @@ public class APIController {
         return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
     }
 
+    @PostMapping("/api/scores/fix-missing-sequence")
+    public ResponseEntity<String> fixMissingSequence(@RequestBody Map<String, Object> payload)
+            throws IOException, ParserConfigurationException, SAXException {
+        Map<String, Object> result = new HashMap<>();
+
+        String pilotId = (String) payload.get("pilotId");
+        String roundType = (String) payload.get("roundType");
+        int round = ((Number) payload.get("round")).intValue();
+
+        if (!"KNOWN".equalsIgnoreCase(roundType)) {
+            result.put("result", "fail");
+            result.put("message", "Fix Missing Sequence is only valid for KNOWN rounds.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        Pilot pilot = pilotService.getPilot(pilotId);
+        if (pilot == null) {
+            result.put("result", "fail");
+            result.put("message", "Pilot not found.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        PilotScores scores = pilotService.getPilotScores(pilot);
+
+        // Pilot must have seq 1 of (KNOWN, round) but not seq 2
+        boolean hasSeq1 = false;
+        boolean hasSeq2 = false;
+        for (PScore s : scores.getScores()) {
+            if ("KNOWN".equalsIgnoreCase(s.getType()) && s.getRound() == round) {
+                if (s.getSequence() == 1) hasSeq1 = true;
+                else if (s.getSequence() == 2) hasSeq2 = true;
+            }
+        }
+        if (!hasSeq1 || hasSeq2) {
+            result.put("result", "fail");
+            result.put("message", pilot.getName() + " has no missing seq 2 for KNOWN round " + round + ".");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        // Peer evidence: another pilot in the same class must have scored seq 2 of this round.
+        // Borrow that peer's figure count so the new PScore matches what the round was scored against.
+        int figureCount = -1;
+        for (Pilot peer : pilotService.getPilots()) {
+            if (peer.getPrimary_id().equals(pilotId)) continue;
+            if (!pilot.getClassString().equalsIgnoreCase(peer.getClassString())) continue;
+            PilotScores peerScores = pilotService.getPilotScores(peer);
+            if (peerScores == null || peerScores.getScores() == null) continue;
+            for (PScore ps : peerScores.getScores()) {
+                if ("KNOWN".equalsIgnoreCase(ps.getType())
+                        && ps.getRound() == round
+                        && ps.getSequence() == 2
+                        && ps.getScores() != null) {
+                    figureCount = ps.getScores().length;
+                    break;
+                }
+            }
+            if (figureCount != -1) break;
+        }
+        if (figureCount == -1) {
+            result.put("result", "fail");
+            result.put("message", "No peer pilot in this class has scored seq 2 of round " + round + " — nothing to borrow figure count from.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        int beforeCount = scoreResolverService.countRoundsForType(scores, roundType);
+        int beforeActiveRound = scores.getActiveRound(roundType);
+        int beforeActiveSeq = scores.getActiveSequence();
+
+        float[] zeros = new float[figureCount];
+        scores.getScores().add(new PScore(round, 2, zeros, "KNOWN"));
+
+        // Round complete — advance state
+        scores.incrementActiveRound(roundType);
+        scores.setActiveSequence(1);
+
+        pilotService.savePilotScoresToFile(scores);
+
+        logger.info("Fix Missing Sequence: pilot={} ({}), class={}, round={}, roundCount {} -> {}, activeRound {} -> {}, activeSequence {} -> {}",
+                pilot.getPrimary_id(), pilot.getName(), pilot.getClassString(), round,
+                beforeCount, scoreResolverService.countRoundsForType(scores, roundType),
+                beforeActiveRound, scores.getActiveRound(roundType),
+                beforeActiveSeq, scores.getActiveSequence());
+
+        result.put("result", "ok");
+        result.put("message", "Sequence marked as not flown.");
+        return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+    }
+
     /**
      * Check for available updates by querying GitHub releases API.
      * Compares current version with latest release tag.
