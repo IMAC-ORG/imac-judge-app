@@ -578,6 +578,124 @@ public class APIController {
         return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
     }
 
+    @PostMapping("/api/scores/zero-fill")
+    public ResponseEntity<String> zeroFill(@RequestBody Map<String, Object> payload)
+            throws IOException, ParserConfigurationException, SAXException {
+        Map<String, Object> result = new HashMap<>();
+
+        String pilotId = (String) payload.get("pilotId");
+        String roundType = (String) payload.get("roundType");
+        int round = ((Number) payload.get("round")).intValue();
+
+        Pilot pilot = pilotService.getPilot(pilotId);
+        if (pilot == null) {
+            result.put("result", "fail");
+            result.put("message", "Pilot not found.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        boolean isFreestyle = "FREESTYLE".equalsIgnoreCase(roundType);
+        boolean isKnown = "KNOWN".equalsIgnoreCase(roundType);
+        List<Pilot> peers;
+        if (isFreestyle) {
+            peers = pilotService.getPilots().stream()
+                    .filter(p -> Boolean.TRUE.equals(p.getFreestyle()))
+                    .toList();
+        } else {
+            peers = pilotService.getPilots().stream()
+                    .filter(p -> pilot.getClassString().equalsIgnoreCase(p.getClassString()))
+                    .toList();
+        }
+
+        PilotScores scores = pilotService.getPilotScores(pilot);
+
+        if (isKnown) {
+            Integer blockingRound = scoreResolverService.findUnresolvedMissingSeq2Round(pilot, peers);
+            if (blockingRound != null) {
+                result.put("result", "fail");
+                result.put("message", pilot.getName() + " has an unresolved missing seq 2 of KNOWN round "
+                        + blockingRound + " — Fix Missing Sequence first.");
+                return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        int targetCount = scoreResolverService.countRoundsForType(scores, roundType);
+
+        int maxPeerCount = -1;
+        for (Pilot peer : peers) {
+            if (peer.getPrimary_id().equals(pilotId)) continue;
+            PilotScores peerScores = pilotService.getPilotScores(peer);
+            int pc = scoreResolverService.countRoundsForType(peerScores, roundType);
+            if (pc > maxPeerCount) maxPeerCount = pc;
+        }
+
+        if (maxPeerCount == -1) {
+            result.put("result", "fail");
+            result.put("message", "No peers in this group — nothing to catch up to.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+        if (targetCount >= maxPeerCount) {
+            result.put("result", "fail");
+            result.put("message", pilot.getName() + " is already caught up.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+        if (round != targetCount + 1) {
+            result.put("result", "fail");
+            result.put("message", pilot.getName() + " must zero round " + (targetCount + 1)
+                    + " before round " + round + " (zero-fill is sequential).");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        int seq1FigureCount = -1;
+        int seq2FigureCount = -1;
+        for (Pilot peer : peers) {
+            if (peer.getPrimary_id().equals(pilotId)) continue;
+            PilotScores peerScores = pilotService.getPilotScores(peer);
+            if (peerScores == null || peerScores.getScores() == null) continue;
+            for (PScore ps : peerScores.getScores()) {
+                if (!roundType.equalsIgnoreCase(ps.getType())) continue;
+                if (ps.getRound() != round) continue;
+                if (ps.getScores() == null) continue;
+                if (ps.getSequence() == 1 && seq1FigureCount == -1) seq1FigureCount = ps.getScores().length;
+                else if (ps.getSequence() == 2 && seq2FigureCount == -1) seq2FigureCount = ps.getScores().length;
+            }
+        }
+        if (!isKnown) seq2FigureCount = -1;
+        boolean filledSeq2 = seq2FigureCount != -1;
+
+        int beforeCount = targetCount;
+        int beforeActiveRound = scores.getActiveRound(roundType);
+        int beforeActiveSeq = scores.getActiveSequence();
+
+        String typeUpper = roundType.toUpperCase();
+        scores.getScores().add(new PScore(round, 1, new float[seq1FigureCount], typeUpper));
+        if (filledSeq2) {
+            scores.getScores().add(new PScore(round, 2, new float[seq2FigureCount], typeUpper));
+        }
+
+        int compSequences = compService.getComp().getSequences();
+        if (!isKnown || compSequences == 1 || filledSeq2) {
+            scores.incrementActiveRound(roundType);
+            scores.setActiveSequence(1);
+        } else {
+            scores.setActiveSequence(2);
+        }
+
+        pilotService.savePilotScoresToFile(scores);
+
+        String sequencesFilled = filledSeq2 ? "1+2" : "1";
+        logger.info("Zero-fill: pilot={} ({}), class={}, type={}, round={}, sequences filled={}, roundCount {} -> {}, activeRound {} -> {}, activeSequence {} -> {}",
+                pilot.getPrimary_id(), pilot.getName(), pilot.getClassString(), roundType, round,
+                sequencesFilled,
+                beforeCount, scoreResolverService.countRoundsForType(scores, roundType),
+                beforeActiveRound, scores.getActiveRound(roundType),
+                beforeActiveSeq, scores.getActiveSequence());
+
+        result.put("result", "ok");
+        result.put("message", "Round zeroed.");
+        return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+    }
+
     /**
      * Check for available updates by querying GitHub releases API.
      * Compares current version with latest release tag.
