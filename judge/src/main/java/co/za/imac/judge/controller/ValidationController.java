@@ -1,6 +1,7 @@
 package co.za.imac.judge.controller;
 
 import co.za.imac.judge.dto.ValidationResult;
+import co.za.imac.judge.service.CompService;
 import co.za.imac.judge.service.PilotService;
 import co.za.imac.judge.service.ScheduleService;
 import co.za.imac.judge.service.SequenceService;
@@ -14,8 +15,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.xml.sax.SAXException;
 
 import jakarta.servlet.http.HttpSession;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
 /**
@@ -42,18 +45,22 @@ public class ValidationController {
     @Autowired
     private ScheduleService scheduleService;
 
+    @Autowired
+    private CompService compService;
+
     /**
      * Called after sync completes. Validates all sequences and redirects appropriately.
      * If issues found, shows the error screen.
      * If clean, redirects to normal flow.
      */
     @GetMapping("/validate-sequences")
-    public String validateSequences(Model model) throws IOException {
+    public String validateSequences(Model model) throws IOException, ParserConfigurationException, SAXException {
         logger.info("Running sequence validation...");
 
         ValidationResult result = validationService.validateAll();
 
         model.addAttribute("settings", settingService.getSettings());
+        model.addAttribute("compName", compService.getComp().getComp_name());
         model.addAttribute("issues", result.getIssues());
         model.addAttribute("hasErrors", result.hasErrors());
         model.addAttribute("hasWarnings", result.hasWarnings());

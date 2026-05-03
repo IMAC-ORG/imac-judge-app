@@ -453,9 +453,10 @@ public class RootController {
     }
 
     @GetMapping("/admin")
-    public String admin(Model model) throws IOException {
+    public String admin(Model model) throws IOException, ParserConfigurationException, SAXException {
         SettingDTO settings = settingService.getSettings();
         model.addAttribute("settings", settings);
+        model.addAttribute("compName", compService.getComp().getComp_name());
         return "admin";
     }
 
