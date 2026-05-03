@@ -592,10 +592,10 @@ public class APIController {
         }
         sourceScores.setScores(remainingSourceScores);
 
-        // Update active round numbers for both pilots
-        int newActiveRound = destRound + 1;
-        sourceScores.setActiveRound(roundType, newActiveRound);
-        destScores.setActiveRound(roundType, newActiveRound);
+        // Source lost a round in the move
+        sourceScores.decrementActiveRound(roundType);
+        // Dest gained a round in the move
+        destScores.incrementActiveRound(roundType);
 
         // Save both pilots
         pilotService.savePilotScoresToFile(sourceScores);
