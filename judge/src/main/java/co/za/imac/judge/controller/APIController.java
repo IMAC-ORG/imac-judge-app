@@ -162,7 +162,8 @@ public class APIController {
 
         // fetch seqs
         sequenceService.getSequenceFileFromScore();
-        
+        scheduleService.populateSequences();
+
         CompDTO newComp = compService.createCompFromRequest(comp);
         if (newComp == null) {
             result.put("result", "fail");
