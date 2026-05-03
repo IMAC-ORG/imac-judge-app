@@ -2,7 +2,7 @@ package co.za.imac.judge.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import co.za.imac.judge.utils.ContestClasses;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -117,9 +117,8 @@ public class RootController {
 
         //now get ordered list of classes for the filter dialog
         Set<String> pilot_classes = new LinkedHashSet<>();
-        List<String> orderedClasses = Arrays.asList("BASIC", "SPORTSMAN", "INTERMEDIATE", "ADVANCED", "UNLIMITED", "INVITATIONAL");
         //build ordered list of classes from those contained in the pilots list
-        for (String className : orderedClasses) {
+        for (String className : ContestClasses.ORDER) {
             if (pilots.stream().anyMatch(pilot -> className.equalsIgnoreCase(pilot.getClassString()))) {
                 pilot_classes.add(className);
             }
@@ -197,9 +196,8 @@ public class RootController {
 
         //now get ordered list of classes for the filter dialog
         Set<String> pilot_classes = new LinkedHashSet<>();
-        List<String> orderedClasses = Arrays.asList("BASIC", "SPORTSMAN", "INTERMEDIATE", "ADVANCED", "UNLIMITED", "INVITATIONAL");
         //build ordered list of classes from those contained in the pilots list
-        for (String className : orderedClasses) {
+        for (String className : ContestClasses.ORDER) {
             if (pilots.stream().anyMatch(pilot -> className.equalsIgnoreCase(pilot.getClassString()))) {
                 pilot_classes.add(className);
             }
