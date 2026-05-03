@@ -17,8 +17,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -719,6 +722,84 @@ public class APIController {
 
         result.put("result", "ok");
         result.put("message", "Round zeroed.");
+        return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
+    }
+
+    @PostMapping("/api/scores/swap-round")
+    public ResponseEntity<String> swapRound(@RequestBody Map<String, Object> payload)
+            throws IOException, ParserConfigurationException, SAXException {
+        Map<String, Object> result = new HashMap<>();
+
+        String pilotIdA = (String) payload.get("pilotIdA");
+        String pilotIdB = (String) payload.get("pilotIdB");
+        String roundType = (String) payload.get("roundType");
+        int round = ((Number) payload.get("round")).intValue();
+
+        if (Objects.equals(pilotIdA, pilotIdB)) {
+            result.put("result", "fail");
+            result.put("message", "Two distinct pilots are required.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        Pilot pilotA = pilotService.getPilot(pilotIdA);
+        Pilot pilotB = pilotService.getPilot(pilotIdB);
+        if (pilotA == null || pilotB == null) {
+            result.put("result", "fail");
+            result.put("message", "Pilot not found.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+        if (!pilotA.getClassString().equalsIgnoreCase(pilotB.getClassString())) {
+            result.put("result", "fail");
+            result.put("message", pilotA.getName() + " and " + pilotB.getName()
+                    + " are not in the same class.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        PilotScores aScores = pilotService.getPilotScores(pilotA);
+        PilotScores bScores = pilotService.getPilotScores(pilotB);
+
+        List<PScore> aMatching = new ArrayList<>();
+        List<PScore> aOther = new ArrayList<>();
+        for (PScore s : aScores.getScores()) {
+            if (roundType.equalsIgnoreCase(s.getType()) && s.getRound() == round) aMatching.add(s);
+            else aOther.add(s);
+        }
+        List<PScore> bMatching = new ArrayList<>();
+        List<PScore> bOther = new ArrayList<>();
+        for (PScore s : bScores.getScores()) {
+            if (roundType.equalsIgnoreCase(s.getType()) && s.getRound() == round) bMatching.add(s);
+            else bOther.add(s);
+        }
+
+        Set<Integer> aSeqs = new HashSet<>();
+        for (PScore s : aMatching) aSeqs.add(s.getSequence());
+        Set<Integer> bSeqs = new HashSet<>();
+        for (PScore s : bMatching) bSeqs.add(s.getSequence());
+        if (!aSeqs.equals(bSeqs)) {
+            result.put("result", "fail");
+            result.put("message", pilotA.getName() + " and " + pilotB.getName()
+                    + " have different sequence sets for " + roundType + " round " + round
+                    + " — fix incomplete round first.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        List<PScore> aNew = new ArrayList<>(aOther);
+        aNew.addAll(bMatching);
+        List<PScore> bNew = new ArrayList<>(bOther);
+        bNew.addAll(aMatching);
+        aScores.setScores(aNew);
+        bScores.setScores(bNew);
+
+        pilotService.savePilotScoresToFile(aScores);
+        pilotService.savePilotScoresToFile(bScores);
+
+        logger.info("Swap Round: pilotA={} ({}), pilotB={} ({}), class={}, type={}, round={}, sequences={}",
+                pilotA.getPrimary_id(), pilotA.getName(),
+                pilotB.getPrimary_id(), pilotB.getName(),
+                pilotA.getClassString(), roundType, round, aSeqs);
+
+        result.put("result", "ok");
+        result.put("message", "Round scores swapped.");
         return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
     }
 
