@@ -15,8 +15,7 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      margin-top: 20px;
-      margin-bottom: 8px;
+      margin: 10px 0 6px 0;
     }
     .heading {
       font-size: calc(1.5vw + 2.5vh) !important;
@@ -34,12 +33,12 @@
     .admin-box {
       border: 2px solid #90a4ae;
       border-radius: 8px;
-      padding: 10px 15px;
-      margin-bottom: 10px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
       background: #fafafa;
     }
     .admin-box-title {
-      font-size: 1rem;
+      font-size: 1.9rem;
       font-weight: 600;
       margin-bottom: 8px;
       color: #455a64;
@@ -51,7 +50,7 @@
       padding: 4px 0;
     }
     .setting-label {
-      font-size: 0.95rem;
+      font-size: 1.75rem;
       font-weight: 500;
       min-width: 120px;
     }
@@ -62,7 +61,7 @@
     }
     [type="radio"]:not(:checked)+span, [type="radio"]:checked+span {
       padding-left: 25px;
-      font-size: 0.95rem;
+      font-size: 1.75rem;
     }
     .number-control {
       display: flex;
@@ -86,17 +85,17 @@
       background: #ffebee;
       border: 2px solid #ef5350;
       border-radius: 8px;
-      padding: 10px 15px;
-      margin-bottom: 10px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
     }
     .warning-box-title {
-      font-size: 0.95rem;
+      font-size: 1.9rem;
       font-weight: 600;
       margin-bottom: 4px;
       color: #c62828;
     }
     .warning-text {
-      font-size: 0.8rem;
+      font-size: 1.5rem;
       color: #b71c1c;
     }
   </style>
@@ -124,7 +123,7 @@
       <!-- Box 1: Scoring Mode -->
       <div class="admin-box">
         <div class="admin-box-title">
-          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.2rem;">dashboard</i>
+          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.5rem;">dashboard</i>
           Scoring Mode
         </div>
 
@@ -156,7 +155,7 @@
       <!-- Box 2: Device Identity -->
       <div class="warning-box">
         <div class="warning-box-title">
-          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1rem;">warning</i>
+          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.5rem;">warning</i>
           Device Identity
         </div>
         <div class="warning-text" style="margin-bottom: 6px;">
@@ -191,10 +190,10 @@
       <!-- Box 3: System Update -->
       <div class="admin-box">
         <div class="admin-box-title">
-          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.2rem;">system_update</i>
+          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.5rem;">system_update</i>
           System Update
         </div>
-        <div id="versionDisplay" style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">
+        <div id="versionDisplay" style="font-size: 1.5rem; color: #666; margin-bottom: 10px;">
           Current version: <span id="currentVersion" style="font-weight: 500;">loading...</span>
         </div>
         <div class="center">
@@ -206,15 +205,15 @@
           <div class="progress" id="updateProgress">
             <div class="indeterminate"></div>
           </div>
-          <div id="updateMessage" style="font-size: 0.9rem; text-align: center; margin-top: 5px;"></div>
+          <div id="updateMessage" style="font-size: 1.5rem; text-align: center; margin-top: 5px;"></div>
         </div>
       </div>
 
       <!-- Confirmation Modal for Device Identity -->
       <div id="confirmDeviceModal" class="modal">
         <div class="modal-content" style="padding: 15px 20px 10px;">
-          <h5 style="margin-top: 0;"><i class="material-icons red-text" style="vertical-align: middle; margin-right: 8px;">warning</i>Change Device Identity?</h5>
-          <p style="font-size: 0.95rem; color: #666; margin: 10px 0;">
+          <h5 style="margin-top: 0; font-size: 1.9rem;"><i class="material-icons red-text" style="vertical-align: middle; margin-right: 8px; font-size: 1.5rem;">warning</i>Change Device Identity?</h5>
+          <p style="font-size: 1.75rem; color: #666; margin: 10px 0;">
             This will save new Line/Judge numbers, connect to Score, archive current scores, and load fresh event data.
           </p>
         </div>
@@ -227,11 +226,11 @@
       <!-- Confirmation Modal for System Update -->
       <div id="confirmUpdateModal" class="modal">
         <div class="modal-content" style="padding: 15px 20px 10px;">
-          <h5 style="margin-top: 0;"><i class="material-icons blue-text" style="vertical-align: middle; margin-right: 8px;">cloud_download</i>Install Update?</h5>
-          <p id="updateVersionInfo" style="font-size: 1rem; margin: 10px 0;">
+          <h5 style="margin-top: 0; font-size: 1.9rem;"><i class="material-icons blue-text" style="vertical-align: middle; margin-right: 8px; font-size: 1.5rem;">cloud_download</i>Install Update?</h5>
+          <p id="updateVersionInfo" style="font-size: 1.5rem; margin: 10px 0;">
             <!-- Populated dynamically with version comparison -->
           </p>
-          <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">
+          <p style="font-size: 1.5rem; color: #666; margin: 5px 0;">
             <i class="material-icons tiny orange-text" style="vertical-align: middle;">warning</i>
             You must be connected to the internet. The device will restart after updating.
           </p>

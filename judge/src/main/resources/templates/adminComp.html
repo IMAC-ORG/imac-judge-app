@@ -15,8 +15,7 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      margin-top: 20px;
-      margin-bottom: 8px;
+      margin: 10px 0 6px 0;
     }
     .heading {
       font-size: calc(1.5vw + 2.5vh) !important;
@@ -34,12 +33,12 @@
     .admin-box {
       border: 2px solid #90a4ae;
       border-radius: 8px;
-      padding: 10px 15px;
-      margin-bottom: 10px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
       background: #fafafa;
     }
     .admin-box-title {
-      font-size: 1rem;
+      font-size: 1.9rem;
       font-weight: 600;
       margin-bottom: 8px;
       color: #455a64;
@@ -51,7 +50,7 @@
       padding: 4px 0;
     }
     .setting-label {
-      font-size: 0.95rem;
+      font-size: 1.75rem;
       font-weight: 500;
       min-width: 140px;
     }
@@ -61,7 +60,7 @@
     }
     [type="radio"]:not(:checked)+span, [type="radio"]:checked+span {
       padding-left: 25px;
-      font-size: 0.95rem;
+      font-size: 1.75rem;
     }
     .action-buttons {
       display: flex;
@@ -70,7 +69,7 @@
       flex-wrap: wrap;
     }
     .warning-note {
-      font-size: 0.8rem;
+      font-size: 1.5rem;
       color: #c62828;
       margin-top: 5px;
       text-align: center;
@@ -101,7 +100,7 @@
       <!-- Box 1: Local Device Settings -->
       <div class="admin-box">
         <div class="admin-box-title">
-          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.2rem;">tune</i>
+          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.5rem;">tune</i>
           Local Device Settings
         </div>
 
@@ -143,7 +142,7 @@
       <!-- Box 2: Score Server Actions -->
       <div class="admin-box">
         <div class="admin-box-title">
-          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.2rem;">cloud_sync</i>
+          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.5rem;">cloud_sync</i>
           Score Server Actions
         </div>
 
@@ -156,7 +155,7 @@
           </a>
         </div>
         <div class="warning-note">
-          <i class="material-icons" style="vertical-align: middle; font-size: 1rem;">warning</i>
+          <i class="material-icons" style="vertical-align: middle; font-size: 1.5rem;">warning</i>
           Load NEW archives current scores
         </div>
       </div>
@@ -164,8 +163,8 @@
       <!-- Confirmation Modal for New Event -->
       <div id="confirmNewEventModal" class="modal">
         <div class="modal-content" style="padding: 15px 20px 10px;">
-          <h5 style="margin-top: 0;"><i class="material-icons red-text" style="vertical-align: middle; margin-right: 8px;">warning</i>Load NEW Event?</h5>
-          <p style="font-size: 0.95rem; color: #666; margin: 10px 0;">
+          <h5 style="margin-top: 0; font-size: 1.9rem;"><i class="material-icons red-text" style="vertical-align: middle; margin-right: 8px; font-size: 1.5rem;">warning</i>Load NEW Event?</h5>
+          <p style="font-size: 1.75rem; color: #666; margin: 10px 0;">
             This will archive current scores, clear pilot data, and load fresh data from Score.
           </p>
         </div>
@@ -178,16 +177,16 @@
       <!-- Format-change blocker modal -->
       <div id="formatChangeBlockerModal" class="modal">
         <div class="modal-content" style="padding: 15px 20px 10px;">
-          <h5 style="margin-top: 0;"><i class="material-icons red-text" style="vertical-align: middle; margin-right: 8px;">block</i>Cannot Change to Single Sequence</h5>
+          <h5 style="margin-top: 0; font-size: 1.9rem;"><i class="material-icons red-text" style="vertical-align: middle; margin-right: 8px; font-size: 1.5rem;">block</i>Cannot Change to Single Sequence</h5>
           <div id="rule1FailuresWrap" style="display: none; margin-top: 10px;">
-            <div style="font-weight: 500; margin-bottom: 4px;">Pilots mid-round (between sequence 1 and sequence 2):</div>
-            <ul id="rule1FailuresList" style="margin-top: 4px; padding-left: 20px;"></ul>
+            <div style="font-weight: 500; margin-bottom: 4px; font-size: 1.75rem;">Pilots mid-round (between sequence 1 and sequence 2):</div>
+            <ul id="rule1FailuresList" style="margin-top: 4px; padding-left: 20px; font-size: 1.75rem;"></ul>
           </div>
           <div id="rule2FailuresWrap" style="display: none; margin-top: 10px;">
-            <div style="font-weight: 500; margin-bottom: 4px;">Classes with uneven KNOWN round counts:</div>
-            <ul id="rule2FailuresList" style="margin-top: 4px; padding-left: 20px;"></ul>
+            <div style="font-weight: 500; margin-bottom: 4px; font-size: 1.75rem;">Classes with uneven KNOWN round counts:</div>
+            <ul id="rule2FailuresList" style="margin-top: 4px; padding-left: 20px; font-size: 1.75rem;"></ul>
           </div>
-          <p style="font-size: 0.95rem; color: #444; margin: 12px 0 4px;">
+          <p style="font-size: 1.5rem; color: #444; margin: 12px 0 4px;">
             Resolve them in Score Fixes first.
           </p>
         </div>
