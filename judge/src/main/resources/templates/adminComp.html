@@ -178,6 +178,27 @@
         </div>
       </div>
 
+      <!-- Format-change blocker modal -->
+      <div id="formatChangeBlockerModal" class="modal">
+        <div class="modal-content" style="padding: 15px 20px 10px;">
+          <h5 style="margin-top: 0;"><i class="material-icons red-text" style="vertical-align: middle; margin-right: 8px;">block</i>Cannot Change to Single Sequence</h5>
+          <div id="rule1FailuresWrap" style="display: none; margin-top: 10px;">
+            <div style="font-weight: 500; margin-bottom: 4px;">Pilots mid-round (between sequence 1 and sequence 2):</div>
+            <ul id="rule1FailuresList" style="margin-top: 4px; padding-left: 20px;"></ul>
+          </div>
+          <div id="rule2FailuresWrap" style="display: none; margin-top: 10px;">
+            <div style="font-weight: 500; margin-bottom: 4px;">Classes with uneven KNOWN round counts:</div>
+            <ul id="rule2FailuresList" style="margin-top: 4px; padding-left: 20px;"></ul>
+          </div>
+          <p style="font-size: 0.95rem; color: #444; margin: 12px 0 4px;">
+            Resolve them in Score Fixes first.
+          </p>
+        </div>
+        <div class="modal-footer" style="padding: 10px 20px;">
+          <a href="/admin/scores" class="waves-effect waves-light btn">Go to Score Fixes</a>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -217,6 +238,45 @@
       $("input[name=sequenceType][value=" + sequenceType + "]").prop('checked', true);
     });
 
+    function showFormatChangeBlocker(payload) {
+      var $rule1Wrap = $('#rule1FailuresWrap');
+      var $rule1List = $('#rule1FailuresList');
+      $rule1List.empty();
+      var rule1 = payload.rule1Failures || [];
+      if (rule1.length > 0) {
+        rule1.forEach(function (f) {
+          $rule1List.append('<li>' + f.name + ' (' + f.className + ') — KNOWN round ' + f.round + '</li>');
+        });
+        $rule1Wrap.show();
+      } else {
+        $rule1Wrap.hide();
+      }
+
+      var $rule2Wrap = $('#rule2FailuresWrap');
+      var $rule2List = $('#rule2FailuresList');
+      $rule2List.empty();
+      var rule2 = payload.rule2Failures || [];
+      if (rule2.length > 0) {
+        rule2.forEach(function (f) {
+          var atMin = (f.pilotsAtMin || []).map(function (p) { return p.name; }).join(', ');
+          var atMax = (f.pilotsAtMax || []).map(function (p) { return p.name; }).join(', ');
+          $rule2List.append('<li>' + f.className + ': counts span ' + f.minCount + ' (' + atMin + ') to ' + f.maxCount + ' (' + atMax + ')</li>');
+        });
+        $rule2Wrap.show();
+      } else {
+        $rule2Wrap.hide();
+      }
+
+      var modal = M.Modal.getInstance(document.getElementById('formatChangeBlockerModal'));
+      modal.open();
+    }
+
+    function isFormatChangeBlockedResponse(errObj) {
+      return errObj && errObj.status === 409
+          && errObj.responseJSON
+          && errObj.responseJSON.blocker === 'format_change_unsafe';
+    }
+
     // Update Local Settings (no Score contact)
     $("#updateLocalSettings").click(function (e) {
       e.preventDefault();
@@ -239,8 +299,12 @@
             M.toast({ html: 'Error: ' + data.message, classes: 'red' });
           }
         },
-        error: function () {
-          M.toast({ html: 'Error updating settings', classes: 'red' });
+        error: function (errObj) {
+          if (isFormatChangeBlockedResponse(errObj)) {
+            showFormatChangeBlocker(errObj.responseJSON);
+          } else {
+            M.toast({ html: 'Error updating settings', classes: 'red' });
+          }
         }
       });
     });
@@ -273,7 +337,9 @@
           }
         },
         error: function (errObj) {
-          if (typeof errObj.responseJSON != "undefined") {
+          if (isFormatChangeBlockedResponse(errObj)) {
+            showFormatChangeBlocker(errObj.responseJSON);
+          } else if (typeof errObj.responseJSON != "undefined") {
             M.toast({ html: 'Error: ' + errObj.responseJSON.message, classes: 'red' });
           } else {
             M.toast({ html: 'Error refreshing event', classes: 'red' });

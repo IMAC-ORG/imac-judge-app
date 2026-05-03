@@ -87,6 +87,86 @@ public class ScoreResolverService {
     }
 
     /**
+     * Evaluates whether the comp can safely change from 2-sequence to
+     * 1-sequence KNOWN. Returns the structured failure payload (with
+     * rule1Failures and rule2Failures lists) when blocked, or null when
+     * both rules pass.
+     *
+     * <p>Rule 1: no pilot has activeSequence == 2 in KNOWN.
+     * <p>Rule 2: within each class, all pilots have the same KNOWN round count.
+     */
+    public Map<String, Object> evaluateFormatChangeBlock()
+            throws IOException, ParserConfigurationException, SAXException {
+        List<Pilot> pilots = pilotService.getPilots();
+
+        List<Map<String, Object>> rule1Failures = new ArrayList<>();
+        Map<String, List<Pilot>> pilotsByClass = new HashMap<>();
+        Map<String, Integer> countByPilotId = new HashMap<>();
+
+        for (Pilot pilot : pilots) {
+            PilotScores scores = pilotService.getPilotScores(pilot);
+            if (scores == null) continue;
+
+            if (scores.getActiveSequence() == 2 && "KNOWN".equalsIgnoreCase(scores.getActiveRoundType())) {
+                Map<String, Object> entry = new HashMap<>();
+                entry.put("pilotId", pilot.getPrimary_id());
+                entry.put("name", pilot.getName());
+                entry.put("className", pilot.getClassString());
+                entry.put("round", scores.getActiveRound("KNOWN"));
+                rule1Failures.add(entry);
+            }
+
+            pilotsByClass.computeIfAbsent(pilot.getClassString().toUpperCase(), k -> new ArrayList<>()).add(pilot);
+            countByPilotId.put(pilot.getPrimary_id(), countRoundsForType(scores, "KNOWN"));
+        }
+
+        List<Map<String, Object>> rule2Failures = new ArrayList<>();
+        for (Map.Entry<String, List<Pilot>> classEntry : pilotsByClass.entrySet()) {
+            List<Pilot> classPilots = classEntry.getValue();
+            int minCount = Integer.MAX_VALUE;
+            int maxCount = Integer.MIN_VALUE;
+            for (Pilot p : classPilots) {
+                int c = countByPilotId.get(p.getPrimary_id());
+                if (c < minCount) minCount = c;
+                if (c > maxCount) maxCount = c;
+            }
+            if (minCount != maxCount) {
+                List<Map<String, Object>> pilotsAtMin = new ArrayList<>();
+                List<Map<String, Object>> pilotsAtMax = new ArrayList<>();
+                for (Pilot p : classPilots) {
+                    int c = countByPilotId.get(p.getPrimary_id());
+                    if (c == minCount || c == maxCount) {
+                        Map<String, Object> info = new HashMap<>();
+                        info.put("pilotId", p.getPrimary_id());
+                        info.put("name", p.getName());
+                        if (c == minCount) pilotsAtMin.add(info);
+                        else pilotsAtMax.add(info);
+                    }
+                }
+                Map<String, Object> failure = new HashMap<>();
+                failure.put("className", classEntry.getKey());
+                failure.put("minCount", minCount);
+                failure.put("maxCount", maxCount);
+                failure.put("pilotsAtMin", pilotsAtMin);
+                failure.put("pilotsAtMax", pilotsAtMax);
+                rule2Failures.add(failure);
+            }
+        }
+
+        if (rule1Failures.isEmpty() && rule2Failures.isEmpty()) {
+            return null;
+        }
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("result", "fail");
+        payload.put("blocker", "format_change_unsafe");
+        payload.put("message", "Cannot change to single-sequence — data is not in a clean state");
+        payload.put("rule1Failures", rule1Failures);
+        payload.put("rule2Failures", rule2Failures);
+        return payload;
+    }
+
+    /**
      * Counts the number of distinct rounds the pilot has scored for the
      * given round type.
      */

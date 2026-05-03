@@ -85,7 +85,8 @@ public class APIController {
      * Accepts: sequences (int), sequenceType (String), score_mode (String)
      */
     @PostMapping("/api/comp/local")
-    public ResponseEntity<String> updateLocalCompSettings(@RequestBody CompDTO comp) throws IOException {
+    public ResponseEntity<String> updateLocalCompSettings(@RequestBody CompDTO comp)
+            throws IOException, ParserConfigurationException, SAXException {
         Map<String, Object> result = new HashMap<>();
 
         CompDTO currentComp = compService.getComp();
@@ -93,6 +94,13 @@ public class APIController {
             result.put("result", "fail");
             result.put("message", "No competition loaded. Load an event first.");
             return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        if (currentComp.getSequences() == 2 && comp.getSequences() == 1) {
+            Map<String, Object> blockPayload = scoreResolverService.evaluateFormatChangeBlock();
+            if (blockPayload != null) {
+                return new ResponseEntity<>(new Gson().toJson(blockPayload), HttpStatus.CONFLICT);
+            }
         }
 
         // Update only the local settings that were provided
@@ -127,7 +135,17 @@ public class APIController {
             throws IOException, ParserConfigurationException, SAXException, URISyntaxException {
 
         Map<String, Object> result = new HashMap<>();
-        
+
+        if (editComp) {
+            CompDTO currentComp = compService.getComp();
+            if (currentComp != null && currentComp.getSequences() == 2 && comp.getSequences() == 1) {
+                Map<String, Object> blockPayload = scoreResolverService.evaluateFormatChangeBlock();
+                if (blockPayload != null) {
+                    return new ResponseEntity<>(new Gson().toJson(blockPayload), HttpStatus.CONFLICT);
+                }
+            }
+        }
+
         logger.debug("Comp data received:");
         logger.debug(new Gson().toJson(comp));
        
