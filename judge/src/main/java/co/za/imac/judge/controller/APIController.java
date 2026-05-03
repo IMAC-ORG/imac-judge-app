@@ -426,6 +426,32 @@ public class APIController {
         PilotScores sourceScores = pilotService.getPilotScores(sourcePilot);
         PilotScores destScores = pilotService.getPilotScores(destPilot);
 
+        int sourceCount = scoreResolverService.countRoundsForType(sourceScores, roundType);
+        int destCount = scoreResolverService.countRoundsForType(destScores, roundType);
+        if (sourceCount <= destCount) {
+            result.put("result", "fail");
+            result.put("message", sourcePilot.getName() + " has no extra round to give to " + destPilot.getName() + ".");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
+        List<Pilot> classPeers = pilotService.getPilots().stream()
+                .filter(p -> sourcePilot.getClassString().equalsIgnoreCase(p.getClassString()))
+                .toList();
+        Integer sourceMissing = scoreResolverService.findUnresolvedMissingSeq2Round(sourcePilot, classPeers);
+        if (sourceMissing != null) {
+            result.put("result", "fail");
+            result.put("message", sourcePilot.getName() + " has an unresolved missing sequence 2 of round "
+                    + sourceMissing + " — Fix Missing Sequence on " + sourcePilot.getName() + " first.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+        Integer destMissing = scoreResolverService.findUnresolvedMissingSeq2Round(destPilot, classPeers);
+        if (destMissing != null) {
+            result.put("result", "fail");
+            result.put("message", destPilot.getName() + " has an unresolved missing sequence 2 of round "
+                    + destMissing + " — Fix Missing Sequence on " + destPilot.getName() + " first.");
+            return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
+        }
+
         // Find the scores to move (all sequences for that round+type)
         List<PScore> scoresToMove = new ArrayList<>();
         List<PScore> remainingSourceScores = new ArrayList<>();
