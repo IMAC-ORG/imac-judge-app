@@ -473,4 +473,11 @@ public class RootController {
         model.addAttribute("settings", settings);
         return "adminScoresResolve";
     }
+
+    @GetMapping("/admin/scores/zero-fill")
+    public String adminScoresZeroFill(Model model) throws IOException {
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+        return "adminScoresZeroFill";
+    }
 }
