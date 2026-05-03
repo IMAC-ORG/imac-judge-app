@@ -196,15 +196,22 @@
     .manual-class-row {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
-      padding: 6px 0;
+      padding: 8px 14px;
+      margin-bottom: 6px;
+      border: 1px solid #90a4ae;
+      border-radius: 6px;
     }
     .manual-class-label {
-      flex: 0 0 130px;
       font-size: 1.9rem;
       font-weight: 600;
       text-transform: uppercase;
       color: #263238;
+    }
+    .manual-class-btns {
+      display: flex;
+      gap: 8px;
     }
     .manual-type-btn {
       padding: 8px 14px;
@@ -565,6 +572,7 @@
         const groups = byClass[className];
         const $row = $('<div class="manual-class-row">');
         $row.append($('<div class="manual-class-label">').text(className));
+        const $btns = $('<div class="manual-class-btns">');
         ['KNOWN', 'UNKNOWN'].forEach(function (rt) {
           const g = groups.find(function (x) { return x.roundType === rt; });
           if (!g) return;
@@ -579,14 +587,16 @@
             showStep('step-op-choice');
             renderStep1();
           });
-          $row.append($btn);
+          $btns.append($btn);
         });
+        $row.append($btns);
         $rows.append($row);
       });
 
       if (freestyle) {
-        $rows.append($('<div class="manual-divider">'));
-        const $fsRow = $('<div class="manual-freestyle-row">');
+        const $row = $('<div class="manual-class-row">');
+        $row.append($('<div class="manual-class-label">').text('FREESTYLE'));
+        const $btns = $('<div class="manual-class-btns">');
         const $btn = $('<a href="#" class="manual-type-btn">').text('Freestyle');
         $btn.on('click', function (e) {
           e.preventDefault();
@@ -598,8 +608,9 @@
           showStep('step-op-choice');
           renderStep1();
         });
-        $fsRow.append($btn);
-        $rows.append($fsRow);
+        $btns.append($btn);
+        $row.append($btns);
+        $rows.append($row);
       }
     }
 

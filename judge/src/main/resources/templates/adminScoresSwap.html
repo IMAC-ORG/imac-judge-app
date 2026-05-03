@@ -64,15 +64,22 @@
     .picker-class-row {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
-      padding: 6px 0;
+      padding: 8px 14px;
+      margin-bottom: 6px;
+      border: 1px solid #90a4ae;
+      border-radius: 6px;
     }
     .picker-class-label {
-      flex: 0 0 130px;
       font-size: 1.9rem;
       font-weight: 600;
       text-transform: uppercase;
       color: #263238;
+    }
+    .picker-class-btns {
+      display: flex;
+      gap: 8px;
     }
     .picker-type-btn {
       padding: 8px 14px;
@@ -388,6 +395,7 @@
         const groups = byClass[className];
         const $row = $('<div class="picker-class-row">');
         $row.append($('<div class="picker-class-label">').text(className));
+        const $btns = $('<div class="picker-class-btns">');
         ['KNOWN', 'UNKNOWN'].forEach(function (rt) {
           const g = groups.find(function (x) { return x.roundType === rt; });
           if (!g) return;
@@ -400,14 +408,16 @@
             showStep('step-round-pick');
             renderRoundPick();
           });
-          $row.append($btn);
+          $btns.append($btn);
         });
+        $row.append($btns);
         $rows.append($row);
       });
 
       if (freestyle) {
-        $rows.append($('<div class="picker-divider">'));
-        const $fsRow = $('<div class="picker-freestyle-row">');
+        const $row = $('<div class="picker-class-row">');
+        $row.append($('<div class="picker-class-label">').text('FREESTYLE'));
+        const $btns = $('<div class="picker-class-btns">');
         const $btn = $('<a href="#" class="picker-type-btn">').text('Freestyle');
         $btn.on('click', function (e) {
           e.preventDefault();
@@ -417,8 +427,9 @@
           showStep('step-round-pick');
           renderRoundPick();
         });
-        $fsRow.append($btn);
-        $rows.append($fsRow);
+        $btns.append($btn);
+        $row.append($btns);
+        $rows.append($row);
       }
     }
 

@@ -96,7 +96,7 @@ public class APIController {
             return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
         }
 
-        if (currentComp.getSequences() == 2 && comp.getSequences() == 1) {
+        if (currentComp.getSequences() != comp.getSequences()) {
             Map<String, Object> blockPayload = scoreResolverService.evaluateFormatChangeBlock();
             if (blockPayload != null) {
                 return new ResponseEntity<>(new Gson().toJson(blockPayload), HttpStatus.CONFLICT);
@@ -138,7 +138,7 @@ public class APIController {
 
         if (editComp) {
             CompDTO currentComp = compService.getComp();
-            if (currentComp != null && currentComp.getSequences() == 2 && comp.getSequences() == 1) {
+            if (currentComp != null && currentComp.getSequences() != comp.getSequences()) {
                 Map<String, Object> blockPayload = scoreResolverService.evaluateFormatChangeBlock();
                 if (blockPayload != null) {
                     return new ResponseEntity<>(new Gson().toJson(blockPayload), HttpStatus.CONFLICT);
@@ -456,7 +456,7 @@ public class APIController {
             return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.BAD_REQUEST);
         }
 
-        List<Pilot> classPeers = pilotService.getPilots().stream()
+        List<Pilot> classPeers = pilotService.getPilots(true).stream()
                 .filter(p -> sourcePilot.getClassString().equalsIgnoreCase(p.getClassString()))
                 .toList();
         Integer sourceMissing = scoreResolverService.findUnresolvedMissingSeq2Round(sourcePilot, classPeers);
@@ -580,7 +580,7 @@ public class APIController {
         // Peer evidence: another pilot in the same class must have scored seq 2 of this round.
         // Borrow that peer's figure count so the new PScore matches what the round was scored against.
         int figureCount = -1;
-        for (Pilot peer : pilotService.getPilots()) {
+        for (Pilot peer : pilotService.getPilots(true)) {
             if (peer.getPrimary_id().equals(pilotId)) continue;
             if (!pilot.getClassString().equalsIgnoreCase(peer.getClassString())) continue;
             PilotScores peerScores = pilotService.getPilotScores(peer);
@@ -646,11 +646,11 @@ public class APIController {
         boolean isKnown = "KNOWN".equalsIgnoreCase(roundType);
         List<Pilot> peers;
         if (isFreestyle) {
-            peers = pilotService.getPilots().stream()
+            peers = pilotService.getPilots(true).stream()
                     .filter(p -> Boolean.TRUE.equals(p.getFreestyle()))
                     .toList();
         } else {
-            peers = pilotService.getPilots().stream()
+            peers = pilotService.getPilots(true).stream()
                     .filter(p -> pilot.getClassString().equalsIgnoreCase(p.getClassString()))
                     .toList();
         }

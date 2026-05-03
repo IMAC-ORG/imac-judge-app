@@ -40,7 +40,7 @@ public class ScoreResolverService {
      * competition class order, then KNOWN, UNKNOWN, FREESTYLE within a class.
      */
     public Map<String, Object> getMismatches() throws IOException, ParserConfigurationException, SAXException {
-        List<Pilot> pilots = pilotService.getPilots();
+        List<Pilot> pilots = pilotService.getPilots(true);
 
         List<Map<String, Object>> mismatches = new ArrayList<>();
         List<Map<String, Object>> allGroups = new ArrayList<>();
@@ -97,7 +97,7 @@ public class ScoreResolverService {
      */
     public Map<String, Object> evaluateFormatChangeBlock()
             throws IOException, ParserConfigurationException, SAXException {
-        List<Pilot> pilots = pilotService.getPilots();
+        List<Pilot> pilots = pilotService.getPilots(true);
 
         List<Map<String, Object>> rule1Failures = new ArrayList<>();
         Map<String, List<Pilot>> pilotsByClass = new HashMap<>();
