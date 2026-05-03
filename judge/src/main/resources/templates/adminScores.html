@@ -30,37 +30,42 @@
       margin: 2px;
       padding: 0 12px;
     }
-    .admin-box {
+    .admin-tile-link {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+    .admin-tile {
       border: 2px solid #90a4ae;
       border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 10px;
-      background: #fafafa;
-      text-align: center;
-    }
-    .tool-box {
-      min-height: 180px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .tool-icon {
-      font-size: 2.5rem;
+      padding: 12px 16px;
       margin-bottom: 8px;
+      background: #fafafa;
     }
-    .tool-title {
-      font-size: 1.1rem;
+    .admin-tile-link:active .admin-tile {
+      background: #eceff1;
+    }
+    .admin-tile-title {
+      font-size: 1.9rem;
       font-weight: 600;
-      margin-bottom: 6px;
+      color: #263238;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .tool-text {
-      font-size: 0.85rem;
+    .admin-tile-title i.material-icons {
+      font-size: 1.9rem;
+    }
+    .admin-tile-text {
+      font-size: 1.5rem;
       color: #555;
-      max-width: 250px;
     }
-    .disabled-tool {
+    .admin-tile.disabled-tool {
       opacity: 0.6;
+    }
+    .admin-tile.disabled-tool .admin-tile-text .coming-soon {
+      font-style: italic;
     }
   </style>
 </head>
@@ -85,73 +90,45 @@
         </div>
       </div>
 
-      <!-- Score Tools -->
-      <div class="row">
-        <div class="col s12 m6">
-          <div class="admin-box tool-box">
-            <i class="material-icons tool-icon green-text">swap_horiz</i>
-            <div class="tool-title">Resolve Mismatches</div>
-            <div class="tool-text">
-              Move rounds between pilots when scores were recorded to the wrong pilot.
-            </div>
-            <a href="/admin/scores/resolve" class="waves-effect waves-light btn green darken-1" style="margin-top: 10px;">
-              <i class="material-icons left">build</i>Open Tool
-            </a>
+      <a href="/admin/scores/resolve" class="admin-tile-link">
+        <div class="admin-tile">
+          <div class="admin-tile-title">
+            <i class="material-icons green-text">swap_horiz</i>Resolve Mismatches
+          </div>
+          <div class="admin-tile-text">
+            Move rounds between pilots when scores were recorded to the wrong pilot.
           </div>
         </div>
+      </a>
 
-        <div class="col s12 m6">
-          <div class="admin-box tool-box">
-            <i class="material-icons tool-icon blue-text">swap_horiz</i>
-            <div class="tool-title">Swap Round Scores</div>
-            <div class="tool-text">
-              Swap two pilots' scores for a single round when the judge attributed each pilot's flight to the other.
-            </div>
-            <a href="/admin/scores/swap" class="waves-effect waves-light btn blue darken-1" style="margin-top: 10px;">
-              <i class="material-icons left">build</i>Open Tool
-            </a>
+      <a href="/admin/scores/swap" class="admin-tile-link">
+        <div class="admin-tile">
+          <div class="admin-tile-title">
+            <i class="material-icons blue-text">swap_horiz</i>Swap Round Scores
+          </div>
+          <div class="admin-tile-text">
+            Swap two pilots' scores for a single round when the judge attributed each pilot's flight to the other.
           </div>
         </div>
-      </div>
+      </a>
 
-      <div class="row">
-        <div class="col s12 m6">
-          <div class="admin-box tool-box">
-            <i class="material-icons tool-icon orange-text">exposure_zero</i>
-            <div class="tool-title">Zero Unflown Rounds</div>
-            <div class="tool-text">
-              Mark rounds as zeros for pilots who had to miss a round.
-            </div>
-            <a href="/admin/scores/zero-fill" class="waves-effect waves-light btn orange darken-1" style="margin-top: 10px;">
-              <i class="material-icons left">build</i>Open Tool
-            </a>
+      <a href="/admin/scores/zero-fill" class="admin-tile-link">
+        <div class="admin-tile">
+          <div class="admin-tile-title">
+            <i class="material-icons orange-text">exposure_zero</i>Zero Unflown Rounds
+          </div>
+          <div class="admin-tile-text">
+            Mark rounds as zeros for pilots who had to miss a round.
           </div>
         </div>
+      </a>
 
-        <div class="col s12 m6">
-          <div class="admin-box tool-box disabled-tool">
-            <i class="material-icons tool-icon grey-text">edit</i>
-            <div class="tool-title">Edit Scores</div>
-            <div class="tool-text">
-              Manually edit individual figure scores.
-            </div>
-            <span class="btn grey lighten-1" style="margin-top: 10px;">
-              <i class="material-icons left">schedule</i>Coming Soon
-            </span>
-          </div>
+      <div class="admin-tile disabled-tool">
+        <div class="admin-tile-title">
+          <i class="material-icons grey-text">history</i>Audit Log
         </div>
-
-        <div class="col s12 m6">
-          <div class="admin-box tool-box disabled-tool">
-            <i class="material-icons tool-icon grey-text">history</i>
-            <div class="tool-title">Audit Log</div>
-            <div class="tool-text">
-              View history of score changes and corrections.
-            </div>
-            <span class="btn grey lighten-1" style="margin-top: 10px;">
-              <i class="material-icons left">schedule</i>Coming Soon
-            </span>
-          </div>
+        <div class="admin-tile-text">
+          <span class="coming-soon">Coming soon — view history of score changes and corrections.</span>
         </div>
       </div>
 
