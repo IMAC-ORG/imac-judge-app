@@ -452,6 +452,13 @@ public class RootController {
         return "adminDevice";
     }
 
+    @GetMapping("/admin")
+    public String admin(Model model) throws IOException {
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+        return "admin";
+    }
+
     @GetMapping("/admin/scores")
     public String adminScores(Model model) throws IOException {
         SettingDTO settings = settingService.getSettings();
