@@ -124,6 +124,12 @@
       background-color: #f5f5f5;
       border-radius: 8px;
     }
+    .event-line {
+      font-size: 1.6rem;
+      font-weight: 700;
+      text-align: center;
+      margin: 4px 0 12px;
+    }
   </style>
 </head>
 
@@ -148,6 +154,13 @@
             <i class="material-icons" style="font-size: inherit; vertical-align: middle;">warning</i>
             Sequence Configuration Issues
           </h2>
+        </div>
+      </div>
+
+      <!-- Event name (always visible) -->
+      <div class="row">
+        <div class="col s12">
+          <p class="event-line" th:text="${compName}"></p>
         </div>
       </div>
 

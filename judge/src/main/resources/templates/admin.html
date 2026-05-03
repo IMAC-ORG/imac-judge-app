@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
+  <title>Admin</title>
+
+  <!-- CSS  -->
+  <link href="/materialize/css/material_lcons.css" rel="stylesheet">
+  <link href="/materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+  <style>
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin: 10px 0 6px 0;
+    }
+    .heading {
+      font-size: calc(1.5vw + 2.5vh) !important;
+      margin: 0;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .admin-nav-btn {
+      margin: 2px;
+      padding: 0 12px;
+    }
+    .admin-tile-link {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+    .admin-tile {
+      border: 2px solid #90a4ae;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      background: #fafafa;
+    }
+    .admin-tile-link:active .admin-tile {
+      background: #eceff1;
+    }
+    .admin-tile-title {
+      font-size: 1.9rem;
+      font-weight: 600;
+      color: #263238;
+      margin-bottom: 4px;
+    }
+    .admin-tile-text {
+      font-size: 1.5rem;
+      color: #555;
+    }
+    .event-line {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #263238;
+      margin: 0 0 12px;
+    }
+  </style>
+</head>
+
+<body class="orange lighten-4">
+  <div th:replace="~{banner::line_judge}"></div>
+  <div th:replace="~{banner::status}"></div>
+
+  <div class="section no-pad-bot orange lighten-4" id="index-banner">
+    <div class="container orange lighten-4 black-text">
+
+      <div class="header-row">
+        <h2 class="heading">Admin</h2>
+        <div class="nav-buttons">
+          <a href="/" class="waves-effect waves-light btn teal admin-nav-btn">
+            <i class="material-icons left">exit_to_app</i>Exit
+          </a>
+        </div>
+      </div>
+
+      <p class="event-line" th:text="${compName}"></p>
+
+      <a href="/admin/comp" class="admin-tile-link">
+        <div class="admin-tile">
+          <div class="admin-tile-title">Event Admin</div>
+          <div class="admin-tile-text">Set sequence options, Score server actions, and load new events.</div>
+        </div>
+      </a>
+
+      <a href="/admin/scores" class="admin-tile-link">
+        <div class="admin-tile">
+          <div class="admin-tile-title">Score Fixes</div>
+          <div class="admin-tile-text">Resolve score mismatches and per-pilot fixes.</div>
+        </div>
+      </a>
+
+      <a href="/admin/device" class="admin-tile-link">
+        <div class="admin-tile">
+          <div class="admin-tile-title">Device Settings</div>
+          <div class="admin-tile-text">Scoring mode, line/judge numbers, and software updates.</div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!--  Scripts-->
+  <script src="/jquery-3.6.4.min.js"></script>
+  <script src="/materialize/js/materialize.js"></script>
+
+</body>
+
+</html>

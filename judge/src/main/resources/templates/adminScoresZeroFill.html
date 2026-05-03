@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
+  <title>Zero Unflown Rounds</title>
+
+  <!-- CSS  -->
+  <link href="/materialize/css/material_lcons.css" rel="stylesheet">
+  <link href="/materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+  <style>
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin: 10px 0 6px 0;
+    }
+    .heading {
+      font-size: calc(1.2vw + 2vh) !important;
+      margin: 0;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .admin-nav-btn {
+      margin: 2px;
+      padding: 0 12px;
+    }
+    .wizard-context {
+      font-size: 1.75rem;
+      font-weight: 500;
+      color: #455a64;
+      margin: 4px 0 8px;
+    }
+    .step-section-title {
+      font-size: 1.9rem;
+      font-weight: 600;
+      color: #455a64;
+      margin: 8px 0 6px 0;
+    }
+    .all-clear {
+      text-align: center;
+      padding: 16px 10px;
+      color: #2e7d32;
+    }
+    .all-clear i {
+      font-size: 3.5rem;
+      color: #4caf50;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .all-clear-title {
+      font-size: 2.1rem;
+      font-weight: 500;
+    }
+    .loading-spinner {
+      text-align: center;
+      padding: 20px;
+    }
+    .picker-class-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 14px;
+      margin-bottom: 6px;
+      border: 1px solid #90a4ae;
+      border-radius: 6px;
+    }
+    .picker-class-label {
+      font-size: 1.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #263238;
+    }
+    .picker-class-btns {
+      display: flex;
+      gap: 8px;
+    }
+    .picker-type-btn {
+      padding: 8px 14px;
+      border: 2px solid #90a4ae;
+      border-radius: 6px;
+      background: #fafafa;
+      color: #263238;
+      font-size: 1.75rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .picker-type-btn:active {
+      background: #eceff1;
+    }
+    .picker-divider {
+      border-top: 1px solid #cfd8dc;
+      margin: 10px 0 8px;
+    }
+    .picker-freestyle-row {
+      text-align: center;
+      margin-top: 8px;
+    }
+    .pick-row {
+      display: block;
+      padding: 10px 14px;
+      margin-bottom: 6px;
+      border: 2px solid #90a4ae;
+      border-radius: 8px;
+      background: #fafafa;
+      font-size: 1.75rem;
+      color: #263238;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .pick-row:active {
+      background: #eceff1;
+    }
+    .pick-row .row-name {
+      font-weight: 500;
+    }
+    .pick-row .row-meta {
+      font-size: 1.5rem;
+      color: #555;
+    }
+    .pick-row.disabled {
+      background: #e0e0e0;
+      color: #757575;
+      border-color: #bdbdbd;
+      cursor: not-allowed;
+    }
+    .pick-row.disabled .row-meta,
+    .pick-row .row-caption {
+      color: #616161;
+      font-size: 1.5rem;
+      margin-top: 3px;
+    }
+    .round-pick-row {
+      display: block;
+      padding: 12px 16px;
+      margin-bottom: 6px;
+      border: 2px solid #1976d2;
+      border-radius: 8px;
+      background: #e3f2fd;
+      color: #0d47a1;
+      font-size: 1.9rem;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .round-pick-row:active {
+      background: #bbdefb;
+    }
+    .round-pick-row.disabled {
+      background: #e0e0e0;
+      color: #757575;
+      border-color: #bdbdbd;
+      cursor: not-allowed;
+    }
+    .round-pick-row .row-caption {
+      font-size: 1.5rem;
+      color: #616161;
+      font-weight: 400;
+      margin-top: 3px;
+    }
+    .confirm-box {
+      border: 2px solid #1976d2;
+      border-radius: 8px;
+      padding: 10px 14px;
+      background: #e3f2fd;
+      color: #0d47a1;
+      margin-bottom: 10px;
+    }
+    .confirm-action {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .confirm-after-line {
+      font-size: 1.75rem;
+      margin: 4px 0;
+    }
+    .confirm-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    .result-box {
+      text-align: center;
+      padding: 12px 16px;
+      margin: 10px 0;
+      border-radius: 8px;
+      background: #e8f5e9;
+      color: #1b5e20;
+    }
+    .result-icon {
+      font-size: 3rem;
+    }
+    .result-message {
+      font-size: 1.75rem;
+      font-weight: 500;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+
+<body class="orange lighten-4">
+  <div th:replace="~{banner::line_judge}"></div>
+  <div th:replace="~{banner::status}"></div>
+
+  <div class="section no-pad-bot orange lighten-4" id="index-banner">
+    <div class="container orange lighten-4 black-text">
+
+      <div class="header-row">
+        <h2 class="heading">Zero Unflown Rounds</h2>
+        <div class="nav-buttons">
+          <a href="#" id="wizardBackBtn" class="waves-effect waves-light btn blue-grey admin-nav-btn" style="display:none;">
+            <i class="material-icons left">arrow_back</i>Back
+          </a>
+          <a href="/admin/scores" class="waves-effect waves-light btn green admin-nav-btn">
+            <i class="material-icons left">arrow_back</i>Score Fixes
+          </a>
+          <a href="/" class="waves-effect waves-light btn teal admin-nav-btn">
+            <i class="material-icons left">exit_to_app</i>Exit
+          </a>
+        </div>
+      </div>
+
+      <div id="wizardContext" class="wizard-context" style="display:none;"></div>
+
+      <!-- Step 0: class/type picker -->
+      <div class="wizard-step" id="step-picker">
+        <div id="loadingState" class="loading-spinner">
+          <div class="preloader-wrapper big active">
+            <div class="spinner-layer spinner-blue-only">
+              <div class="circle-clipper left"><div class="circle"></div></div>
+              <div class="gap-patch"><div class="circle"></div></div>
+              <div class="circle-clipper right"><div class="circle"></div></div>
+            </div>
+          </div>
+          <p>Scanning for groups to zero...</p>
+        </div>
+
+        <div id="noEligible" class="all-clear" style="display:none;">
+          <i class="material-icons">check_circle</i>
+          <div class="all-clear-title">All pilot rounds in sync — nothing to zero</div>
+        </div>
+
+        <div id="pickerWrap" style="display:none;">
+          <div class="step-section-title">Pick a class and round type:</div>
+          <div id="pickerRows"></div>
+        </div>
+      </div>
+
+      <!-- Step 2a: pilot pick -->
+      <div class="wizard-step" id="step-pilot-pick" style="display:none;">
+        <div class="step-section-title">Pick pilot to zero:</div>
+        <div id="pilotPickList"></div>
+      </div>
+
+      <!-- Step 2b: round pick -->
+      <div class="wizard-step" id="step-round-pick" style="display:none;">
+        <div id="roundPickTitle" class="step-section-title"></div>
+        <div id="roundPickList"></div>
+      </div>
+
+      <!-- Step 3: confirm -->
+      <div class="wizard-step" id="step-confirm" style="display:none;">
+        <div class="confirm-box" id="confirmBox"></div>
+        <div class="confirm-buttons">
+          <a href="#" id="confirmCancelBtn" class="waves-effect waves-light btn-flat">Cancel</a>
+          <a href="#" id="confirmActionBtn" class="waves-effect waves-light btn green">Confirm Zero-fill</a>
+        </div>
+      </div>
+
+      <!-- Step 4: result -->
+      <div class="wizard-step" id="step-result" style="display:none;">
+        <div class="result-box">
+          <i class="material-icons result-icon">check_circle</i>
+          <div class="result-message">Round zeroed.</div>
+        </div>
+        <div class="confirm-buttons">
+          <a href="/admin/scores" class="waves-effect waves-light btn green">Done</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!--  Scripts-->
+  <script src="/jquery-3.6.4.min.js"></script>
+  <script src="/materialize/js/materialize.js"></script>
+  <script>
+    /* Zero-fill wizard — single-page state machine. */
+    const state = {
+      group: null,           // selected (class, roundType) group
+      targetPilot: null,     // selected pilot
+      targetRound: null,     // selected round
+      allGroups: []
+    };
+    const stepHistory = [];
+
+    function showStep(stepId, recordHistory) {
+      $('.wizard-step').hide();
+      $('#' + stepId).show();
+      if (recordHistory !== false) stepHistory.push(stepId);
+      const showBack = stepHistory.length > 1
+          && stepId !== 'step-picker'
+          && stepId !== 'step-result';
+      $('#wizardBackBtn').toggle(showBack);
+      updateContextStrip(stepId);
+    }
+
+    function goBack() {
+      stepHistory.pop();
+      const prev = stepHistory[stepHistory.length - 1] || 'step-picker';
+      $('.wizard-step').hide();
+      $('#' + prev).show();
+      const showBack = stepHistory.length > 1
+          && prev !== 'step-picker'
+          && prev !== 'step-result';
+      $('#wizardBackBtn').toggle(showBack);
+      updateContextStrip(prev);
+    }
+
+    function updateContextStrip(stepId) {
+      const $ctx = $('#wizardContext');
+      if (!state.group || stepId === 'step-picker') {
+        $ctx.hide().text('');
+        return;
+      }
+      $ctx.text('Zero-fill: ' + state.group.className + ' — ' + roundTypeLabel(state.group.roundType)).show();
+    }
+
+    function roundTypeLabel(rt) {
+      if (rt === 'KNOWN') return 'Known Rounds';
+      if (rt === 'UNKNOWN') return 'Unknown Rounds';
+      if (rt === 'FREESTYLE') return 'Freestyle';
+      return rt;
+    }
+
+    function roundTypeTitle(rt) {
+      if (rt === 'KNOWN') return 'Known';
+      if (rt === 'UNKNOWN') return 'Unknown';
+      if (rt === 'FREESTYLE') return 'Freestyle';
+      return rt;
+    }
+
+    function isEligiblePilot(p, group) {
+      return p.incompleteRound == null && p.roundCount < group.maxCount;
+    }
+
+    function groupHasEligible(g) {
+      return (g.pilots || []).some(function (p) { return isEligiblePilot(p, g); });
+    }
+
+    function fetchGroups() {
+      $('#loadingState').show();
+      $('#noEligible').hide();
+      $('#pickerWrap').hide();
+      $.ajax({
+        url: '/api/scores/mismatches',
+        cache: false,
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+          state.allGroups = (data.allGroups || []).filter(groupHasEligible);
+          renderPicker();
+        },
+        error: function () {
+          $('#loadingState').hide();
+          M.toast({ html: 'Could not load detection data', classes: 'red' });
+        }
+      });
+    }
+
+    function renderPicker() {
+      $('#loadingState').hide();
+      if (state.allGroups.length === 0) {
+        $('#noEligible').show();
+        $('#pickerWrap').hide();
+        return;
+      }
+      $('#noEligible').hide();
+      $('#pickerWrap').show();
+      const $rows = $('#pickerRows').empty();
+
+      const byClass = {};
+      let freestyle = null;
+      state.allGroups.forEach(function (g) {
+        if (g.className === 'FREESTYLE') {
+          freestyle = g;
+          return;
+        }
+        if (!byClass[g.className]) byClass[g.className] = [];
+        byClass[g.className].push(g);
+      });
+
+      Object.keys(byClass).forEach(function (className) {
+        const groups = byClass[className];
+        const $row = $('<div class="picker-class-row">');
+        $row.append($('<div class="picker-class-label">').text(className));
+        const $btns = $('<div class="picker-class-btns">');
+        ['KNOWN', 'UNKNOWN'].forEach(function (rt) {
+          const g = groups.find(function (x) { return x.roundType === rt; });
+          if (!g) return;
+          const $btn = $('<a href="#" class="picker-type-btn">').text(roundTypeTitle(rt));
+          $btn.on('click', function (e) {
+            e.preventDefault();
+            state.group = g;
+            stepHistory.length = 0;
+            stepHistory.push('step-picker');
+            showStep('step-pilot-pick');
+            renderPilotPick();
+          });
+          $btns.append($btn);
+        });
+        $row.append($btns);
+        $rows.append($row);
+      });
+
+      if (freestyle) {
+        const $row = $('<div class="picker-class-row">');
+        $row.append($('<div class="picker-class-label">').text('FREESTYLE'));
+        const $btns = $('<div class="picker-class-btns">');
+        const $btn = $('<a href="#" class="picker-type-btn">').text('Freestyle');
+        $btn.on('click', function (e) {
+          e.preventDefault();
+          state.group = freestyle;
+          stepHistory.length = 0;
+          stepHistory.push('step-picker');
+          showStep('step-pilot-pick');
+          renderPilotPick();
+        });
+        $btns.append($btn);
+        $row.append($btns);
+        $rows.append($row);
+      }
+    }
+
+    function renderPilotPick() {
+      const $list = $('#pilotPickList').empty();
+      const pilots = (state.group.pilots || []).slice()
+          .sort(function (a, b) { return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }); });
+      const maxC = state.group.maxCount;
+      pilots.forEach(function (p) {
+        const $row = $('<a href="#" class="pick-row">');
+        $row.append($('<div class="row-name">').text(p.name));
+        const meta = p.roundCount + ' ' + roundTypeTitle(state.group.roundType) + ' rounds';
+        $row.append($('<div class="row-meta">').text(meta));
+        let disabled = false;
+        let caption = null;
+        if (p.incompleteRound != null) {
+          disabled = true;
+          caption = 'Mark missing sequence first';
+        } else if (p.roundCount >= maxC) {
+          disabled = true;
+          caption = 'Already caught up';
+        }
+        if (caption) $row.append($('<div class="row-caption">').text(caption));
+        if (disabled) {
+          $row.addClass('disabled');
+        } else {
+          $row.on('click', function (e) {
+            e.preventDefault();
+            state.targetPilot = p;
+            showStep('step-round-pick');
+            renderRoundPick();
+          });
+        }
+        $list.append($row);
+      });
+    }
+
+    function renderRoundPick() {
+      $('#roundPickTitle').text('Pick round to zero for ' + state.targetPilot.name + ':');
+      const $list = $('#roundPickList').empty();
+      const start = state.targetPilot.roundCount + 1;
+      const end = state.group.maxCount;
+      for (let r = start; r <= end; r++) {
+        const round = r;
+        const $row = $('<a href="#" class="round-pick-row">');
+        $row.append($('<div>').text(roundTypeTitle(state.group.roundType) + ' Round ' + round));
+        if (round === start) {
+          $row.on('click', function (e) {
+            e.preventDefault();
+            state.targetRound = round;
+            showStep('step-confirm');
+            renderConfirm();
+          });
+        } else {
+          $row.addClass('disabled');
+          $row.append($('<div class="row-caption">').text('Zero Round ' + start + ' first'));
+        }
+        $list.append($row);
+      }
+    }
+
+    function renderConfirm() {
+      const p = state.targetPilot;
+      const typeTitle = roundTypeTitle(state.group.roundType);
+      const $box = $('#confirmBox').empty();
+      $box.append($('<div class="confirm-action">').text(
+          'Add zero scores for ' + typeTitle + ' Round ' + state.targetRound + ' to ' + p.name + '.'));
+      const afterCount = state.targetRound;
+      $box.append($('<div class="confirm-after-line">').text(
+          'After: ' + afterCount + ' ' + typeTitle + ' rounds (next: Round ' + (afterCount + 1) + ').'));
+    }
+
+    function executeZeroFill() {
+      $.ajax({
+        url: '/api/scores/zero-fill',
+        cache: false,
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json',
+        data: JSON.stringify({
+          pilotId: state.targetPilot.pilotId,
+          roundType: state.group.roundType,
+          round: state.targetRound
+        }),
+        success: function (data) {
+          if (data.result === 'ok') {
+            showStep('step-result');
+          } else {
+            M.toast({ html: data.message || 'Zero-fill failed', classes: 'red' });
+          }
+        },
+        error: function (errObj) {
+          const msg = errObj.responseJSON && errObj.responseJSON.message
+              ? errObj.responseJSON.message
+              : 'Zero-fill failed';
+          M.toast({ html: msg, classes: 'red' });
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      stepHistory.push('step-picker');
+      fetchGroups();
+    });
+
+    $('#wizardBackBtn').on('click', function (e) {
+      e.preventDefault();
+      goBack();
+    });
+
+    $('#confirmCancelBtn').on('click', function (e) {
+      e.preventDefault();
+      goBack();
+    });
+
+    $('#confirmActionBtn').on('click', function (e) {
+      e.preventDefault();
+      executeZeroFill();
+    });
+  </script>
+
+</body>
+
+</html>

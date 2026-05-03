@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
-  <title>Admin - Scores</title>
+  <title>Score Fixes</title>
 
   <!-- CSS  -->
   <link href="/materialize/css/material_lcons.css" rel="stylesheet">
@@ -15,8 +15,7 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      margin-top: 20px;
-      margin-bottom: 8px;
+      margin: 10px 0 6px 0;
     }
     .heading {
       font-size: calc(1.5vw + 2.5vh) !important;
@@ -31,37 +30,42 @@
       margin: 2px;
       padding: 0 12px;
     }
-    .admin-box {
+    .admin-tile-link {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+    .admin-tile {
       border: 2px solid #90a4ae;
       border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 10px;
-      background: #fafafa;
-      text-align: center;
-    }
-    .tool-box {
-      min-height: 180px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .tool-icon {
-      font-size: 2.5rem;
+      padding: 12px 16px;
       margin-bottom: 8px;
+      background: #fafafa;
     }
-    .tool-title {
-      font-size: 1.1rem;
+    .admin-tile-link:active .admin-tile {
+      background: #eceff1;
+    }
+    .admin-tile-title {
+      font-size: 1.9rem;
       font-weight: 600;
-      margin-bottom: 6px;
+      color: #263238;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .tool-text {
-      font-size: 0.85rem;
+    .admin-tile-title i.material-icons {
+      font-size: 1.9rem;
+    }
+    .admin-tile-text {
+      font-size: 1.5rem;
       color: #555;
-      max-width: 250px;
     }
-    .disabled-tool {
+    .admin-tile.disabled-tool {
       opacity: 0.6;
+    }
+    .admin-tile.disabled-tool .admin-tile-text .coming-soon {
+      font-style: italic;
     }
   </style>
 </head>
@@ -75,74 +79,56 @@
 
       <!-- Header + Navigation -->
       <div class="header-row">
-        <h2 class="heading">Score Admin</h2>
+        <h2 class="heading">Score Fixes</h2>
         <div class="nav-buttons">
-          <a href="/admin/comp" class="waves-effect waves-light btn blue-grey admin-nav-btn">
-            <i class="material-icons left">settings</i>Scorekeeper
-          </a>
-          <a href="/admin/device" class="waves-effect waves-light btn blue admin-nav-btn">
-            <i class="material-icons left">devices</i>Device
+          <a href="/admin" class="waves-effect waves-light btn blue-grey admin-nav-btn">
+            <i class="material-icons left">menu</i>Admin Menu
           </a>
           <a href="/" class="waves-effect waves-light btn teal admin-nav-btn">
-            <i class="material-icons left">home</i>Home
+            <i class="material-icons left">exit_to_app</i>Exit
           </a>
         </div>
       </div>
 
-      <!-- Score Tools -->
-      <div class="row">
-        <div class="col s12 m6">
-          <div class="admin-box tool-box">
-            <i class="material-icons tool-icon green-text">swap_horiz</i>
-            <div class="tool-title">Resolve Mismatches</div>
-            <div class="tool-text">
-              Move rounds between pilots when scores were recorded to the wrong pilot.
-            </div>
-            <a href="/admin/scores/resolve" class="waves-effect waves-light btn green darken-1" style="margin-top: 10px;">
-              <i class="material-icons left">build</i>Open Tool
-            </a>
+      <a href="/admin/scores/resolve" class="admin-tile-link">
+        <div class="admin-tile">
+          <div class="admin-tile-title">
+            <i class="material-icons green-text">swap_horiz</i>Resolve Mismatches
+          </div>
+          <div class="admin-tile-text">
+            Move rounds between pilots when scores were recorded to the wrong pilot.
           </div>
         </div>
+      </a>
 
-        <div class="col s12 m6">
-          <div class="admin-box tool-box disabled-tool">
-            <i class="material-icons tool-icon grey-text">exposure_zero</i>
-            <div class="tool-title">Zero Unflown Rounds</div>
-            <div class="tool-text">
-              Mark rounds as zeros for pilots who didn't fly.
-            </div>
-            <span class="btn grey lighten-1" style="margin-top: 10px;">
-              <i class="material-icons left">schedule</i>Coming Soon
-            </span>
+      <a href="/admin/scores/swap" class="admin-tile-link">
+        <div class="admin-tile">
+          <div class="admin-tile-title">
+            <i class="material-icons blue-text">swap_horiz</i>Swap Round Scores
+          </div>
+          <div class="admin-tile-text">
+            Swap two pilots' scores for a single round when the judge attributed each pilot's flight to the other.
           </div>
         </div>
-      </div>
+      </a>
 
-      <div class="row">
-        <div class="col s12 m6">
-          <div class="admin-box tool-box disabled-tool">
-            <i class="material-icons tool-icon grey-text">edit</i>
-            <div class="tool-title">Edit Scores</div>
-            <div class="tool-text">
-              Manually edit individual figure scores.
-            </div>
-            <span class="btn grey lighten-1" style="margin-top: 10px;">
-              <i class="material-icons left">schedule</i>Coming Soon
-            </span>
+      <a href="/admin/scores/zero-fill" class="admin-tile-link">
+        <div class="admin-tile">
+          <div class="admin-tile-title">
+            <i class="material-icons orange-text">exposure_zero</i>Zero Unflown Rounds
+          </div>
+          <div class="admin-tile-text">
+            Mark rounds as zeros for pilots who had to miss a round.
           </div>
         </div>
+      </a>
 
-        <div class="col s12 m6">
-          <div class="admin-box tool-box disabled-tool">
-            <i class="material-icons tool-icon grey-text">history</i>
-            <div class="tool-title">Audit Log</div>
-            <div class="tool-text">
-              View history of score changes and corrections.
-            </div>
-            <span class="btn grey lighten-1" style="margin-top: 10px;">
-              <i class="material-icons left">schedule</i>Coming Soon
-            </span>
-          </div>
+      <div class="admin-tile disabled-tool">
+        <div class="admin-tile-title">
+          <i class="material-icons grey-text">history</i>Audit Log
+        </div>
+        <div class="admin-tile-text">
+          <span class="coming-soon">Coming soon — view history of score changes and corrections.</span>
         </div>
       </div>
 
@@ -154,8 +140,7 @@
       <i class="large material-icons">menu</i>
     </a>
     <ul>
-      <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">home</i></a></li>
-      <li><a class="btn-floating btn-large blue-grey" href="/admin/comp"><i class="material-icons">settings</i></a></li>
+      <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">exit_to_app</i></a></li>
     </ul>
   </div>
 

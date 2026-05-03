@@ -130,6 +130,15 @@ public class PilotScores {
     }
 
     /**
+     * Decrement active round for a specific type.
+     * @param roundType KNOWN, UNKNOWN, or FREESTYLE
+     */
+    public void decrementActiveRound(String roundType) {
+        int current = getActiveRound(roundType);
+        setActiveRound(roundType, current - 1);
+    }
+
+    /**
      * Get the full activeRoundByType map (for JSON serialization).
      */
     public Map<String, Integer> getActiveRoundByType() {

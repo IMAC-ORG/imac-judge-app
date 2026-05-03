@@ -4,6 +4,93 @@ All notable changes to the AeroJudge App will be documented in this file.
 
 ---
 
+## [Unreleased] - admin-pages-overhaul
+
+### Added
+
+- **Admin landing page** (`/admin`): New top-level admin menu with three full-width tile links —
+  Event Admin (`/admin/comp`), Score Fixes (`/admin/scores`), Device Settings (`/admin/device`).
+  Single Exit button in the header; no FAB nav inside the menu.
+- **Event name display**: The loaded comp's event name now shows bold and prominently on
+  `/admin` and on `/validate-sequences` (both success and issues states), closing the
+  test/live event confusion gap.
+- **Fix Missing Sequence**: New admin action to mark a pilot's missing seq 2 of a 2-sequence
+  KNOWN round as 0.0 (didn't fly). Used when the pilot didn't fly seq 2 (mechanical, scratch)
+  and a judge at the line didn't manually zero the figures. Backend
+  `POST /api/scores/fix-missing-sequence`. Reachable from the Resolve Mismatches wizard.
+- **Move Round eligibility checks**: Backend `POST /api/scores/move-round` now rejects 400
+  when the source has no extra round to give, or when either pilot has an unresolved missing
+  seq 2 — admin must run Fix Missing Sequence first. Failure response names the specific
+  pilot and the action to take.
+- **Zero-fill** (`/admin/scores/zero-fill`): New tile + wizard for catching a behind pilot up
+  to peers who have already flown a round. Used when a pilot had to miss a round (mechanical,
+  control issues, etc.). Sequential constraint enforced — must zero K+1 before K+2.
+  Backend `POST /api/scores/zero-fill`.
+- **Swap Round Scores** (`/admin/scores/swap`): New tile + wizard for swapping two pilots'
+  scores in a single round when the judge attributed each pilot's flight to the other. Both
+  records look valid so the detector can't surface this case; admin discovers it from a
+  judge report. Backend `POST /api/scores/swap-round`.
+- **Format-change preventive blocker**: 2-sequence → 1-sequence reconfig is rejected with
+  HTTP 409 when the data isn't in a clean state — any pilot mid-round in KNOWN
+  (`activeSequence == 2`), or any class with uneven KNOWN round counts. Modal lists per-rule
+  failures and links to Score Fixes. Pre-check on both `/api/comp/local` and
+  `/api/comp?edit=true`; new comp creation skipped (backupAllFiles wipes pilots first).
+- **Pre-sync mismatch modal**: Tapping the publish-icon FAB on `pilot-list-global` /
+  `pilot-list-round` now runs a pre-flight check against `/api/scores/mismatches`; if
+  anomalies are detected the modal lists them with equal-styling Get admin / Sync anyway
+  choices.
+
+### Changed
+
+- **Detection rewrite** (`/api/scores/mismatches`): Replaces the median/mode "expectedCount"
+  algorithm and the silent-drop gate (which only emitted when both `tooMany` AND `tooFew`
+  were non-empty — hiding single-sided gaps). New algorithm computes per-(class, roundType)
+  min/max/spread plus per-pilot incomplete-round detection (seq 1 present, seq 2 missing,
+  peer evidence required). Payload now exposes both `mismatches` (anomalous groups) and
+  `allGroups` (every group with at least one pilot, used by manual-fix and zero-fill
+  pickers). Anomaly tags (`count_gap`, `incomplete_round`) on each group.
+- **Move-round activeRound integrity** (production bug fix): Non-equal-count moves previously
+  bricked the affected pilots by force-writing both activeRounds to `destRound + 1`. Now
+  uses explicit `decrementActiveRound` (source) + `incrementActiveRound` (destination)
+  matching the delta of the move.
+- **Page renames**:
+  - `/admin/comp`: Scorekeeper Admin → **Event Admin**
+  - `/admin/scores`: Score Admin → **Score Fixes**
+  - `/admin/device`: Device Settings — unchanged
+- **Admin navigation simplified**: Cross-link cleanup on every admin page — separate
+  Scorekeeper / Device / Scores buttons replaced with a single Admin Menu button → `/admin`.
+  The previous "Home" button (a misnomer — `/` is the judging interface) becomes "Exit"
+  with the `exit_to_app` icon; FAB green-circle picks up the same icon swap. FAB cleanup on
+  `/admin/scores` and `/admin/device` removes the secondary `/admin/comp` settings entry.
+- **Score Fixes tile layout**: Stacked full-width tiles using `.admin-tile-link` /
+  `.admin-tile` / `.admin-tile-title` / `.admin-tile-text` (matching the admin landing). Tile
+  order: Resolve Mismatches, Swap Round Scores, Zero Unflown Rounds, Audit Log (placeholder).
+  The previously-placeholder Edit Scores tile is removed entirely.
+- **Pilot-list admin warning Continue button**: Now lands on `/admin` (the menu) instead of
+  `/admin/comp` directly.
+- **Resolver wizard** (`/admin/scores/resolve`): The single-page move-only flow is replaced
+  wholesale by a two-operation wizard. Detected-mismatch entry from the new detection
+  algorithm; manual entry via Force Round Edits for cases the detector can't surface from
+  data. Step 1 offers Fix Missing Sequence and Move Round side-by-side, with per-op greying
+  driven by the group's incomplete-round and count-spread state.
+- **DESIGN.md tier sweep**: All admin templates (admin landing, Event Admin, Device Settings,
+  Score Fixes, all wizards, sync-mismatch modal) now use the locked text-size tiers (1.5 /
+  1.75 / 1.9 / 2.1 rem) and spacing tiers from `.idea/DESIGN.md`. Inline icons unified to
+  1.5rem. Disabled-row contrast palette applied uniformly with `cursor: not-allowed`.
+- **`ContestClasses.ORDER` consolidation**: New `co.za.imac.judge.utils.ContestClasses`
+  utility is the single source of truth for the IMAC class-order constant. Duplicate copies
+  in `SequenceValidationService` and `RootController` removed.
+  `ContestClasses.orderIndex(...)` helper handles case-insensitive lookup with an
+  `ORDER.size()` fallback for null / unknown / FREESTYLE.
+- **`ScoreResolverService`**: Pure-logic resolver helpers extracted from `APIController` to a
+  new `@Service` class mirroring `SequenceValidationService`. Public methods: `getMismatches`,
+  `countRoundsForType`, `findUnresolvedMissingSeq2Round`. Controller is now a thin HTTP layer.
+
+The 21 commits on this branch are sequenced so each lands a single coherent concern that a
+reviewer can read in isolation.
+
+---
+
 ## [Unreleased] - fix/update-exit-143-bug
 
 ### Fixed

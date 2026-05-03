@@ -115,6 +115,9 @@
 </div>
 
 <!-- Admin Warning Modal -->
+<!-- Pre-sync mismatch warning modal (shared fragment) -->
+<div th:replace="~{sync-mismatch-modal :: modal}"></div>
+
 <div id="admin_warning_modal" class="modal">
   <div class="modal-content center-align">
     <h4><i class="material-icons medium orange-text">warning</i></h4>
@@ -123,7 +126,7 @@
     <p style="font-size: 1.2rem; color: #ff0000;">Changes made here may affect the competition setup.</p>
   </div>
     <div class="modal-footer" style="text-align: center;">
-      <a href="/admin/comp" class="waves-effect waves-green btn green" style="text-align: center; width: 120px; margin-right: 60px;">Continue</a>
+      <a href="/admin" class="waves-effect waves-green btn green" style="text-align: center; width: 120px; margin-right: 60px;">Continue</a>
       <a href="#!" class="modal-close waves-effect waves-red btn red" style="text-align: center; width: 120px;">Exit</a>
     </div>
 </div>
@@ -234,17 +237,63 @@
     }
 
     async function syncScores() {
+      let payload = null;
       try {
-        const response = await $.ajax({
-          url: "/api/scores/sync"
+        payload = await $.ajax({
+          url: '/api/scores/mismatches',
+          cache: false,
+          dataType: 'json'
         });
-
-        M.toast({ html: 'Scores Sync Success', classes: 'toastMessage', displayLength: 4000 })
-
-      } catch (errMsg) {
-          M.toast({ html: 'Scores Sync Error - Is Score Available?', classes: 'toastMessage', displayLength: 4000 })
+      } catch (e) {
+        // Pre-flight failed — fall through to sync without modal
       }
+      if (payload && payload.mismatches && payload.mismatches.length > 0) {
+        populateAndOpenSyncMismatchModal(payload);
+        return;
+      }
+      doActualSync();
     }
+
+    function doActualSync() {
+      $.ajax({ url: '/api/scores/sync' })
+        .done(function () {
+          M.toast({ html: 'Scores Sync Success', classes: 'toastMessage', displayLength: 4000 });
+        })
+        .fail(function () {
+          M.toast({ html: 'Scores Sync Error - Is Score Available?', classes: 'toastMessage', displayLength: 4000 });
+        });
+    }
+
+    function syncMismatchRoundTypeLabel(rt) {
+      if (rt === 'KNOWN') return 'Known';
+      if (rt === 'UNKNOWN') return 'Unknown';
+      if (rt === 'FREESTYLE') return 'Freestyle';
+      return rt;
+    }
+
+    function populateAndOpenSyncMismatchModal(payload) {
+      const $list = $('#syncMismatchList').empty();
+      (payload.mismatches || []).forEach(function (g) {
+        const groupLabel = g.className + ' ' + syncMismatchRoundTypeLabel(g.roundType);
+        if ((g.anomalies || []).indexOf('count_gap') !== -1) {
+          $list.append($('<li>').text(groupLabel + ': counts span ' + g.minCount + ' to ' + g.maxCount));
+        }
+        if ((g.anomalies || []).indexOf('incomplete_round') !== -1) {
+          (g.pilots || []).forEach(function (p) {
+            if (p.incompleteRound != null) {
+              $list.append($('<li>').text(
+                  groupLabel + ': ' + p.name + ' — Round ' + p.incompleteRound + ' incomplete (sequence 2 missing)'));
+            }
+          });
+        }
+      });
+      const modal = M.Modal.getInstance(document.getElementById('syncMismatchModal'));
+      modal.open();
+    }
+
+    $(document).on('click', '#syncAnywayBtn', function () {
+      doActualSync();
+    });
 
     // Instructions audio for new users
     var instructionsAudio = null;

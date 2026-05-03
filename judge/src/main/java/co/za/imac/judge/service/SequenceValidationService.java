@@ -4,6 +4,7 @@ import co.za.imac.judge.dto.Pilot;
 import co.za.imac.judge.dto.ScheduleDTO;
 import co.za.imac.judge.dto.ValidationResult;
 import co.za.imac.judge.dto.ValidationIssue;
+import co.za.imac.judge.utils.ContestClasses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +34,6 @@ public class SequenceValidationService {
 
     @Autowired
     private CompService compService;
-
-    // Competition class ordering (from RootController)
-    private static final List<String> CLASS_ORDER = Arrays.asList(
-        "BASIC", "SPORTSMAN", "INTERMEDIATE", "ADVANCED", "UNLIMITED", "INVITATIONAL"
-    );
 
     /**
      * Validates all sequence configurations after sync.
@@ -394,13 +390,9 @@ public class SequenceValidationService {
             if ("SYSTEM".equals(a) || "SEQUENCES".equals(a)) return -1;
             if ("SYSTEM".equals(b) || "SEQUENCES".equals(b)) return 1;
 
-            // Get order indices
-            int orderA = CLASS_ORDER.indexOf(classA);
-            int orderB = CLASS_ORDER.indexOf(classB);
-
-            // If not in order list, put at end (before FREESTYLE)
-            if (orderA == -1) orderA = CLASS_ORDER.size();
-            if (orderB == -1) orderB = CLASS_ORDER.size();
+            // Get order indices (orderIndex pushes unknown / FREESTYLE to the end)
+            int orderA = ContestClasses.orderIndex(classA);
+            int orderB = ContestClasses.orderIndex(classB);
 
             // Compare by order
             int classCompare = Integer.compare(orderA, orderB);

@@ -2,7 +2,7 @@ package co.za.imac.judge.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import co.za.imac.judge.utils.ContestClasses;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -117,9 +117,8 @@ public class RootController {
 
         //now get ordered list of classes for the filter dialog
         Set<String> pilot_classes = new LinkedHashSet<>();
-        List<String> orderedClasses = Arrays.asList("BASIC", "SPORTSMAN", "INTERMEDIATE", "ADVANCED", "UNLIMITED", "INVITATIONAL");
         //build ordered list of classes from those contained in the pilots list
-        for (String className : orderedClasses) {
+        for (String className : ContestClasses.ORDER) {
             if (pilots.stream().anyMatch(pilot -> className.equalsIgnoreCase(pilot.getClassString()))) {
                 pilot_classes.add(className);
             }
@@ -197,9 +196,8 @@ public class RootController {
 
         //now get ordered list of classes for the filter dialog
         Set<String> pilot_classes = new LinkedHashSet<>();
-        List<String> orderedClasses = Arrays.asList("BASIC", "SPORTSMAN", "INTERMEDIATE", "ADVANCED", "UNLIMITED", "INVITATIONAL");
         //build ordered list of classes from those contained in the pilots list
-        for (String className : orderedClasses) {
+        for (String className : ContestClasses.ORDER) {
             if (pilots.stream().anyMatch(pilot -> className.equalsIgnoreCase(pilot.getClassString()))) {
                 pilot_classes.add(className);
             }
@@ -452,6 +450,14 @@ public class RootController {
         return "adminDevice";
     }
 
+    @GetMapping("/admin")
+    public String admin(Model model) throws IOException, ParserConfigurationException, SAXException {
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+        model.addAttribute("compName", compService.getComp().getComp_name());
+        return "admin";
+    }
+
     @GetMapping("/admin/scores")
     public String adminScores(Model model) throws IOException {
         SettingDTO settings = settingService.getSettings();
@@ -464,5 +470,19 @@ public class RootController {
         SettingDTO settings = settingService.getSettings();
         model.addAttribute("settings", settings);
         return "adminScoresResolve";
+    }
+
+    @GetMapping("/admin/scores/zero-fill")
+    public String adminScoresZeroFill(Model model) throws IOException {
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+        return "adminScoresZeroFill";
+    }
+
+    @GetMapping("/admin/scores/swap")
+    public String adminScoresSwap(Model model) throws IOException {
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+        return "adminScoresSwap";
     }
 }

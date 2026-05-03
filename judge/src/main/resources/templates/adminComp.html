@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
-  <title>Admin - Scorekeeper</title>
+  <title>Event Admin</title>
 
   <!-- CSS  -->
   <link href="/materialize/css/material_lcons.css" rel="stylesheet">
@@ -15,8 +15,7 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      margin-top: 20px;
-      margin-bottom: 8px;
+      margin: 10px 0 6px 0;
     }
     .heading {
       font-size: calc(1.5vw + 2.5vh) !important;
@@ -34,12 +33,12 @@
     .admin-box {
       border: 2px solid #90a4ae;
       border-radius: 8px;
-      padding: 10px 15px;
-      margin-bottom: 10px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
       background: #fafafa;
     }
     .admin-box-title {
-      font-size: 1rem;
+      font-size: 1.9rem;
       font-weight: 600;
       margin-bottom: 8px;
       color: #455a64;
@@ -51,7 +50,7 @@
       padding: 4px 0;
     }
     .setting-label {
-      font-size: 0.95rem;
+      font-size: 1.75rem;
       font-weight: 500;
       min-width: 140px;
     }
@@ -61,7 +60,7 @@
     }
     [type="radio"]:not(:checked)+span, [type="radio"]:checked+span {
       padding-left: 25px;
-      font-size: 0.95rem;
+      font-size: 1.75rem;
     }
     .action-buttons {
       display: flex;
@@ -70,7 +69,7 @@
       flex-wrap: wrap;
     }
     .warning-note {
-      font-size: 0.8rem;
+      font-size: 1.5rem;
       color: #c62828;
       margin-top: 5px;
       text-align: center;
@@ -87,16 +86,13 @@
 
       <!-- Header + Navigation -->
       <div class="header-row">
-        <h2 class="heading">Scorekeeper Admin</h2>
+        <h2 class="heading">Event Admin</h2>
         <div class="nav-buttons">
-          <a href="/admin/device" class="waves-effect waves-light btn blue admin-nav-btn">
-            <i class="material-icons left">devices</i>Device
-          </a>
-          <a href="/admin/scores" class="waves-effect waves-light btn green admin-nav-btn">
-            <i class="material-icons left">assessment</i>Scores
+          <a href="/admin" class="waves-effect waves-light btn blue-grey admin-nav-btn">
+            <i class="material-icons left">menu</i>Admin Menu
           </a>
           <a href="/" class="waves-effect waves-light btn teal admin-nav-btn">
-            <i class="material-icons left">home</i>Home
+            <i class="material-icons left">exit_to_app</i>Exit
           </a>
         </div>
       </div>
@@ -104,7 +100,7 @@
       <!-- Box 1: Local Device Settings -->
       <div class="admin-box">
         <div class="admin-box-title">
-          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.2rem;">tune</i>
+          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.5rem;">tune</i>
           Local Device Settings
         </div>
 
@@ -146,7 +142,7 @@
       <!-- Box 2: Score Server Actions -->
       <div class="admin-box">
         <div class="admin-box-title">
-          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.2rem;">cloud_sync</i>
+          <i class="material-icons" style="vertical-align: middle; margin-right: 6px; font-size: 1.5rem;">cloud_sync</i>
           Score Server Actions
         </div>
 
@@ -159,7 +155,7 @@
           </a>
         </div>
         <div class="warning-note">
-          <i class="material-icons" style="vertical-align: middle; font-size: 1rem;">warning</i>
+          <i class="material-icons" style="vertical-align: middle; font-size: 1.5rem;">warning</i>
           Load NEW archives current scores
         </div>
       </div>
@@ -167,14 +163,35 @@
       <!-- Confirmation Modal for New Event -->
       <div id="confirmNewEventModal" class="modal">
         <div class="modal-content" style="padding: 15px 20px 10px;">
-          <h5 style="margin-top: 0;"><i class="material-icons red-text" style="vertical-align: middle; margin-right: 8px;">warning</i>Load NEW Event?</h5>
-          <p style="font-size: 0.95rem; color: #666; margin: 10px 0;">
+          <h5 style="margin-top: 0; font-size: 1.9rem;"><i class="material-icons red-text" style="vertical-align: middle; margin-right: 8px; font-size: 1.5rem;">warning</i>Load NEW Event?</h5>
+          <p style="font-size: 1.75rem; color: #666; margin: 10px 0;">
             This will archive current scores, clear pilot data, and load fresh data from Score.
           </p>
         </div>
         <div class="modal-footer" style="padding: 10px 20px;">
           <a href="#!" class="modal-close waves-effect waves-red btn-flat">Cancel</a>
           <a href="#!" id="confirmNewEventBtn" class="waves-effect waves-light btn red">Yes, Load New</a>
+        </div>
+      </div>
+
+      <!-- Format-change blocker modal -->
+      <div id="formatChangeBlockerModal" class="modal">
+        <div class="modal-content" style="padding: 15px 20px 10px;">
+          <h5 style="margin-top: 0; font-size: 1.9rem;"><i class="material-icons red-text" style="vertical-align: middle; margin-right: 8px; font-size: 1.5rem;">block</i>Cannot Change Sequence Mode</h5>
+          <div id="rule1FailuresWrap" style="display: none; margin-top: 10px;">
+            <div style="font-weight: 500; margin-bottom: 4px; font-size: 1.75rem;">Pilots mid-round (between sequence 1 and sequence 2):</div>
+            <ul id="rule1FailuresList" style="margin-top: 4px; padding-left: 20px; font-size: 1.75rem;"></ul>
+          </div>
+          <div id="rule2FailuresWrap" style="display: none; margin-top: 10px;">
+            <div style="font-weight: 500; margin-bottom: 4px; font-size: 1.75rem;">Classes with uneven KNOWN round counts:</div>
+            <ul id="rule2FailuresList" style="margin-top: 4px; padding-left: 20px; font-size: 1.75rem;"></ul>
+          </div>
+          <p style="font-size: 1.5rem; color: #444; margin: 12px 0 4px;">
+            Resolve them in Score Fixes first.
+          </p>
+        </div>
+        <div class="modal-footer" style="padding: 10px 20px;">
+          <a href="/admin/scores" class="waves-effect waves-light btn">Go to Score Fixes</a>
         </div>
       </div>
 
@@ -186,7 +203,7 @@
       <i class="large material-icons">menu</i>
     </a>
     <ul>
-      <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">home</i></a></li>
+      <li><a class="btn-floating btn-large green" href="/"><i class="material-icons">exit_to_app</i></a></li>
     </ul>
   </div>
 
@@ -217,6 +234,45 @@
       $("input[name=sequenceType][value=" + sequenceType + "]").prop('checked', true);
     });
 
+    function showFormatChangeBlocker(payload) {
+      var $rule1Wrap = $('#rule1FailuresWrap');
+      var $rule1List = $('#rule1FailuresList');
+      $rule1List.empty();
+      var rule1 = payload.rule1Failures || [];
+      if (rule1.length > 0) {
+        rule1.forEach(function (f) {
+          $rule1List.append('<li>' + f.name + ' (' + f.className + ') — KNOWN round ' + f.round + '</li>');
+        });
+        $rule1Wrap.show();
+      } else {
+        $rule1Wrap.hide();
+      }
+
+      var $rule2Wrap = $('#rule2FailuresWrap');
+      var $rule2List = $('#rule2FailuresList');
+      $rule2List.empty();
+      var rule2 = payload.rule2Failures || [];
+      if (rule2.length > 0) {
+        rule2.forEach(function (f) {
+          var atMin = (f.pilotsAtMin || []).map(function (p) { return p.name; }).join(', ');
+          var atMax = (f.pilotsAtMax || []).map(function (p) { return p.name; }).join(', ');
+          $rule2List.append('<li>' + f.className + ': counts span ' + f.minCount + ' (' + atMin + ') to ' + f.maxCount + ' (' + atMax + ')</li>');
+        });
+        $rule2Wrap.show();
+      } else {
+        $rule2Wrap.hide();
+      }
+
+      var modal = M.Modal.getInstance(document.getElementById('formatChangeBlockerModal'));
+      modal.open();
+    }
+
+    function isFormatChangeBlockedResponse(errObj) {
+      return errObj && errObj.status === 409
+          && errObj.responseJSON
+          && errObj.responseJSON.blocker === 'format_change_unsafe';
+    }
+
     // Update Local Settings (no Score contact)
     $("#updateLocalSettings").click(function (e) {
       e.preventDefault();
@@ -239,8 +295,12 @@
             M.toast({ html: 'Error: ' + data.message, classes: 'red' });
           }
         },
-        error: function () {
-          M.toast({ html: 'Error updating settings', classes: 'red' });
+        error: function (errObj) {
+          if (isFormatChangeBlockedResponse(errObj)) {
+            showFormatChangeBlocker(errObj.responseJSON);
+          } else {
+            M.toast({ html: 'Error updating settings', classes: 'red' });
+          }
         }
       });
     });
@@ -273,7 +333,9 @@
           }
         },
         error: function (errObj) {
-          if (typeof errObj.responseJSON != "undefined") {
+          if (isFormatChangeBlockedResponse(errObj)) {
+            showFormatChangeBlocker(errObj.responseJSON);
+          } else if (typeof errObj.responseJSON != "undefined") {
             M.toast({ html: 'Error: ' + errObj.responseJSON.message, classes: 'red' });
           } else {
             M.toast({ html: 'Error refreshing event', classes: 'red' });
