@@ -16,12 +16,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -44,13 +41,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import co.za.imac.judge.utils.ContestClasses;
 import co.za.imac.judge.utils.SettingUtils;
 
 import co.za.imac.judge.service.CompService;
 import co.za.imac.judge.service.InfoCollectorService;
 import co.za.imac.judge.service.PilotService;
 import co.za.imac.judge.service.ScheduleService;
+import co.za.imac.judge.service.ScoreResolverService;
 import co.za.imac.judge.service.SequenceService;
 import co.za.imac.judge.service.SettingService;
 
@@ -72,6 +69,8 @@ public class APIController {
     private InfoCollectorService infoCollectorService;
     @Autowired
     private ScheduleService scheduleService;
+    @Autowired
+    private ScoreResolverService scoreResolverService;
 
     @GetMapping("/api/comp")
     public CompDTO getComp() throws IOException, ParserConfigurationException, SAXException {
@@ -362,49 +361,7 @@ public class APIController {
 
     @GetMapping("/api/scores/mismatches")
     public ResponseEntity<String> getScoreMismatches() throws IOException, ParserConfigurationException, SAXException {
-        List<Pilot> pilots = pilotService.getPilots();
-
-        List<Map<String, Object>> mismatches = new ArrayList<>();
-        List<Map<String, Object>> allGroups = new ArrayList<>();
-
-        Map<String, List<Pilot>> pilotsByClass = new HashMap<>();
-        for (Pilot pilot : pilots) {
-            pilotsByClass.computeIfAbsent(pilot.getClassString().toUpperCase(), k -> new ArrayList<>()).add(pilot);
-        }
-
-        String[] classRoundTypes = {"KNOWN", "UNKNOWN"};
-        for (Map.Entry<String, List<Pilot>> entry : pilotsByClass.entrySet()) {
-            for (String roundType : classRoundTypes) {
-                checkAndAddMismatches(entry.getValue(), roundType, entry.getKey(), mismatches, allGroups);
-            }
-        }
-
-        // FREESTYLE: cross-class virtual group
-        List<Pilot> freestylePilots = pilots.stream()
-                .filter(p -> Boolean.TRUE.equals(p.getFreestyle()))
-                .toList();
-        if (!freestylePilots.isEmpty()) {
-            checkAndAddMismatches(freestylePilots, "FREESTYLE", "FREESTYLE", mismatches, allGroups);
-        }
-
-        // Sort by class order, then KNOWN -> UNKNOWN -> FREESTYLE within a class.
-        Comparator<Map<String, Object>> byClassOrder = (g1, g2) -> {
-            int classCmp = Integer.compare(
-                    ContestClasses.orderIndex((String) g1.get("className")),
-                    ContestClasses.orderIndex((String) g2.get("className")));
-            if (classCmp != 0) return classCmp;
-            String t1 = (String) g1.get("roundType");
-            String t2 = (String) g2.get("roundType");
-            int o1 = "KNOWN".equals(t1) ? 0 : "UNKNOWN".equals(t1) ? 1 : 2;
-            int o2 = "KNOWN".equals(t2) ? 0 : "UNKNOWN".equals(t2) ? 1 : 2;
-            return Integer.compare(o1, o2);
-        };
-        mismatches.sort(byClassOrder);
-        allGroups.sort(byClassOrder);
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("mismatches", mismatches);
-        result.put("allGroups", allGroups);
+        Map<String, Object> result = scoreResolverService.getMismatches();
         return new ResponseEntity<>(new Gson().toJson(result), HttpStatus.OK);
     }
 
@@ -441,112 +398,6 @@ public class APIController {
 
         // Versions are equal
         return false;
-    }
-
-    private int countRoundsForType(PilotScores scores, String roundType) {
-        if (scores == null || scores.getScores() == null) return 0;
-
-        Set<Integer> rounds = new HashSet<>();
-        for (PScore score : scores.getScores()) {
-            if (roundType.equalsIgnoreCase(score.getType())) {
-                rounds.add(score.getRound());
-            }
-        }
-        return rounds.size();
-    }
-
-    /**
-     * Builds the (class, roundType) detection group and adds it to allGroups.
-     * Adds to mismatches when the group has a count gap (max - min &gt;= 2) or
-     * any pilot has an incomplete round. A spread of 0 or 1 with no incomplete
-     * rounds is a valid state and yields no mismatch entry.
-     */
-    private void checkAndAddMismatches(List<Pilot> pilots, String roundType, String className,
-                                       List<Map<String, Object>> mismatches,
-                                       List<Map<String, Object>> allGroups) throws IOException {
-        if (pilots.isEmpty()) return;
-
-        List<Map<String, Object>> pilotEntries = new ArrayList<>();
-        int minCount = Integer.MAX_VALUE;
-        int maxCount = Integer.MIN_VALUE;
-
-        for (Pilot pilot : pilots) {
-            PilotScores scores = pilotService.getPilotScores(pilot);
-            int count = countRoundsForType(scores, roundType);
-            Integer incompleteRound = "KNOWN".equalsIgnoreCase(roundType)
-                    ? findUnresolvedMissingSeq2Round(pilot, pilots)
-                    : null;
-
-            Map<String, Object> entry = new HashMap<>();
-            entry.put("pilotId", pilot.getPrimary_id());
-            entry.put("name", pilot.getName());
-            entry.put("roundCount", count);
-            entry.put("incompleteRound", incompleteRound);
-            pilotEntries.add(entry);
-
-            if (count < minCount) minCount = count;
-            if (count > maxCount) maxCount = count;
-        }
-
-        pilotEntries.sort((a, b) ->
-                ((String) a.get("name")).compareToIgnoreCase((String) b.get("name")));
-
-        int spread = maxCount - minCount;
-        boolean hasIncomplete = pilotEntries.stream().anyMatch(e -> e.get("incompleteRound") != null);
-
-        List<String> anomalies = new ArrayList<>();
-        if (spread >= 2) anomalies.add("count_gap");
-        if (hasIncomplete) anomalies.add("incomplete_round");
-
-        Map<String, Object> group = new HashMap<>();
-        group.put("className", className);
-        group.put("roundType", roundType);
-        group.put("minCount", minCount);
-        group.put("maxCount", maxCount);
-        group.put("spread", spread);
-        group.put("anomalies", anomalies);
-        group.put("pilots", pilotEntries);
-
-        allGroups.add(group);
-        if (!anomalies.isEmpty()) {
-            mismatches.add(group);
-        }
-    }
-
-    /**
-     * Returns the round number of the pilot's unresolved missing seq 2, or null.
-     * A round R qualifies iff the pilot has scored seq 1 of (R, KNOWN) but not
-     * seq 2, AND some other pilot in the same group has scored seq 2 of
-     * (R, KNOWN).
-     */
-    private Integer findUnresolvedMissingSeq2Round(Pilot pilot, List<Pilot> groupPilots) throws IOException {
-        PilotScores scores = pilotService.getPilotScores(pilot);
-        if (scores == null || scores.getScores() == null) return null;
-
-        Set<Integer> roundsWithSeq1 = new HashSet<>();
-        Set<Integer> roundsWithSeq2 = new HashSet<>();
-        for (PScore s : scores.getScores()) {
-            if (!"KNOWN".equalsIgnoreCase(s.getType())) continue;
-            if (s.getSequence() == 1) roundsWithSeq1.add(s.getRound());
-            else if (s.getSequence() == 2) roundsWithSeq2.add(s.getRound());
-        }
-
-        for (Integer round : roundsWithSeq1) {
-            if (roundsWithSeq2.contains(round)) continue;
-            for (Pilot peer : groupPilots) {
-                if (peer.getPrimary_id().equals(pilot.getPrimary_id())) continue;
-                PilotScores peerScores = pilotService.getPilotScores(peer);
-                if (peerScores == null || peerScores.getScores() == null) continue;
-                for (PScore ps : peerScores.getScores()) {
-                    if ("KNOWN".equalsIgnoreCase(ps.getType())
-                            && ps.getRound() == round
-                            && ps.getSequence() == 2) {
-                        return round;
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     @PostMapping("/api/scores/move-round")
@@ -594,7 +445,7 @@ public class APIController {
         }
 
         // Determine destination round number
-        int destRound = countRoundsForType(destScores, roundType) + 1;
+        int destRound = scoreResolverService.countRoundsForType(destScores, roundType) + 1;
 
         // Add audit comment timestamp
         String auditComment = String.format("[%s] Round moved from pilot %s",
@@ -630,8 +481,8 @@ public class APIController {
         pilotService.savePilotScoresToFile(destScores);
 
         logger.info("Successfully moved round. Source now has {} {} rounds, dest has {} {} rounds",
-                countRoundsForType(sourceScores, roundType), roundType,
-                countRoundsForType(destScores, roundType), roundType);
+                scoreResolverService.countRoundsForType(sourceScores, roundType), roundType,
+                scoreResolverService.countRoundsForType(destScores, roundType), roundType);
 
         result.put("result", "ok");
         result.put("message", "Round moved successfully");
