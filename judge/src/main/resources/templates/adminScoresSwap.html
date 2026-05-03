@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
+  <title>Swap Round Scores</title>
+
+  <!-- CSS  -->
+  <link href="/materialize/css/material_lcons.css" rel="stylesheet">
+  <link href="/materialize/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+  <style>
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      margin-bottom: 8px;
+    }
+    .heading {
+      font-size: calc(1.2vw + 2vh) !important;
+      margin: 0;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .admin-nav-btn {
+      margin: 2px;
+      padding: 0 12px;
+    }
+    .wizard-context {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #455a64;
+      margin: 4px 0 12px;
+    }
+    .step-section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #455a64;
+      margin: 10px 0 8px;
+    }
+    .all-clear {
+      text-align: center;
+      padding: 16px;
+      color: #2e7d32;
+    }
+    .all-clear i {
+      font-size: 3.5rem;
+      color: #4caf50;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .all-clear-title {
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+    .loading-spinner {
+      text-align: center;
+      padding: 20px;
+    }
+    .picker-class-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+    }
+    .picker-class-label {
+      flex: 0 0 110px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #263238;
+    }
+    .picker-type-btn {
+      padding: 6px 14px;
+      border: 2px solid #90a4ae;
+      border-radius: 6px;
+      background: #fafafa;
+      color: #263238;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .picker-type-btn:active {
+      background: #eceff1;
+    }
+    .picker-divider {
+      border-top: 1px solid #cfd8dc;
+      margin: 10px 0 8px;
+    }
+    .picker-freestyle-row {
+      text-align: center;
+      margin-top: 8px;
+    }
+    .pick-row {
+      display: block;
+      padding: 10px 14px;
+      margin-bottom: 6px;
+      border: 2px solid #90a4ae;
+      border-radius: 8px;
+      background: #fafafa;
+      font-size: 1rem;
+      color: #263238;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .pick-row:active {
+      background: #eceff1;
+    }
+    .pick-row .row-name {
+      font-weight: 500;
+    }
+    .pick-row .row-meta {
+      font-size: 0.9rem;
+      color: #555;
+    }
+    .pick-row.disabled {
+      background: #e0e0e0;
+      color: #757575;
+      border-color: #bdbdbd;
+      cursor: default;
+    }
+    .pick-row.disabled .row-meta,
+    .pick-row .row-caption {
+      color: #616161;
+      font-size: 0.85rem;
+    }
+    .round-pick-row {
+      display: block;
+      padding: 12px 16px;
+      margin-bottom: 6px;
+      border: 2px solid #1976d2;
+      border-radius: 8px;
+      background: #e3f2fd;
+      color: #0d47a1;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .round-pick-row:active {
+      background: #bbdefb;
+    }
+    .confirm-box {
+      border: 2px solid #1976d2;
+      border-radius: 8px;
+      padding: 12px 16px;
+      background: #e3f2fd;
+      color: #0d47a1;
+      margin: 10px 0;
+    }
+    .confirm-action {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .confirm-after-line {
+      font-size: 1rem;
+      margin: 4px 0;
+    }
+    .confirm-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+    .result-box {
+      text-align: center;
+      padding: 18px;
+      margin: 14px 0;
+      border-radius: 8px;
+      background: #e8f5e9;
+      color: #1b5e20;
+    }
+    .result-icon {
+      font-size: 3rem;
+    }
+    .result-message {
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+
+<body class="orange lighten-4">
+  <div th:replace="~{banner::line_judge}"></div>
+  <div th:replace="~{banner::status}"></div>
+
+  <div class="section no-pad-bot orange lighten-4" id="index-banner">
+    <div class="container orange lighten-4 black-text">
+
+      <div class="header-row">
+        <h2 class="heading">Swap Round Scores</h2>
+        <div class="nav-buttons">
+          <a href="#" id="wizardBackBtn" class="waves-effect waves-light btn blue-grey admin-nav-btn" style="display:none;">
+            <i class="material-icons left">arrow_back</i>Back
+          </a>
+          <a href="/admin/scores" class="waves-effect waves-light btn green admin-nav-btn">
+            <i class="material-icons left">arrow_back</i>Score Fixes
+          </a>
+          <a href="/" class="waves-effect waves-light btn teal admin-nav-btn">
+            <i class="material-icons left">exit_to_app</i>Exit
+          </a>
+        </div>
+      </div>
+
+      <div id="wizardContext" class="wizard-context" style="display:none;"></div>
+
+      <!-- Step 1: class/type picker -->
+      <div class="wizard-step" id="step-picker">
+        <div id="loadingState" class="loading-spinner">
+          <div class="preloader-wrapper big active">
+            <div class="spinner-layer spinner-blue-only">
+              <div class="circle-clipper left"><div class="circle"></div></div>
+              <div class="gap-patch"><div class="circle"></div></div>
+              <div class="circle-clipper right"><div class="circle"></div></div>
+            </div>
+          </div>
+          <p>Scanning for swap candidates...</p>
+        </div>
+
+        <div id="noEligible" class="all-clear" style="display:none;">
+          <i class="material-icons">check_circle</i>
+          <div class="all-clear-title">No swap candidates — every (class, round) is unique per pilot or has only one pilot</div>
+        </div>
+
+        <div id="pickerWrap" style="display:none;">
+          <div class="step-section-title">Pick a class and round type:</div>
+          <div id="pickerRows"></div>
+        </div>
+      </div>
+
+      <!-- Step 2: round pick -->
+      <div class="wizard-step" id="step-round-pick" style="display:none;">
+        <div class="step-section-title">Pick round to swap:</div>
+        <div id="roundPickList"></div>
+      </div>
+
+      <!-- Step 3: first pilot -->
+      <div class="wizard-step" id="step-first-pilot" style="display:none;">
+        <div class="step-section-title">Pick first pilot:</div>
+        <div id="firstPilotList"></div>
+      </div>
+
+      <!-- Step 4: second pilot -->
+      <div class="wizard-step" id="step-second-pilot" style="display:none;">
+        <div class="step-section-title">Pick second pilot:</div>
+        <div id="secondPilotList"></div>
+      </div>
+
+      <!-- Step 5: confirm -->
+      <div class="wizard-step" id="step-confirm" style="display:none;">
+        <div class="confirm-box" id="confirmBox"></div>
+        <div class="confirm-buttons">
+          <a href="#" id="confirmCancelBtn" class="waves-effect waves-light btn-flat">Cancel</a>
+          <a href="#" id="confirmActionBtn" class="waves-effect waves-light btn green">Confirm Swap</a>
+        </div>
+      </div>
+
+      <!-- Step 6: result -->
+      <div class="wizard-step" id="step-result" style="display:none;">
+        <div class="result-box">
+          <i class="material-icons result-icon">check_circle</i>
+          <div class="result-message">Round scores swapped.</div>
+        </div>
+        <div class="confirm-buttons">
+          <a href="/admin/scores" class="waves-effect waves-light btn green">Done</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!--  Scripts-->
+  <script src="/jquery-3.6.4.min.js"></script>
+  <script src="/materialize/js/materialize.js"></script>
+  <script>
+    /* Swap Round wizard — single-page state machine. */
+    const state = {
+      group: null,           // selected (class, roundType)
+      round: null,           // selected round
+      firstPilot: null,
+      secondPilot: null,
+      allGroups: []
+    };
+    const stepHistory = [];
+
+    function showStep(stepId, recordHistory) {
+      $('.wizard-step').hide();
+      $('#' + stepId).show();
+      if (recordHistory !== false) stepHistory.push(stepId);
+      const showBack = stepHistory.length > 1
+          && stepId !== 'step-picker'
+          && stepId !== 'step-result';
+      $('#wizardBackBtn').toggle(showBack);
+      updateContextStrip(stepId);
+    }
+
+    function goBack() {
+      stepHistory.pop();
+      const prev = stepHistory[stepHistory.length - 1] || 'step-picker';
+      $('.wizard-step').hide();
+      $('#' + prev).show();
+      const showBack = stepHistory.length > 1
+          && prev !== 'step-picker'
+          && prev !== 'step-result';
+      $('#wizardBackBtn').toggle(showBack);
+      updateContextStrip(prev);
+    }
+
+    function updateContextStrip(stepId) {
+      const $ctx = $('#wizardContext');
+      if (!state.group || stepId === 'step-picker') {
+        $ctx.hide().text('');
+        return;
+      }
+      $ctx.text('Swap Round Scores: ' + state.group.className + ' — ' + roundTypeLabel(state.group.roundType)).show();
+    }
+
+    function roundTypeLabel(rt) {
+      if (rt === 'KNOWN') return 'Known Rounds';
+      if (rt === 'UNKNOWN') return 'Unknown Rounds';
+      if (rt === 'FREESTYLE') return 'Freestyle';
+      return rt;
+    }
+
+    function roundTypeTitle(rt) {
+      if (rt === 'KNOWN') return 'Known';
+      if (rt === 'UNKNOWN') return 'Unknown';
+      if (rt === 'FREESTYLE') return 'Freestyle';
+      return rt;
+    }
+
+    function groupHasSwapCandidates(g) {
+      const withRounds = (g.pilots || []).filter(function (p) { return p.roundCount >= 1; });
+      return withRounds.length >= 2;
+    }
+
+    function fetchGroups() {
+      $('#loadingState').show();
+      $('#noEligible').hide();
+      $('#pickerWrap').hide();
+      $.ajax({
+        url: '/api/scores/mismatches',
+        cache: false,
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+          state.allGroups = (data.allGroups || []).filter(groupHasSwapCandidates);
+          renderPicker();
+        },
+        error: function () {
+          $('#loadingState').hide();
+          M.toast({ html: 'Could not load detection data', classes: 'red' });
+        }
+      });
+    }
+
+    function renderPicker() {
+      $('#loadingState').hide();
+      if (state.allGroups.length === 0) {
+        $('#noEligible').show();
+        $('#pickerWrap').hide();
+        return;
+      }
+      $('#noEligible').hide();
+      $('#pickerWrap').show();
+      const $rows = $('#pickerRows').empty();
+
+      const byClass = {};
+      let freestyle = null;
+      state.allGroups.forEach(function (g) {
+        if (g.className === 'FREESTYLE') {
+          freestyle = g;
+          return;
+        }
+        if (!byClass[g.className]) byClass[g.className] = [];
+        byClass[g.className].push(g);
+      });
+
+      Object.keys(byClass).forEach(function (className) {
+        const groups = byClass[className];
+        const $row = $('<div class="picker-class-row">');
+        $row.append($('<div class="picker-class-label">').text(className));
+        ['KNOWN', 'UNKNOWN'].forEach(function (rt) {
+          const g = groups.find(function (x) { return x.roundType === rt; });
+          if (!g) return;
+          const $btn = $('<a href="#" class="picker-type-btn">').text(roundTypeTitle(rt));
+          $btn.on('click', function (e) {
+            e.preventDefault();
+            state.group = g;
+            stepHistory.length = 0;
+            stepHistory.push('step-picker');
+            showStep('step-round-pick');
+            renderRoundPick();
+          });
+          $row.append($btn);
+        });
+        $rows.append($row);
+      });
+
+      if (freestyle) {
+        $rows.append($('<div class="picker-divider">'));
+        const $fsRow = $('<div class="picker-freestyle-row">');
+        const $btn = $('<a href="#" class="picker-type-btn">').text('Freestyle');
+        $btn.on('click', function (e) {
+          e.preventDefault();
+          state.group = freestyle;
+          stepHistory.length = 0;
+          stepHistory.push('step-picker');
+          showStep('step-round-pick');
+          renderRoundPick();
+        });
+        $fsRow.append($btn);
+        $rows.append($fsRow);
+      }
+    }
+
+    function renderRoundPick() {
+      const $list = $('#roundPickList').empty();
+      const pilots = state.group.pilots || [];
+      const maxC = state.group.maxCount;
+      for (let r = 1; r <= maxC; r++) {
+        const round = r;
+        const pilotsForRound = pilots.filter(function (p) { return p.roundCount >= round; });
+        if (pilotsForRound.length < 2) continue;
+        const $row = $('<a href="#" class="round-pick-row">').text(
+            roundTypeTitle(state.group.roundType) + ' Round ' + round);
+        $row.on('click', function (e) {
+          e.preventDefault();
+          state.round = round;
+          showStep('step-first-pilot');
+          renderFirstPilot();
+        });
+        $list.append($row);
+      }
+    }
+
+    function renderFirstPilot() {
+      const $list = $('#firstPilotList').empty();
+      const pilots = (state.group.pilots || [])
+          .filter(function (p) { return p.roundCount >= state.round; })
+          .slice()
+          .sort(function (a, b) { return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }); });
+      pilots.forEach(function (p) {
+        const $row = $('<a href="#" class="pick-row">');
+        $row.append($('<div class="row-name">').text(p.name));
+        $row.on('click', function (e) {
+          e.preventDefault();
+          state.firstPilot = p;
+          showStep('step-second-pilot');
+          renderSecondPilot();
+        });
+        $list.append($row);
+      });
+    }
+
+    function renderSecondPilot() {
+      const $list = $('#secondPilotList').empty();
+      const pilots = (state.group.pilots || [])
+          .filter(function (p) { return p.roundCount >= state.round && p.pilotId !== state.firstPilot.pilotId; })
+          .slice()
+          .sort(function (a, b) { return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }); });
+      const isKnown = state.group.roundType === 'KNOWN';
+      const firstIncomplete = isKnown && state.firstPilot.incompleteRound === state.round;
+      pilots.forEach(function (p) {
+        const $row = $('<a href="#" class="pick-row">');
+        $row.append($('<div class="row-name">').text(p.name));
+        const candidateIncomplete = isKnown && p.incompleteRound === state.round;
+        const seqMismatch = isKnown && (firstIncomplete !== candidateIncomplete);
+        if (seqMismatch) {
+          $row.addClass('disabled');
+          $row.append($('<div class="row-caption">').text(
+              "Sequences don't match — fix incomplete round first"));
+        } else {
+          $row.on('click', function (e) {
+            e.preventDefault();
+            state.secondPilot = p;
+            showStep('step-confirm');
+            renderConfirm();
+          });
+        }
+        $list.append($row);
+      });
+    }
+
+    function renderConfirm() {
+      const a = state.firstPilot;
+      const b = state.secondPilot;
+      const typeTitle = roundTypeTitle(state.group.roundType);
+      const $box = $('#confirmBox').empty();
+      $box.append($('<div class="confirm-action">').text(
+          'Swap ' + a.name + "'s and " + b.name + "'s " + typeTitle + ' Round ' + state.round + ' scores.'));
+      $box.append($('<div class="confirm-after-line">').text(
+          'After: counts unchanged for both pilots.'));
+    }
+
+    function executeSwap() {
+      $.ajax({
+        url: '/api/scores/swap-round',
+        cache: false,
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json',
+        data: JSON.stringify({
+          pilotIdA: state.firstPilot.pilotId,
+          pilotIdB: state.secondPilot.pilotId,
+          roundType: state.group.roundType,
+          round: state.round
+        }),
+        success: function (data) {
+          if (data.result === 'ok') {
+            showStep('step-result');
+          } else {
+            M.toast({ html: data.message || 'Swap failed', classes: 'red' });
+          }
+        },
+        error: function (errObj) {
+          const msg = errObj.responseJSON && errObj.responseJSON.message
+              ? errObj.responseJSON.message
+              : 'Swap failed';
+          M.toast({ html: msg, classes: 'red' });
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      stepHistory.push('step-picker');
+      fetchGroups();
+    });
+
+    $('#wizardBackBtn').on('click', function (e) {
+      e.preventDefault();
+      goBack();
+    });
+
+    $('#confirmCancelBtn').on('click', function (e) {
+      e.preventDefault();
+      goBack();
+    });
+
+    $('#confirmActionBtn').on('click', function (e) {
+      e.preventDefault();
+      executeSwap();
+    });
+  </script>
+
+</body>
+
+</html>

@@ -480,4 +480,11 @@ public class RootController {
         model.addAttribute("settings", settings);
         return "adminScoresZeroFill";
     }
+
+    @GetMapping("/admin/scores/swap")
+    public String adminScoresSwap(Model model) throws IOException {
+        SettingDTO settings = settingService.getSettings();
+        model.addAttribute("settings", settings);
+        return "adminScoresSwap";
+    }
 }
